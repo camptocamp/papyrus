@@ -1,3 +1,4 @@
 *.pyc
 *.egg
 papyrus.egg-info/
+dist
