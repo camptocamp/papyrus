@@ -1,0 +1,8 @@
+Renderers
+
+- add integration test to make sure that the geojson renderer works for views
+  (with add_view and/or view_config)
+
+MapFish Protocol
+
+- add protocol.py with the MapFish protocol
