@@ -16,7 +16,7 @@ setup(name='papyrus',
       description="Geospatial Extensions for Pyramid",
       classifiers=[], # Get strings from http://pypi.python.org/pypi?%3Aaction=list_classifiers
       keywords='FOSS4G, Pylons, Pyramid',
-      author='\xc3\x89ric Lemoine',
+      author='Eric Lemoine',
       author_email='eric.lemoine@gmail.com',
       url='https://github.com/elemoine/papyrus',
       license='BSD',
