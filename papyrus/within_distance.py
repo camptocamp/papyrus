@@ -1,4 +1,4 @@
-# 
+#
 # Copyright (c) 2008-2011 Camptocamp.
 # All rights reserved.
 #
@@ -10,8 +10,8 @@
 # 2. Redistributions in binary form must reproduce the above copyright
 #    notice, this list of conditions and the following disclaimer in the
 #    documentation and/or other materials provided with the distribution.
-# 3. Neither the name of Camptocamp nor the names of its contributors may 
-#    be used to endorse or promote products derived from this software 
+# 3. Neither the name of Camptocamp nor the names of its contributors may
+#    be used to endorse or promote products derived from this software
 #    without specific prior written permission.
 #
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
@@ -31,7 +31,7 @@ from geoalchemy.geometry import GeometryExtensionColumn
 from geoalchemy.spatialite import SQLiteSpatialDialect
 
 from sqlalchemy.ext.compiler import compiles
-from sqlalchemy.sql import and_, text, table, column 
+from sqlalchemy.sql import and_, text, table, column
 from sqlalchemy import select, func
 from sqlalchemy.schema import Column
 
@@ -41,9 +41,9 @@ from sqlalchemy.dialects.mysql.base import MySQLDialect
 from sqlalchemy.dialects.oracle.base import OracleDialect
 
 class within_distance(BaseFunction):
-    """This class is used as SQLAlchemy function to query features that are 
-    within a certain distance of a geometry. 
-    When it is used inside a query, the SQLAlchemy compiler calls the 
+    """This class is used as SQLAlchemy function to query features that are
+    within a certain distance of a geometry.
+    When it is used inside a query, the SQLAlchemy compiler calls the
     method __compile_within_distance.
     """
     pass
@@ -61,15 +61,15 @@ def __compile_within_distance(element, compiler, **kw):
     else:
         raise NotImplementedError(
             "'within_distance' not supported by '%s'" % (compiler.dialect))
-    
+
     arguments = list(element.arguments)
     return compiler.process(
-        function(compiler, parse_clause(arguments.pop(0), compiler), 
+        function(compiler, parse_clause(arguments.pop(0), compiler),
         parse_clause(arguments.pop(0), compiler), arguments.pop(0), *arguments))
-    
+
 def __within_distance_pg(compiler, geom1, geom2, distance):
     """Implementation of within_distance for PostGIS
-    
+
     ST_DWithin in early versions of PostGIS 1.3 does not work when
     distance = 0. So we are directly using the (correct) internal definition.
     Note that the definition changed in version 1.3.4, see also:
@@ -81,7 +81,7 @@ def __within_distance_pg(compiler, geom1, geom2, distance):
 
 def __within_distance_mysql(compiler, geom1, geom2, distance):
     """Implementation of within_distance for MySQL
-    
+
     MySQL does not support the function distance, so we are doing
     a kind of "mbr_within_distance".
     The MBR of 'geom2' is expanded with the amount of 'distance' by
@@ -89,15 +89,15 @@ def __within_distance_mysql(compiler, geom1, geom2, distance):
     this expanded MBR.
     """
     mbr = func.ExteriorRing(func.Envelope(geom2))
-    
+
     lower_left = func.StartPoint(mbr)
     upper_right = func.PointN(mbr, 3)
-    
+
     xmin = func.X(lower_left)
     ymin = func.Y(lower_left)
     xmax = func.X(upper_right)
     ymax = func.Y(upper_right)
-    
+
     return func.Intersects(
             geom1,
             func.GeomFromText(
@@ -108,7 +108,7 @@ def __within_distance_mysql(compiler, geom1, geom2, distance):
                        xmin - distance, ' ', ymax + distance, ',',
                        xmin - distance, ' ', ymin - distance, '))'),
                 func.srid(geom2)
-                )                                              
+                )
             )
 
 def __within_distance_spatialite(compiler, geom1, geom2, distance):
@@ -119,7 +119,7 @@ def __within_distance_spatialite(compiler, geom1, geom2, distance):
        SQLiteSpatialDialect.supports_rtree(compiler.dialect):
         """If querying on a geometry column that also has a spatial index,
         then make use of this index.
-        
+
         see: http://www.gaia-gis.it/spatialite/spatialite-tutorial-2.3.1.html#t8 and
         http://groups.google.com/group/spatialite-users/browse_thread/thread/34609c7a711ac92d/7688ced3f909039c?lnk=gst&q=index#f6dbc235471574db
         """
@@ -134,19 +134,19 @@ def __within_distance_spatialite(compiler, geom1, geom2, distance):
                     )
                 )
             )
-        
+
     else:
         return func.Distance(geom1, geom2) <= distance
-    
+
 
 
 def __within_distance_oracle(compiler, geom1, geom2, distance, additional_params={}):
     """Implementation of within_distance for Oracle
-    
+
     If the first parameter is a geometry column, then the Oracle operator
     SDO_WITHIN_DISTANCE is called and Oracle makes use of the spatial index of
     this column.
-    
+
     If the first parameter is not a geometry column but a function, which is
     the case when a coordinate transformation had to be added by the spatial
     filter, then the function SDO_GEOM.WITHIN_DISTANCE is called.
@@ -154,43 +154,43 @@ def __within_distance_oracle(compiler, geom1, geom2, distance, additional_params
     additional parameters: either a tolerance value or a dimension information
     array (DIMINFO) for both geometries. These parameters can be specified when
     defining the spatial filter, e.g.::
-    
+
         additional_params={'tol': '0.005'}
-        
+
         or
-        
+
         from sqlalchemy.sql.expression import text
         diminfo = text("MDSYS.SDO_DIM_ARRAY("\
             "MDSYS.SDO_DIM_ELEMENT('LONGITUDE', -180, 180, 0.000000005),"\
             "MDSYS.SDO_DIM_ELEMENT('LATITUDE', -90, 90, 0.000000005)"\
             ")")
         additional_params={'dim1': diminfo, 'dim2': diminfo}
-        
+
         filter = create_default_filter(request, Spot, additional_params=additional_params)
         proto.count(request, filter=filter)
-        
+
     For its distance calculation Oracle by default uses meter as unit for
     geodetic data (like EPSG:4326) and otherwise the 'unit of measurement
     associated with the data'. The unit used for the 'distance' value can be
     changed by adding an entry to 'additional_params'. Valid units are defined
     in the view 'sdo_dist_units'::
-    
+
         additional_params={'params': 'unit=km'}
-        
+
     SDO_WITHIN_DISTANCE accepts further parameters, which can also be set using
     the name 'params' together with the unit::
-    
+
         additional_params={'params': 'unit=km max_resolution=10'}
-        
-    
+
+
     Valid options for 'additional_params' are:
-    
+
         params
             A String containing additional parameters, for example the unit.
-            
+
         tol
             The tolerance value used for the SDO_GEOM.WITHIN_DISTANCE function call.
-            
+
         dim1 and dim2
             If the parameter 'tol' is not set, these two parameters have to be
             set. 'dim1' is the DIMINFO for the first geometry (the reprojected
@@ -198,11 +198,11 @@ def __within_distance_oracle(compiler, geom1, geom2, distance, additional_params
             (the input geometry from the request). Values for 'dim1' and 'dim2'
             have to be SQLAlchemy expressions, either literal text (text(..))
             or a select query.
-            
+
     Note that 'tol' or 'dim1'/'dim2' only have to be set when the input
     geometry from the request uses a different CRS than the geometry column!
-    
-    
+
+
     SDO_WITHIN_DISTANCE:
     http://download.oracle.com/docs/cd/E11882_01/appdev.112/e11830/sdo_operat.htm#i77653
 
@@ -214,31 +214,31 @@ def __within_distance_oracle(compiler, geom1, geom2, distance, additional_params
 
     TOLERANCE:
     http://download.oracle.com/docs/cd/E11882_01/appdev.112/e11830/sdo_intro.htm#i884589
-    
+
     """
     params = additional_params.get('params', '')
-    
+
     if isinstance(geom1, Column):
         return (func.SDO_WITHIN_DISTANCE(
-                    geom1, geom2, 
+                    geom1, geom2,
                     'distance=%s %s' % (distance, params)) == 'TRUE')
     else:
         dim1 = additional_params.get('dim1', None)
         dim2 = additional_params.get('dim2', None)
-        
+
         if dim1 is not None and dim2 is not None:
-            return (func.SDO_GEOM.WITHIN_DISTANCE(geom1, dim1, 
-                                             distance, 
-                                             geom2, dim2, 
+            return (func.SDO_GEOM.WITHIN_DISTANCE(geom1, dim1,
+                                             distance,
+                                             geom2, dim2,
                                              params) == 'TRUE')
         else:
             tol = additional_params.get('tol', None)
-            
+
             if tol is not None:
-                return (func.SDO_GEOM.WITHIN_DISTANCE(geom1, 
-                                             distance, 
+                return (func.SDO_GEOM.WITHIN_DISTANCE(geom1,
+                                             distance,
                                              geom2,
-                                             tol, 
+                                             tol,
                                              params) == 'TRUE')
             else:
                 raise Exception('No dimension information ("dim1" and "dim2") or '\

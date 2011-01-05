@@ -1,4 +1,4 @@
-# 
+#
 # Copyright (c) 2008-2011 Camptocamp.
 # All rights reserved.
 #
@@ -10,8 +10,8 @@
 # 2. Redistributions in binary form must reproduce the above copyright
 #    notice, this list of conditions and the following disclaimer in the
 #    documentation and/or other materials provided with the distribution.
-# 3. Neither the name of Camptocamp nor the names of its contributors may 
-#    be used to endorse or promote products derived from this software 
+# 3. Neither the name of Camptocamp nor the names of its contributors may
+#    be used to endorse or promote products derived from this software
 #    without specific prior written permission.
 #
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
@@ -50,7 +50,7 @@ from papyrus.geomtable import GeometryTableMixIn
 
 #
 # Setup
-# 
+#
 
 Base = declarative_base(metadata=MetaData())
 
@@ -93,7 +93,7 @@ def _compiled_to_string(compiled_filter):
 
 #
 # Test
-# 
+#
 
 class Test_protocol(unittest.TestCase):
 
@@ -111,7 +111,7 @@ class Test_protocol(unittest.TestCase):
         self.assertEqual(params["GeomFromWKB_2"], 4326)
         self.assertEqual(params["ST_Expand_1"], 1)
         self.assertEqual(params["ST_Distance_1"], 1)
-   
+
         request = testing.DummyRequest(
             params={"bbox": "-180,-90,180,90", "tolerance": "1", "epsg": "900913"}
             )
@@ -254,8 +254,8 @@ class Test_protocol(unittest.TestCase):
         )
         filter = create_attr_filter(request, MappedClass)
         self.assertEqual(filter, None)
-    
-    
+
+
     def test_asbool(self):
         from papyrus.protocol import asbool
         self.assertEqual(asbool(0), False)
@@ -273,53 +273,53 @@ class Test_protocol(unittest.TestCase):
         self.assertEqual(asbool(u"true"), True)
         self.assertEqual(asbool(u"False"), False)
         self.assertEqual(asbool(u"True"), True)
-    
+
     def test_protocol_query(self):
         from papyrus.protocol import Protocol, create_attr_filter
         proto = Protocol(Session, MappedClass)
-    
+
         request = testing.DummyRequest()
         query = proto._query(request, execute=False)
         stmt = query.statement
         stmtm_str = stmt.compile(engine)
         self.assertTrue("SELECT" in query_to_str(query))
-    
+
         request = testing.DummyRequest(params={"queryable": "id", "id__eq": "1"})
         query = proto._query(request, execute=False)
         self.assertTrue("WHERE" in query_to_str(query))
-    
+
         request = testing.DummyRequest(params={"queryable": "id", "id__eq": "1"})
         filter = create_attr_filter(request, MappedClass)
         query = proto._query(testing.DummyRequest(), filter=filter, execute=False)
         self.assertTrue("WHERE" in query_to_str(query))
-    
+
         request = testing.DummyRequest(params={"limit": "2"})
         query = proto._query(request, execute=False)
         self.assertTrue("LIMIT 2" in query_to_str(query))
-    
+
         request = testing.DummyRequest(params={"maxfeatures": "2"})
         query = proto._query(request, execute=False)
         self.assertTrue("LIMIT 2" in query_to_str(query))
-    
+
         request = testing.DummyRequest(params={"limit": "2", "offset": "10"})
         query = proto._query(request, execute=False)
         self.assertTrue("OFFSET 10" in query_to_str(query))
-    
+
         request = testing.DummyRequest(params={"order_by": "text"})
         query = proto._query(request, execute=False)
         self.assertTrue("ORDER BY" in query_to_str(query))
         self.assertTrue("ASC" in query_to_str(query))
-    
+
         request = testing.DummyRequest(params={"sort": "text"})
         query = proto._query(request, execute=False)
         self.assertTrue("ORDER BY" in query_to_str(query))
         self.assertTrue("ASC" in query_to_str(query))
-    
+
         request = testing.DummyRequest(params={"order_by": "text", "dir": "DESC"})
         query = proto._query(request, execute=False)
         self.assertTrue("ORDER BY" in query_to_str(query))
         self.assertTrue("DESC" in query_to_str(query))
-    
+
     def test_protocol_create(self):
         from papyrus.protocol import Protocol
         proto = Protocol(Session, MappedClass)

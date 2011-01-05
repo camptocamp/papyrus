@@ -1,4 +1,4 @@
-# 
+#
 # Copyright (c) 2008-2011 Camptocamp.
 # All rights reserved.
 #
@@ -10,8 +10,8 @@
 # 2. Redistributions in binary form must reproduce the above copyright
 #    notice, this list of conditions and the following disclaimer in the
 #    documentation and/or other materials provided with the distribution.
-# 3. Neither the name of Camptocamp nor the names of its contributors may 
-#    be used to endorse or promote products derived from this software 
+# 3. Neither the name of Camptocamp nor the names of its contributors may
+#    be used to endorse or promote products derived from this software
 #    without specific prior written permission.
 #
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
@@ -36,13 +36,13 @@ from geoalchemy import Geometry as GeometryBase
 class GeometryTableMixIn(object):
 
     """Class to be mixed in mapped classes.
-    
+
        When used the mapped class exposes
 
        ``geometry_column()``
            Class method returning the ``Column`` object corresponding to the
            geometry column.
-       
+
        ``primary_key_column()``
            Class method returning the ``Column`` object corresponding to the
            primary key.
@@ -52,7 +52,7 @@ class GeometryTableMixIn(object):
        ``geometry``
            The Shapely geometry object representing the geometry value in the
            database.
-           
+
        ``fid``
            The value of the primary key.
 
@@ -61,7 +61,7 @@ class GeometryTableMixIn(object):
            this object.
 
        Example::
-       
+
             Base = declarative_base(metadata=metadata)
 
             class Line(Base, GeometryTableMixIn):
@@ -70,7 +70,7 @@ class GeometryTableMixIn(object):
                         'autoload' : True,
                         'autoload_with' : engine
                     }
-                
+
                 the_geom = GeometryColumn(Geometry(dimension=2, srid=4326))
 
     """
@@ -118,7 +118,7 @@ class GeometryTableMixIn(object):
             else:
                 column = columns.pop()
                 cls.__column_cache__ = dict(geometry=column)
-        return cls.__column_cache__["geometry"] 
+        return cls.__column_cache__["geometry"]
 
     @classmethod
     def primary_key_column(cls):
@@ -149,7 +149,7 @@ class GeometryTableMixIn(object):
             k = str(k)
             if k != fid_column and k != geom_column and hasattr(self, k):
                 attributes[k] = getattr(self, k)
-        
+
         if hasattr(self.geometry, 'shape') and self.geometry.shape is not None:
             # we already have the geometry as Shapely geometry (when updating/inserting)
             geometry = self.geometry.shape
@@ -157,7 +157,7 @@ class GeometryTableMixIn(object):
             # create a Shapely geometry from the WKB geometry returned from the database
             geometry = loads(str(self.geometry.geom_wkb))
 
-        return Feature(id=self.fid, 
+        return Feature(id=self.fid,
                        geometry=geometry,
                        properties=attributes,
                        bbox=geometry.bounds)

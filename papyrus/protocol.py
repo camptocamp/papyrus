@@ -1,4 +1,4 @@
-# 
+#
 # Copyright (c) 2008-2011 Camptocamp.
 # All rights reserved.
 #
@@ -10,8 +10,8 @@
 # 2. Redistributions in binary form must reproduce the above copyright
 #    notice, this list of conditions and the following disclaimer in the
 #    documentation and/or other materials provided with the distribution.
-# 3. Neither the name of Camptocamp nor the names of its contributors may 
-#    be used to endorse or promote products derived from this software 
+# 3. Neither the name of Camptocamp nor the names of its contributors may
+#    be used to endorse or promote products derived from this software
 #    without specific prior written permission.
 #
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
@@ -81,7 +81,7 @@ def create_geom_filter(request, mapped_class, **kwargs):
                                kwargs['additional_params'])
     else:
         return within_distance(geom_column, wkb_geometry, tolerance)
- 
+
 def create_attr_filter(request, mapped_class):
     """Create an ``and_`` SQLAlchemy filter (a ClauseList object) based
     on the request params (``queryable``, ``eq``, ``ne``, ...)."""
