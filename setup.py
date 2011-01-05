@@ -6,10 +6,15 @@ version = '0.1'
 
 install_requires = [
     'pyramid',
-    'geojson>=1.0,<=1.0.99'
+    'geojson>=1.0,<=1.0.99',
+    'shapely>=1.2,<=1.2.99',
+    'geoalchemy>=0.4,<=0.4.99'
     ]
 
-tests_require = install_requires + ['WebTest']
+tests_require = install_requires + [
+    'WebTest',
+    'psycopg2'
+    ]
 
 setup(name='papyrus',
       version=version,
