@@ -44,7 +44,7 @@ from geojson import dumps, Feature
 from shapely import wkt, wkb
 from shapely.geometry.polygon import Polygon
 
-from geoalchemy import GeometryColumn, Geometry
+from geoalchemy import GeometryColumn, Geometry, WKBSpatialElement
 
 from papyrus.geomtable import GeometryTableMixIn
 
@@ -320,6 +320,24 @@ class Test_protocol(unittest.TestCase):
         self.assertTrue("ORDER BY" in query_to_str(query))
         self.assertTrue("DESC" in query_to_str(query))
 
+    def test_protocol_create_forbidden(self):
+        from papyrus.protocol import Protocol
+        proto = Protocol(Session, MappedClass, readonly=True)
+        # we need an actual Request object here, for body_file to do its job
+        request = Request({})
+        request.body_file = StringIO('{"type": "FeatureCollection", "features": [{"type": "Feature", "properties": {"text": "foo"}, "geometry": {"type": "Point", "coordinates": [45, 5]}}, {"type": "Feature", "properties": {"text": "foo"}, "geometry": {"type": "Point", "coordinates": [45, 5]}}]}')
+        response = proto.create(request, execute=False)
+        self.assertEqual(response.status_int, 403)
+
+    def test_protocol_create_badrequest(self):
+        from papyrus.protocol import Protocol
+        proto = Protocol(Session, MappedClass)
+        # we need an actual Request object here, for body_file to do its job
+        request = Request({})
+        request.body_file = StringIO('{"type": "Feature", "properties": {"text": "foo"}, "geometry": {"type": "Point", "coordinates": [45, 5]}}')
+        response = proto.create(request, execute=False)
+        self.assertEqual(response.status_int, 400)
+
     def test_protocol_create(self):
         from papyrus.protocol import Protocol
         proto = Protocol(Session, MappedClass)
@@ -334,3 +352,97 @@ class Test_protocol(unittest.TestCase):
             self.assertEqual(obj.geometry.shape.x, 45)
             self.assertEqual(obj.geometry.shape.y, 5)
         Session.rollback()
+
+    def test_protocol_update_forbidden(self):
+        from papyrus.protocol import Protocol
+        proto = Protocol(Session, MappedClass, readonly=True)
+        # we need an actual Request object here, for body_file to do its job
+        request = Request({})
+        request.body_file = StringIO('{"type": "Feature", "id": 1, "properties": {"text": "foo"}, "geometry": {"type": "Point", "coordinates": [45, 5]}}')
+        response = proto.update(request, 1)
+        self.assertEqual(response.status_int, 403)
+
+    def test_protocol_update_notfound(self):
+        from papyrus.protocol import Protocol
+        # a mock session specific to this test
+        class MockSession(object):
+            @staticmethod
+            def query(mapped_class):
+                return {}
+        proto = Protocol(MockSession, MappedClass)
+        # we need an actual Request object here, for body_file to do its job
+        request = Request({})
+        request.body_file = StringIO('{"type": "Feature", "id": 1, "properties": {"text": "foo"}, "geometry": {"type": "Point", "coordinates": [45, 5]}}')
+        response = proto.update(request, 1)
+        self.assertEqual(response.status_int, 404)
+
+    def test_protocol_update_badrequest(self):
+        from papyrus.protocol import Protocol
+        # a mock session specific to this test
+        class MockSession(object):
+            @staticmethod
+            def query(mapped_class):
+                return {'a': {}}
+        proto = Protocol(MockSession, MappedClass)
+        # we need an actual Request object here, for body_file to do its job
+        request = Request({})
+        request.body_file = StringIO('{"type": "Point", "coordinates": [45, 5]}')
+        response = proto.update(request, 'a')
+        self.assertEqual(response.status_int, 400)
+
+    def test_protocol_update(self):
+        from papyrus.protocol import Protocol
+        # a mock session specific to this test
+        class MockSession(object):
+            @staticmethod
+            def query(mapped_class):
+                return {'a': MappedClass()}
+            @staticmethod
+            def commit():
+                pass
+        proto = Protocol(MockSession, MappedClass)
+        # we need an actual Request object here, for body_file to do its job
+        request = Request({})
+        request.body_file = StringIO('{"type": "Feature", "id": "a", "properties": {"text": "foo"}, "geometry": {"type": "Point", "coordinates": [45, 5]}}')
+        obj = proto.update(request, "a")
+        self.assertEqual(len(request.response_callbacks), 1)
+        self.assertTrue(isinstance(obj, MappedClass))
+        self.assertTrue(isinstance(obj.geometry, WKBSpatialElement))
+        self.assertEqual(obj.text, "foo")
+
+    def test_protocol_delete_forbidden(self):
+        from papyrus.protocol import Protocol
+        proto = Protocol(Session, MappedClass, readonly=True)
+        request = testing.DummyRequest()
+        response = proto.delete(request, 1)
+        self.assertEqual(response.status_int, 403)
+
+    def test_protocol_delete_notfound(self):
+        from papyrus.protocol import Protocol
+        # a mock session specific to this test
+        class MockSession(object):
+            @staticmethod
+            def query(mapped_class):
+                return {}
+        proto = Protocol(MockSession, MappedClass)
+        request = testing.DummyRequest()
+        response = proto.delete(request, 1)
+        self.assertEqual(response.status_int, 404)
+
+    def test_protocol_delete(self):
+        from papyrus.protocol import Protocol
+        # a mock session specific to this test
+        class MockSession(object):
+            @staticmethod
+            def query(mapped_class):
+                return {'a': MappedClass()}
+            @staticmethod
+            def delete(obj):
+                pass
+            @staticmethod
+            def commit():
+                pass
+        proto = Protocol(MockSession, MappedClass)
+        request = testing.DummyRequest()
+        proto.delete(request, 'a')
+        self.assertEqual(len(request.response_callbacks), 1)
