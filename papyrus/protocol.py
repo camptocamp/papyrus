@@ -1,4 +1,4 @@
-#
+
 # Copyright (c) 2008-2011 Camptocamp.
 # All rights reserved.
 #
@@ -26,8 +26,7 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-from pyramid.httpexceptions import HTTPBadRequest
-from pyramid.exceptions import NotFound, Forbidden
+from pyramid.httpexceptions import HTTPBadRequest, HTTPForbidden, HTTPNotFound
 
 from shapely.geometry import asShape
 from shapely.geometry.point import Point
@@ -249,7 +248,7 @@ class Protocol(object):
         if id is not None:
             o = self.Session.query(self.mapped_class).get(id)
             if o is None:
-                return NotFound()
+                return HTTPNotFound()
             ret = self._filter_attrs(o.__geo_interface__, request)
         else:
             objs = self._query(request, filter)
@@ -262,7 +261,7 @@ class Protocol(object):
         """ Read the GeoJSON feature collection from the request body and
             create new objects in the database. """
         if self.readonly:
-            return Forbidden()
+            return HTTPForbidden()
         content = request.environ['wsgi.input'].read(int(request.environ['CONTENT_LENGTH']))
         factory = lambda ob: GeoJSON.to_instance(ob)
         collection = loads(content, object_hook=factory)
@@ -296,10 +295,10 @@ class Protocol(object):
         """ Read the GeoJSON feature from the request body and update the
         corresponding object in the database. """
         if self.readonly:
-            return Forbidden()
+            return HTTPForbidden()
         obj = self.Session.query(self.mapped_class).get(id)
         if obj is None:
-            return NotFound()
+            return HTTPNotFound()
         content = request.environ['wsgi.input'].read(int(request.environ['CONTENT_LENGTH']))
         factory = lambda ob: GeoJSON.to_instance(ob)
         feature = loads(content, object_hook=factory)
@@ -316,10 +315,10 @@ class Protocol(object):
     def delete(self, request, id):
         """ Remove the targetted feature from the database """
         if self.readonly:
-            return Forbidden()
+            return HTTPForbidden()
         obj = self.Session.query(self.mapped_class).get(id)
         if obj is None:
-            return NotFound()
+            return HTTPNotFound()
         if self.before_delete is not None:
             self.before_delete(request, obj)
         self.Session.delete(obj)
