@@ -26,7 +26,7 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-__all__ = ['GeometryTableMixIn']
+__all__ = ['GeoMixin']
 
 from shapely.geometry import asShape
 from shapely.wkb import loads
@@ -35,7 +35,7 @@ from geojson import Feature
 
 from geoalchemy import Geometry as GeometryBase, WKBSpatialElement
 
-class GeometryTableMixIn(object):
+class GeoMixin(object):
 
     """Class to be mixed in mapped classes.
 
@@ -66,7 +66,7 @@ class GeometryTableMixIn(object):
 
             Base = declarative_base(metadata=metadata)
 
-            class Line(Base, GeometryTableMixIn):
+            class Line(Base, GeoMixin):
                 __tablename__ = 'lines'
                 __table_args__ = {
                         'autoload' : True,

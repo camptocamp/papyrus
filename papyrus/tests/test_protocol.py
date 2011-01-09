@@ -46,7 +46,7 @@ from shapely.geometry.polygon import Polygon
 
 from geoalchemy import GeometryColumn, Geometry, WKBSpatialElement
 
-from papyrus.geomtable import GeometryTableMixIn
+from papyrus.geomixin import GeoMixin
 
 #
 # Setup
@@ -54,7 +54,7 @@ from papyrus.geomtable import GeometryTableMixIn
 
 Base = declarative_base(metadata=MetaData())
 
-class MappedClass(Base, GeometryTableMixIn):
+class MappedClass(Base, GeoMixin):
     __tablename__ = "table"
     id = Column(types.Integer, primary_key=True)
     text = Column(types.Unicode)

@@ -96,9 +96,9 @@ class::
 
 With the mixin applied the mapped class definition is::
 
-    from papyrus.geomtable import GeometryTableMixin
+    from papyrus.geomixin import GeoMixin
 
-    class Spot(Base, GeometryTableMixin):
+    class Spot(Base, GeoMixin):
         __tablename__ = 'spots'
         id = Column(Integer, primary_key=True)
         name = Column(Unicode, nullable=False)
