@@ -28,10 +28,12 @@
 
 __all__ = ['GeometryTableMixIn']
 
+from shapely.geometry import asShape
 from shapely.wkb import loads
+
 from geojson import Feature
 
-from geoalchemy import Geometry as GeometryBase
+from geoalchemy import Geometry as GeometryBase, WKBSpatialElement
 
 class GeometryTableMixIn(object):
 
@@ -133,8 +135,7 @@ class GeometryTableMixIn(object):
                 cls.__column_cache__ = dict(primary_key=keys.pop())
         return cls.__column_cache__["primary_key"]
 
-    @property
-    def __geo_interface__(self):
+    def _get_geoiface(self):
         """Create and return a ``geojson.Feature`` object from this mapped object."""
         if not self.exported_keys:
             exported = self.__table__.c.keys()
@@ -161,3 +162,16 @@ class GeometryTableMixIn(object):
                        geometry=geometry,
                        properties=attributes,
                        bbox=geometry.bounds)
+
+    def _set_geoiface(self, feature):
+        """ Set this object's geometry and attributes based on the geometry
+        and attributes of the passed ``geojson.Feature`` object."""
+        if feature.geometry is not None:
+            shape = asShape(feature.geometry)
+            srid = self.geometry_column().type.srid
+            self.geometry = WKBSpatialElement(buffer(shape.wkb), srid=srid)
+            self.geometry.shape = shape
+        for key in feature.properties:
+            self[key] = feature.properties[key]
+
+    __geo_interface__ = property(_get_geoiface, _set_geoiface)

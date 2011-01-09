@@ -28,7 +28,6 @@
 
 from pyramid.httpexceptions import HTTPBadRequest, HTTPForbidden, HTTPNotFound
 
-from shapely.geometry import asShape
 from shapely.geometry.point import Point
 from shapely.geometry.polygon import Polygon
 
@@ -278,7 +277,7 @@ class Protocol(object):
             if obj is None:
                 obj = self.mapped_class()
                 create = True
-            self.__copy_attributes(feature, obj)
+            obj.__geo_interface__ = feature;
             if create:
                 self.Session.add(obj)
             objects.append(obj)
@@ -306,7 +305,7 @@ class Protocol(object):
             return HTTPBadRequest()
         if self.before_update is not None:
             self.before_update(request, feature, obj)
-        self.__copy_attributes(feature, obj)
+        obj.__geo_interface__ = feature;
         self.Session.commit()
         callback = create_response_callback(201)
         request.add_response_callback(callback)
@@ -326,17 +325,3 @@ class Protocol(object):
         callback = create_response_callback(204)
         request.add_response_callback(callback)
         return
-
-    def __copy_attributes(self, json_feature, obj):
-        """Updates the passed-in object with the values
-        from the GeoJSON feature."""
-        # create a Shapely geometry from GeoJSON and persist the geometry using
-        # WKB
-        shape = asShape(json_feature.geometry)
-        srid = self.mapped_class.geometry_column().type.srid
-        obj.geometry = WKBSpatialElement(buffer(shape.wkb), srid=srid)
-        # also store the Shapely geometry so that we can use it to return the
-        # geometry as GeoJSON
-        obj.geometry.shape = shape
-        for key in json_feature.properties:
-            obj[key] = json_feature.properties[key]
