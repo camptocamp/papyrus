@@ -2,12 +2,3 @@ Renderers
 
 - add integration test to make sure that the geojson renderer works for views
   (with add_view and/or view_config)
-
-Geo mixin
-
-- rename from GeometryTableMixin to GeoMixin
-- make the __geo_interface__ r/w
-
-Protocol
-
-- and change the protocol create/update code to use the setter
