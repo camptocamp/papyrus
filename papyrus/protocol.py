@@ -28,6 +28,7 @@
 
 from pyramid.httpexceptions import HTTPBadRequest, HTTPForbidden, HTTPNotFound
 
+from shapely.geometry import asShape
 from shapely.geometry.point import Point
 from shapely.geometry.polygon import Polygon
 
