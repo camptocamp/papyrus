@@ -245,7 +245,7 @@ class Protocol(object):
     def count(self, request, filter=None):
         """ Return the number of records matching the given filter. """
         if filter is None:
-            filter = create_default_filter(request, self.mapped_class)
+            filter = create_default_filter(request, self.mapped_class, self.geom_attr, epsg=self.epsg)
         return str(self.Session().query(self.mapped_class).filter(filter).count())
 
     def read(self, request, filter=None, id=None):

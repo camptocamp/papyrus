@@ -170,7 +170,7 @@ web service, the ``spot.py`` view file::
     def read(request):
         return proto.read(request)
 
-    @view_config(route_name='spots_count')
+    @view_config(route_name='spots_count', renderer='string')
     def count(request):
         return proto.count(request)
 
@@ -189,4 +189,12 @@ web service, the ``spot.py`` view file::
 Our web service is now completely defined. The ``spot.py`` file defines five
 view callables, one for each *verb* of the MapFish Protocol.
 
-Finally we'll need to provide routes to our view callables: TODO
+Finally we'll need to provide routes to our view callables. This is the usual
+way in the application's ``__init.py__`` file, by calling ``add_route`` on the
+``Configurator``::
+
+    config.add_route('spots_read', '/summits', request_method='GET')
+    config.add_route('spots_count', '/summits/count', request_method='GET')
+    config.add_route('spots_create', '/summits', request_method='POST')
+    config.add_route('spots_update', '/summits/{id}', request_method='PUT')
+    config.add_route('spots_delete', '/summits/{id}', request_method='DELETE')
