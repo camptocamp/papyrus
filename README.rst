@@ -110,7 +110,7 @@ Pyramid's ``alchemyroute`` template places SQLAlchemy models in a
 
     from geoalchemy import GeometryColumn, Point, WKBSpatialElement
 
-    from geojson import Feature
+    import geojson
 
     from shapely.geometry import asShape
     from shapely.wkb import loads
@@ -125,30 +125,38 @@ Pyramid's ``alchemyroute`` template places SQLAlchemy models in a
         id = Column(Integer, primary_key=True)
         name = Column(Unicode, nullable=False)
         geom = GeometryColumn('the_geom', Point(srid=4326))
-        
+
+        def __init__(self, feature):
+            self.id = feature.id
+            self.__update__(feature)
+
+        def __update__(self, feature):
+            geometry = feature.geometry
+            if geometry is not None and \
+               not isinstance(geometry, geojson.geometry.Default):
+                shape = asShape(feature.geometry)
+                self.geom = WKBSpatialElement(buffer(shape.wkb), srid=4326)
+                self.geom.shape = shape
+            self.name = feature.properties.get('name', None)
+       
         @property
         def __geo_interface__(self):
             id = self.id
             geometry = loads(str(self.geom.geom_wkb))
             properties = dict(name=self.name)
-            return Feature(id=id, geometry=geometry, properties=properties)
-
-        def _from_feature(self, feature):
-            if feature.geometry is not None:
-                shape = asShape(feature.geometry)
-                self.geom = WKBSpatialElement(buffer(shape.wkb), srid=4326)
-            self.name = feature.properties['name']
+            return geojson.Feature(id=id, geometry=geometry, properties=properties)
 
     def initialize_sql(engine):
         DBSession.configure(bind=engine)
         Base.metadata.bind = engine
 
 Note that the ``Spot`` class implements the Python Geo Interface (though the
-``__geo_interface__`` property), and defines a ``_from_feature`` method.
-Implementing the Python Geo Interface is required for being able to serialize
-``Spot`` objects into GeoJSON. Defining the ``_from_feature`` method is
-required for insertion and update, it is called by the Protocol implementation
-with a GeoJSON feature (``geojson.Feature``) as an argument.
+``__geo_interface__`` property), and defines ``__init__`` and ``__update__``
+methods.  Implementing the Python Geo Interface is required for being able to
+serialize ``Spot`` objects into GeoJSON. Defining the ``__init__``
+and ``__update__`` methods is required for inserting and updating objects,
+respectively. Both the ``__init__`` and ``__update__`` methods receive
+a GeoJSON feature (``geojson.Feature``) as an argument.
 
 Now that database model is defined we can now create the core of our MapFish
 web service, the ``spot.py`` view file::
@@ -156,7 +164,7 @@ web service, the ``spot.py`` view file::
     from myproject.models import DBSession, Spot
     from papyrus.protocol import Protocol, read, create, update, delete
 
-    proto = Protocol(DBSession, Spot, Spot.geom)
+    proto = Protocol(DBSession, Spot, Spot.geom, epsg=4326)
 
     @view_config(renderer='geojson')
     def read(request):
