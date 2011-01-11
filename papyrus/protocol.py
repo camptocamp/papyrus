@@ -42,16 +42,16 @@ from geojson import Feature, FeatureCollection, loads, GeoJSON
 from papyrus.within_distance import within_distance
 
 
-def create_geom_filter(request, mapped_class, **kwargs):
+def create_geom_filter(request, mapped_class, geom_attr, epsg=4326, **kwargs):
     """Create MapFish geometry filter based on the request params. Either
     a box or within or geometry filter, depending on the request params.
     Additional named arguments are passed to the spatial filter."""
     tolerance = 0
     if 'tolerance' in request.params:
         tolerance = float(request.params['tolerance'])
-    epsg = None
+    _epsg = None
     if 'epsg' in request.params:
-        epsg = int(request.params['epsg'])
+        _epsg = int(request.params['epsg'])
     box = None
     if 'bbox' in request.params:
         box = request.params['bbox']
@@ -70,16 +70,15 @@ def create_geom_filter(request, mapped_class, **kwargs):
         geometry = asShape(geometry)
     if geometry is None:
         return None
-    geom_column = mapped_class.geometry_column()
-    epsg = geom_column.type.srid if epsg is None else epsg
-    if epsg != geom_column.type.srid:
-        geom_column = functions.transform(geom_column, epsg)
-    wkb_geometry = WKBSpatialElement(buffer(geometry.wkb), epsg)
+    _epsg = epsg if _epsg is None else _epsg
+    if _epsg != epsg:
+        geom_attr = functions.transform(geom_attr, _epsg)
+    wkb_geometry = WKBSpatialElement(buffer(geometry.wkb), _epsg)
     if 'additional_params' in kwargs:
-        return within_distance(geom_column, wkb_geometry, tolerance,
+        return within_distance(geom_attr, wkb_geometry, tolerance,
                                kwargs['additional_params'])
     else:
-        return within_distance(geom_column, wkb_geometry, tolerance)
+        return within_distance(geom_attr, wkb_geometry, tolerance)
 
 def create_attr_filter(request, mapped_class):
     """Create an ``and_`` SQLAlchemy filter (a ClauseList object) based
@@ -108,11 +107,11 @@ def create_attr_filter(request, mapped_class):
             filters.append(f)
     return and_(*filters) if len(filters) > 0 else None
 
-def create_default_filter(request, mapped_class, **kwargs):
+def create_default_filter(request, mapped_class, geom_attr, **kwargs):
     """ Create MapFish default filter based on the request params. Additional
     named arguments are passed to the spatial filter."""
     attr_filter = create_attr_filter(request, mapped_class)
-    geom_filter = create_geom_filter(request, mapped_class, **kwargs)
+    geom_filter = create_geom_filter(request, mapped_class, geom_attr, **kwargs)
     if geom_filter is None and attr_filter is None:
         return None
     return and_(geom_filter, attr_filter)
@@ -141,6 +140,12 @@ class Protocol(object):
       mapped_class
           the class mapped to a database table in the ORM.
 
+      geom_attr
+          the mapped class' geometry attribute.
+
+      epsg
+          the EPSG number for the geom attribute.
+
       readonly
           ``True`` if this protocol is read-only, ``False`` otherwise. If
           ``True``, the methods ``create()``, ``update()`` and  ``delete()``
@@ -166,9 +171,11 @@ class Protocol(object):
             and the database object about to be deleted.
     """
 
-    def __init__(self, Session, mapped_class, readonly=False, **kwargs):
+    def __init__(self, Session, mapped_class, geom_attr, epsg=4326, readonly=False, **kwargs):
         self.Session = Session
         self.mapped_class = mapped_class
+        self.geom_attr = geom_attr
+        self.epsg = epsg
         self.readonly = readonly
         self.before_create = None
         if kwargs.has_key('before_create'):
@@ -224,8 +231,8 @@ class Protocol(object):
             offset = int(request.params['offset'])
         if filter is None:
             # create MapFish default filter
-            filter = create_default_filter(request, self.mapped_class)
-        query = self.Session.query(self.mapped_class).filter(filter)
+            filter = create_default_filter(request, self.mapped_class, self.geom_attr, epsg=self.epsg)
+        query = self.Session().query(self.mapped_class).filter(filter)
         order_by = self._get_order_by(request)
         if order_by is not None:
             query = query.order_by(order_by)
@@ -239,22 +246,21 @@ class Protocol(object):
         """ Return the number of records matching the given filter. """
         if filter is None:
             filter = create_default_filter(request, self.mapped_class)
-        return str(self.Session.query(self.mapped_class).filter(filter).count())
+        return str(self.Session().query(self.mapped_class).filter(filter).count())
 
     def read(self, request, filter=None, id=None):
         """ Build a query based on the filter or the idenfier, send the query
         to the database, and return a Feature or a FeatureCollection. """
         ret = None
         if id is not None:
-            o = self.Session.query(self.mapped_class).get(id)
+            o = self.Session().query(self.mapped_class).get(id)
             if o is None:
                 return HTTPNotFound()
             ret = self._filter_attrs(o.__geo_interface__, request)
         else:
             objs = self._query(request, filter)
             ret = FeatureCollection(
-                    [self._filter_attrs(o.__geo_interface__, request) \
-                        for o in objs if o.geometry is not None])
+                    [self._filter_attrs(o.__geo_interface__, request) for o in objs])
         return ret
 
     def create(self, request, execute=True):
@@ -267,28 +273,29 @@ class Protocol(object):
         collection = loads(content, object_hook=factory)
         if not isinstance(collection, FeatureCollection):
             return HTTPBadRequest()
+        session = self.Session()
         objects = []
         for feature in collection.features:
             create = False
             obj = None
             if isinstance(feature.id, int):
-                obj = self.Session.query(self.mapped_class).get(feature.id)
+                obj = session.query(self.mapped_class).get(feature.id)
             if self.before_create is not None:
                 self.before_create(request, feature, obj)
             if obj is None:
-                obj = self.mapped_class()
+                obj = self.mapped_class(feature)
                 create = True
-            obj.__geo_interface__ = feature;
+            else:
+                obj.__update__(feature)
             if create:
-                self.Session.add(obj)
+                session.add(obj)
             objects.append(obj)
         if execute:
-            self.Session.commit()
+            session.commit()
         callback = create_response_callback(201)
         request.add_response_callback(callback)
         if len(objects) > 0:
-            features = [o for o in objects if o.geometry is not None]
-            return FeatureCollection(features)
+            return FeatureCollection(objects)
         return
 
     def update(self, request, id):
@@ -296,7 +303,8 @@ class Protocol(object):
         corresponding object in the database. """
         if self.readonly:
             return HTTPForbidden()
-        obj = self.Session.query(self.mapped_class).get(id)
+        session = self.Session()
+        obj = session.query(self.mapped_class).get(id)
         if obj is None:
             return HTTPNotFound()
         content = request.environ['wsgi.input'].read(int(request.environ['CONTENT_LENGTH']))
@@ -306,8 +314,8 @@ class Protocol(object):
             return HTTPBadRequest()
         if self.before_update is not None:
             self.before_update(request, feature, obj)
-        obj.__geo_interface__ = feature;
-        self.Session.commit()
+        obj.__update__(feature)
+        session.commit()
         callback = create_response_callback(201)
         request.add_response_callback(callback)
         return obj
@@ -316,13 +324,14 @@ class Protocol(object):
         """ Remove the targetted feature from the database """
         if self.readonly:
             return HTTPForbidden()
-        obj = self.Session.query(self.mapped_class).get(id)
+        session = self.Session()
+        obj = session.query(self.mapped_class).get(id)
         if obj is None:
             return HTTPNotFound()
         if self.before_delete is not None:
             self.before_delete(request, obj)
-        self.Session.delete(obj)
-        self.Session.commit()
+        session.delete(obj)
+        session.commit()
         callback = create_response_callback(204)
         request.add_response_callback(callback)
         return

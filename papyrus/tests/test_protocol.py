@@ -39,14 +39,14 @@ from sqlalchemy import MetaData, Column, create_engine
 from sqlalchemy import types, orm, sql
 from sqlalchemy.ext.declarative import declarative_base
 
+import geojson
 from geojson import dumps, Feature
 
 from shapely import wkt, wkb
+from shapely.geometry import asShape
 from shapely.geometry.polygon import Polygon
 
 from geoalchemy import GeometryColumn, Geometry, WKBSpatialElement
-
-from papyrus.geomixin import GeoMixin
 
 #
 # Setup
@@ -54,26 +54,30 @@ from papyrus.geomixin import GeoMixin
 
 Base = declarative_base(metadata=MetaData())
 
-class MappedClass(Base, GeoMixin):
+class MappedClass(Base):
     __tablename__ = "table"
     id = Column(types.Integer, primary_key=True)
     text = Column(types.Unicode)
     geom = GeometryColumn(Geometry(dimension=2, srid=4326))
 
-#class testing.DummyRequest(object):
-#    def __init__(self, params=None):
-#        self.params = params
-#        self.environ = {}
-#
-#    def _setbody(self, body):
-#        self.environ["wsgi.input"] = StringIO(body)
-#        self.environ["CONTENT_LENGTH"] = len(body)
-#    body = property(None, _setbody)
-#
-#class FakeResponse(object):
-#    def __init__(self):
-#        self.status = 0
-#
+    def __init__(self, feature):
+        self.id = feature.id
+        self.__update__(feature)
+
+    def __update__(self, feature):
+        geometry = feature.geometry
+        if geometry is not None and not isinstance(geometry, geojson.geometry.Default):
+            shape = asShape(feature.geometry)
+            self.geom = WKBSpatialElement(buffer(shape.wkb), srid=4326)
+            self.geom.shape = shape
+        self.text = feature.properties.get('text', None)
+ 
+    @property
+    def __geo_interface__(self):
+        id = self.id
+        geometry = loads(str(self.geom.geom_wkb))
+        properties = dict(text=self.text)
+        return Feature(id=id, geometry=geometry, properties=properties)
 
 # create a session in the same way it's done in a typical Pyramid app
 engine = create_engine('postgresql://user:user@no_connection/no_db', echo=True)
@@ -102,7 +106,7 @@ class Test_protocol(unittest.TestCase):
         request = testing.DummyRequest(
             params={"bbox": "-180,-90,180,90", "tolerance": "1"}
             )
-        filter = create_geom_filter(request, MappedClass)
+        filter = create_geom_filter(request, MappedClass, MappedClass.geom)
         compiled_filter = filter.compile(engine)
         params = compiled_filter.params
         filter_str = _compiled_to_string(compiled_filter)
@@ -115,7 +119,7 @@ class Test_protocol(unittest.TestCase):
         request = testing.DummyRequest(
             params={"bbox": "-180,-90,180,90", "tolerance": "1", "epsg": "900913"}
             )
-        filter = create_geom_filter(request, MappedClass)
+        filter = create_geom_filter(request, MappedClass, MappedClass.geom)
         compiled_filter = filter.compile(engine)
         params = compiled_filter.params
         filter_str = _compiled_to_string(compiled_filter)
@@ -131,7 +135,7 @@ class Test_protocol(unittest.TestCase):
         request = testing.DummyRequest(
             params={"lon": "40", "lat": "5", "tolerance": "1"}
             )
-        filter = create_geom_filter(request, MappedClass)
+        filter = create_geom_filter(request, MappedClass, MappedClass.geom)
         compiled_filter = filter.compile(engine)
         params = compiled_filter.params
         filter_str = _compiled_to_string(compiled_filter)
@@ -144,7 +148,7 @@ class Test_protocol(unittest.TestCase):
         request = testing.DummyRequest(
             params={"lon": "40", "lat": "5", "tolerance": "1", "epsg": "900913"}
             )
-        filter = create_geom_filter(request, MappedClass)
+        filter = create_geom_filter(request, MappedClass, MappedClass.geom)
         compiled_filter = filter.compile(engine)
         params = compiled_filter.params
         filter_str = _compiled_to_string(compiled_filter)
@@ -161,7 +165,7 @@ class Test_protocol(unittest.TestCase):
         request = testing.DummyRequest(
             {"geometry": dumps(poly), "tolerance": "1"}
         )
-        filter = create_geom_filter(request, MappedClass)
+        filter = create_geom_filter(request, MappedClass, MappedClass.geom)
         compiled_filter = filter.compile(engine)
         params = compiled_filter.params
         filter_str = _compiled_to_string(compiled_filter)
@@ -175,7 +179,7 @@ class Test_protocol(unittest.TestCase):
         request = testing.DummyRequest(
             {"geometry": dumps(poly), "tolerance": "1", "epsg": "900913"}
         )
-        filter = create_geom_filter(request, MappedClass)
+        filter = create_geom_filter(request, MappedClass, MappedClass.geom)
         compiled_filter = filter.compile(engine)
         params = compiled_filter.params
         filter_str = _compiled_to_string(compiled_filter)
@@ -189,7 +193,7 @@ class Test_protocol(unittest.TestCase):
     def test_geom_filter_misc(self):
         from papyrus.protocol import create_geom_filter
         request = testing.DummyRequest()
-        filter = create_geom_filter(request, MappedClass)
+        filter = create_geom_filter(request, MappedClass, MappedClass.geom)
         self.assertEqual(filter, None)
 
     def test_create_attr_filter(self):
@@ -276,7 +280,7 @@ class Test_protocol(unittest.TestCase):
 
     def test_protocol_query(self):
         from papyrus.protocol import Protocol, create_attr_filter
-        proto = Protocol(Session, MappedClass)
+        proto = Protocol(Session, MappedClass, MappedClass.geom)
 
         request = testing.DummyRequest()
         query = proto._query(request, execute=False)
@@ -322,7 +326,7 @@ class Test_protocol(unittest.TestCase):
 
     def test_protocol_create_forbidden(self):
         from papyrus.protocol import Protocol
-        proto = Protocol(Session, MappedClass, readonly=True)
+        proto = Protocol(Session, MappedClass, MappedClass.geom, readonly=True)
         # we need an actual Request object here, for body_file to do its job
         request = Request({})
         request.body_file = StringIO('{"type": "FeatureCollection", "features": [{"type": "Feature", "properties": {"text": "foo"}, "geometry": {"type": "Point", "coordinates": [45, 5]}}, {"type": "Feature", "properties": {"text": "foo"}, "geometry": {"type": "Point", "coordinates": [45, 5]}}]}')
@@ -331,7 +335,7 @@ class Test_protocol(unittest.TestCase):
 
     def test_protocol_create_badrequest(self):
         from papyrus.protocol import Protocol
-        proto = Protocol(Session, MappedClass)
+        proto = Protocol(Session, MappedClass, MappedClass.geom)
         # we need an actual Request object here, for body_file to do its job
         request = Request({})
         request.body_file = StringIO('{"type": "Feature", "properties": {"text": "foo"}, "geometry": {"type": "Point", "coordinates": [45, 5]}}')
@@ -340,7 +344,7 @@ class Test_protocol(unittest.TestCase):
 
     def test_protocol_create(self):
         from papyrus.protocol import Protocol
-        proto = Protocol(Session, MappedClass)
+        proto = Protocol(Session, MappedClass, MappedClass.geom)
         # we need an actual Request object here, for body_file to do its job
         request = Request({})
         request.body_file = StringIO('{"type": "FeatureCollection", "features": [{"type": "Feature", "properties": {"text": "foo"}, "geometry": {"type": "Point", "coordinates": [45, 5]}}, {"type": "Feature", "properties": {"text": "foo"}, "geometry": {"type": "Point", "coordinates": [45, 5]}}]}')
@@ -348,14 +352,14 @@ class Test_protocol(unittest.TestCase):
         self.assertEqual(len(request.response_callbacks), 1)
         self.assertEqual(len(Session.new), 2)
         for obj in Session.new:
-            self.assertEqual(obj["text"], "foo")
-            self.assertEqual(obj.geometry.shape.x, 45)
-            self.assertEqual(obj.geometry.shape.y, 5)
+            self.assertEqual(obj.text, "foo")
+            self.assertEqual(obj.geom.shape.x, 45)
+            self.assertEqual(obj.geom.shape.y, 5)
         Session.rollback()
 
     def test_protocol_update_forbidden(self):
         from papyrus.protocol import Protocol
-        proto = Protocol(Session, MappedClass, readonly=True)
+        proto = Protocol(Session, MappedClass, MappedClass.geom, readonly=True)
         # we need an actual Request object here, for body_file to do its job
         request = Request({})
         request.body_file = StringIO('{"type": "Feature", "id": 1, "properties": {"text": "foo"}, "geometry": {"type": "Point", "coordinates": [45, 5]}}')
@@ -369,7 +373,7 @@ class Test_protocol(unittest.TestCase):
             @staticmethod
             def query(mapped_class):
                 return {}
-        proto = Protocol(MockSession, MappedClass)
+        proto = Protocol(MockSession, MappedClass, MappedClass.geom)
         # we need an actual Request object here, for body_file to do its job
         request = Request({})
         request.body_file = StringIO('{"type": "Feature", "id": 1, "properties": {"text": "foo"}, "geometry": {"type": "Point", "coordinates": [45, 5]}}')
@@ -383,7 +387,7 @@ class Test_protocol(unittest.TestCase):
             @staticmethod
             def query(mapped_class):
                 return {'a': {}}
-        proto = Protocol(MockSession, MappedClass)
+        proto = Protocol(MockSession, MappedClass, MappedClass.geom)
         # we need an actual Request object here, for body_file to do its job
         request = Request({})
         request.body_file = StringIO('{"type": "Point", "coordinates": [45, 5]}')
@@ -392,27 +396,28 @@ class Test_protocol(unittest.TestCase):
 
     def test_protocol_update(self):
         from papyrus.protocol import Protocol
+        from geojson import Feature
         # a mock session specific to this test
         class MockSession(object):
             @staticmethod
             def query(mapped_class):
-                return {'a': MappedClass()}
+                return {'a': MappedClass(Feature())}
             @staticmethod
             def commit():
                 pass
-        proto = Protocol(MockSession, MappedClass)
+        proto = Protocol(MockSession, MappedClass, MappedClass.geom)
         # we need an actual Request object here, for body_file to do its job
         request = Request({})
         request.body_file = StringIO('{"type": "Feature", "id": "a", "properties": {"text": "foo"}, "geometry": {"type": "Point", "coordinates": [45, 5]}}')
         obj = proto.update(request, "a")
         self.assertEqual(len(request.response_callbacks), 1)
         self.assertTrue(isinstance(obj, MappedClass))
-        self.assertTrue(isinstance(obj.geometry, WKBSpatialElement))
+        self.assertTrue(isinstance(obj.geom, WKBSpatialElement))
         self.assertEqual(obj.text, "foo")
 
     def test_protocol_delete_forbidden(self):
         from papyrus.protocol import Protocol
-        proto = Protocol(Session, MappedClass, readonly=True)
+        proto = Protocol(Session, MappedClass, MappedClass.geom, readonly=True)
         request = testing.DummyRequest()
         response = proto.delete(request, 1)
         self.assertEqual(response.status_int, 403)
@@ -424,25 +429,26 @@ class Test_protocol(unittest.TestCase):
             @staticmethod
             def query(mapped_class):
                 return {}
-        proto = Protocol(MockSession, MappedClass)
+        proto = Protocol(MockSession, MappedClass, MappedClass.geom)
         request = testing.DummyRequest()
         response = proto.delete(request, 1)
         self.assertEqual(response.status_int, 404)
 
     def test_protocol_delete(self):
         from papyrus.protocol import Protocol
+        from geojson import Feature
         # a mock session specific to this test
         class MockSession(object):
             @staticmethod
             def query(mapped_class):
-                return {'a': MappedClass()}
+                return {'a': MappedClass(Feature())}
             @staticmethod
             def delete(obj):
                 pass
             @staticmethod
             def commit():
                 pass
-        proto = Protocol(MockSession, MappedClass)
+        proto = Protocol(MockSession, MappedClass, MappedClass.geom)
         request = testing.DummyRequest()
         proto.delete(request, 'a')
         self.assertEqual(len(request.response_callbacks), 1)
