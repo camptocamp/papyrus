@@ -30,10 +30,11 @@ application ``setup.py``::
 GeoJSON Renderer
 ----------------
 
-Papyrus provides a GeoJSON renderer.
+Papyrus provides a GeoJSON renderer, based on Sean Gillies' `geojson package
+<http://trac.gispython.org/lab/wiki/GeoJSON>`_.
 
-To be able to use the GeoJSON renderer for views its factory must be added to
-the application configuration.
+To be able to use the GeoJSON renderer the GeoJSON renderer factory must be
+added to the application configuration.
 
 For that you can either pass the factory to the ``Configurator``
 constructor::
@@ -45,16 +46,16 @@ constructor::
                    ('geojson', geojson_renderer_factory))
         )
 
-Or you can use the ``add_renderer`` method::
+Or you can apply the ``add_renderer`` method to the ``Configurator`` instance::
 
     from papyrus.renderers import geojson_renderer_factory
     config.add_renderer('geojson', geojson_renderer_factory)
 
 Make sure that ``add_renderer`` is called before any ``add_view`` call that
-uses ``geojson`` as the renderer name.
+names ``geojson`` as an argument.
 
-With the GeoJSON renderer factory registered into the application you can now
-use it for views. Here's a (fake) example::
+To use the GeoJSON renderer in a view set ``renderer`` to ``geojson`` in the
+view config. Here is a simple example::
 
     @view_config(renderer='geojson')
     def hello_world(request):
@@ -65,61 +66,119 @@ use it for views. Here's a (fake) example::
             'properties': {'title': 'Dict 1'},
             }
 
-Mapped Class Mixin
-------------------
+Views configured with the ``geojson`` renderer must return objects that
+implement the `Python Geo Interface
+<http://trac.gispython.org/lab/wiki/PythonGeoInterface>`_.
 
-Papyrus provides a mixin for SQLAlchemy/GeoAlchemy classes mapped to geometry
-tables (i.e. tables with geometry columns).
+Here's another example where the returned object is an SQLAlchemy (or
+GeoAlchemy) mapped object::
 
-Applying this mixin is necessary for mapped classes/tables involved in a
-MapFish web service, i.e. a web service implementing the MapFish Protocol.
+    @view_config(renderer='geojson')
+    def features(request):
+        return DBSession().query(Spot).all()
 
-Also, and importantly, instances of mapped classes to which the mixin is
-applied will provide the `Python Geo Interface
-<http://trac.gispython.org/lab/wiki/PythonGeoInterface>`_, this makes
-them serializable into GeoJSON using ``geojson.dumps`` and the
-GeoJSON Renderer (see the previous section).
+In the above example the ``Spot`` objects returned by the ``query`` call must
+implement the Python Geo Interface.
 
-Using SQLAlchemy's declarative layer here's an example of a GeoAlchemy mapped
-class::
+MapFish Web Services
+--------------------
 
-    metadata = MetaData(engine)
-    Base = declarative_base(metadata=metadata)
+Papyrus provides an implementation of the `MapFish Protocol
+<http://trac.mapfish.org/trac/mapfish/wiki/MapFishProtocol>`_. This
+implementation relies on `GeoAlchemy <http://www.geoalchemy.org>`_.
+
+Let's we want to create a ``spots`` MapFish web service that relies on
+a ``spots`` database table.
+
+First of all we need an SQLAlchemy/GeoAlchemy mapping for that table.
+Pyramid's ``alchemyroute`` template places SQLAlchemy models in a
+``models.py`` file. Here's what our ``models.py`` file looks like::
+
+    import transaction
+
+    from sqlalchemy import Column
+    from sqlalchemy import Integer
+    from sqlalchemy import Unicode
+
+    from sqlalchemy.exc import IntegrityError
+    from sqlalchemy.ext.declarative import declarative_base
+
+    from sqlalchemy.orm import scoped_session
+    from sqlalchemy.orm import sessionmaker
+
+    from zope.sqlalchemy import ZopeTransactionExtension
+
+    from geoalchemy import GeometryColumn, Point, WKBSpatialElement
+
+    from geojson import Feature
+
+    from shapely.geometry import asShape
+    from shapely.wkb import loads
+
+    DBSession = scoped_session(
+                    sessionmaker(extension=ZopeTransactionExtension())
+                    )
+    Base = declarative_base()
 
     class Spot(Base):
         __tablename__ = 'spots'
         id = Column(Integer, primary_key=True)
         name = Column(Unicode, nullable=False)
-        height = Column(Integer)
-        created = Column(DateTime, default=datetime.now())
-        geom = GeometryColumn(Point(2))
+        geom = GeometryColumn('the_geom', Point(srid=4326))
+        
+        @property
+        def __geo_interface__(self):
+            id = self.id
+            geometry = loads(str(self.geom.geom_wkb))
+            properties = dict(name=self.name)
+            return Feature(id=id, geometry=geometry, properties=properties)
 
-With the mixin applied the mapped class definition is::
+        def _from_feature(self, feature):
+            if feature.geometry is not None:
+                shape = asShape(feature.geometry)
+                self.geom = WKBSpatialElement(buffer(shape.wkb), srid=4326)
+            self.name = feature.properties['name']
 
-    from papyrus.geomixin import GeoMixin
+    def initialize_sql(engine):
+        DBSession.configure(bind=engine)
+        Base.metadata.bind = engine
 
-    class Spot(Base, GeoMixin):
-        __tablename__ = 'spots'
-        id = Column(Integer, primary_key=True)
-        name = Column(Unicode, nullable=False)
-        height = Column(Integer)
-        created = Column(DateTime, default=datetime.now())
-        geom = GeometryColumn(Point(2))
+Note that the ``Spot`` class implements the Python Geo Interface (though the
+``__geo_interface__`` property), and defines a ``_from_feature`` method.
+Implementing the Python Geo Interface is required for being able to serialize
+``Spot`` objects into GeoJSON. Defining the ``_from_feature`` method is
+required for insertion and update, it is called by the Protocol implementation
+with a GeoJSON feature (``geojson.Feature``) as an argument.
 
-MapFish Web Services
---------------------
+Now that database model is defined we can now create the core of our MapFish
+web service, the ``spot.py`` view file::
 
-Papyrus includes an implementation of the `MapFish Protocol
-<http://trac.mapfish.org/trac/mapfish/wiki/MapFishProtocol>`_. The MapFish
-Protocol specifies REST APIs for querying and editing geographic objects
-(features).
+    from myproject.models import DBSession, Spot
+    from papyrus.protocol import Protocol, read, create, update, delete
 
-This implementation is provided in the ``papyrus.protocol`` module, with
-the ``Protocol`` class.
-
-Here's an example of use::
+    proto = Protocol(DBSession, Spot, Spot.geom)
 
     @view_config(renderer='geojson')
     def read(request):
-        proto = Protocol(DBSession(), Spot)
         return proto.read(request)
+
+    @view_config()
+    def count(request)
+        return proto.count(request)
+
+    @view_config(renderer='geojson')
+    def create(request):
+        return proto.create(request)
+
+    @view_config(renderer='geojson')
+    def update(request):
+        return proto.create(request)
+
+    @view_config()
+    def delete(request):
+        return proto.delete(request)
+
+Our web service is now completely defined. The ``spot.py`` file defines five
+view callables, one for each *verb* of the MapFish Protocol.
+
+Finally we'll need to provide routes to our view callables: TODO
