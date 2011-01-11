@@ -162,27 +162,27 @@ Now that database model is defined we can now create the core of our MapFish
 web service, the ``spot.py`` view file::
 
     from myproject.models import DBSession, Spot
-    from papyrus.protocol import Protocol, read, create, update, delete
+    from papyrus.protocol import Protocol
 
     proto = Protocol(DBSession, Spot, Spot.geom, epsg=4326)
 
-    @view_config(renderer='geojson')
+    @view_config(route_name='spots_read', renderer='geojson')
     def read(request):
         return proto.read(request)
 
-    @view_config()
-    def count(request)
+    @view_config(route_name='spots_count')
+    def count(request):
         return proto.count(request)
 
-    @view_config(renderer='geojson')
+    @view_config(route_name='spots_create', renderer='geojson')
     def create(request):
         return proto.create(request)
 
-    @view_config(renderer='geojson')
+    @view_config(route_name='spots_update', renderer='geojson')
     def update(request):
         return proto.create(request)
 
-    @view_config()
+    @view_config(route_name='spots_delete')
     def delete(request):
         return proto.delete(request)
 

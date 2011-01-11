@@ -260,7 +260,7 @@ class Protocol(object):
         else:
             objs = self._query(request, filter)
             ret = FeatureCollection(
-                    [self._filter_attrs(o.__geo_interface__, request) for o in objs])
+                    [self._filter_attrs(o.__geo_interface__, request) for o in objs if o is not None])
         return ret
 
     def create(self, request, execute=True):
