@@ -167,9 +167,14 @@ web service, the ``spot.py`` view file::
     # 'geom' is the name of the mapped class' geometry property
     proto = Protocol(DBSession, Spot, 'geom')
 
-    @view_config(route_name='spots_read', renderer='geojson')
-    def read(request):
+    @view_config(route_name='spots_read_many', renderer='geojson')
+    def read_many(request): 
         return proto.read(request)
+
+    @view_config(route_name='spots_read_one', renderer='geojson')
+    def read_one(request):
+        id = request.matchdict.get('id', None)
+        return proto.read(request, id=id)
 
     @view_config(route_name='spots_count', renderer='string')
     def count(request):
@@ -189,14 +194,15 @@ web service, the ``spot.py`` view file::
         id = request.matchdict['id']
         return proto.delete(request, id)
 
-Our web service is now completely defined. The ``spot.py`` file defines five
-view callables, one for each *verb* of the MapFish Protocol.
+With these six view callables our ``spots`` MapFish web service is completely
+defined.
 
 Finally we'll need to provide routes to our view callables. This is the usual
 way in the application's ``__init.py__`` file, by calling ``add_route`` on the
 ``Configurator``::
 
-    config.add_route('spots_read', '/summits', request_method='GET')
+    config.add_route('spots_read_many', '/summits', request_method='GET')
+    config.add_route('spots_read_one', '/summits/{id}', request_method='GET')
     config.add_route('spots_count', '/summits/count', request_method='GET')
     config.add_route('spots_create', '/summits', request_method='POST')
     config.add_route('spots_update', '/summits/{id}', request_method='PUT')
