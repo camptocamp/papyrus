@@ -164,8 +164,7 @@ web service, the ``spot.py`` view file::
     from myproject.models import DBSession, Spot
     from papyrus.protocol import Protocol
 
-    # 'geom' is the GeometryColumn's key, it is used by the protocol
-    # to get the geometry attribute and the geometry column
+    # 'geom' is the name of the mapped class' geometry property
     proto = Protocol(DBSession, Spot, 'geom')
 
     @view_config(route_name='spots_read', renderer='geojson')
