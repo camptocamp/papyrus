@@ -2,3 +2,12 @@ Renderers
 
 - add integration test to make sure that the geojson renderer works for views
   (with add_view and/or view_config)
+
+Protocol
+
+- find a way to determine the geom attribute's srid, and simplify the Protocol signature
+- test CREATE, UPDATE and DELETE (and correct the documentation)
+
+Testing
+
+- use nose and coverage (see Pyramid narrative doc)
