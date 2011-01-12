@@ -124,7 +124,7 @@ Pyramid's ``alchemyroute`` template places SQLAlchemy models in a
         __tablename__ = 'spots'
         id = Column(Integer, primary_key=True)
         name = Column(Unicode, nullable=False)
-        geom = GeometryColumn('the_geom', Point(srid=4326))
+        geom = GeometryColumn(name='the_geom', key='geom', Point(srid=4326))
 
         def __init__(self, feature):
             self.id = feature.id
@@ -164,7 +164,9 @@ web service, the ``spot.py`` view file::
     from myproject.models import DBSession, Spot
     from papyrus.protocol import Protocol
 
-    proto = Protocol(DBSession, Spot, Spot.geom, epsg=4326)
+    # 'geom' is the GeometryColumn's key, it is used by the protocol
+    # to get the geometry attribute and the geometry column
+    proto = Protocol(DBSession, Spot, 'geom')
 
     @view_config(route_name='spots_read', renderer='geojson')
     def read(request):
@@ -180,11 +182,13 @@ web service, the ``spot.py`` view file::
 
     @view_config(route_name='spots_update', renderer='geojson')
     def update(request):
-        return proto.create(request)
+        id = request.matchdict['id']
+        return proto.update(request, id)
 
     @view_config(route_name='spots_delete')
     def delete(request):
-        return proto.delete(request)
+        id = request.matchdict['id']
+        return proto.delete(request, id)
 
 Our web service is now completely defined. The ``spot.py`` file defines five
 view callables, one for each *verb* of the MapFish Protocol.
