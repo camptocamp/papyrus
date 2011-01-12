@@ -7,6 +7,7 @@ Protocol
 
 - find a way to determine the geom attribute's srid, and simplify the Protocol signature
 - test CREATE, UPDATE and DELETE (and correct the documentation)
+- the _get_order_by function is incorrect - looking at __table__.c[column_name] isn't right
 
 Testing
 
