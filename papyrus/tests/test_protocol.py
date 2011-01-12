@@ -58,7 +58,7 @@ class MappedClass(Base):
     __tablename__ = "table"
     id = Column(types.Integer, primary_key=True)
     text = Column(types.Unicode)
-    geom = GeometryColumn('geom', Geometry(dimension=2, srid=4326), key='geom_key')
+    geom = GeometryColumn(Geometry(dimension=2, srid=4326))
 
     def __init__(self, feature):
         self.id = feature.id
