@@ -27,6 +27,7 @@
 #
 
 from pyramid.httpexceptions import HTTPBadRequest, HTTPForbidden, HTTPNotFound
+from pyramid.response import Response
 
 from shapely.geometry import asShape
 from shapely.geometry.point import Point
@@ -321,7 +322,7 @@ class Protocol(object):
                     [self._filter_attrs(o.__geo_interface__, request) for o in objs if o is not None])
         return ret
 
-    def create(self, request, execute=True):
+    def create(self, request):
         """ Read the GeoJSON feature collection from the request body and
             create new objects in the database. """
         if self.readonly:
@@ -348,8 +349,6 @@ class Protocol(object):
             if create:
                 session.add(obj)
             objects.append(obj)
-        if execute:
-            session.commit()
         callback = create_response_callback(201)
         request.add_response_callback(callback)
         if len(objects) > 0:
@@ -373,7 +372,6 @@ class Protocol(object):
         if self.before_update is not None:
             self.before_update(request, feature, obj)
         obj.__update__(feature)
-        session.commit()
         callback = create_response_callback(201)
         request.add_response_callback(callback)
         return obj
@@ -389,7 +387,4 @@ class Protocol(object):
         if self.before_delete is not None:
             self.before_delete(request, obj)
         session.delete(obj)
-        session.commit()
-        callback = create_response_callback(204)
-        request.add_response_callback(callback)
-        return
+        return Response(status_int=204)

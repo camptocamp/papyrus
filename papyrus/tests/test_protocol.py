@@ -34,6 +34,7 @@ import unittest
 
 from pyramid import testing
 from pyramid.request import Request
+from pyramid.response import Response
 
 from sqlalchemy import MetaData, Column, create_engine
 from sqlalchemy import types, orm, sql
@@ -330,7 +331,7 @@ class Test_protocol(unittest.TestCase):
         # we need an actual Request object here, for body_file to do its job
         request = Request({})
         request.body_file = StringIO('{"type": "FeatureCollection", "features": [{"type": "Feature", "properties": {"text": "foo"}, "geometry": {"type": "Point", "coordinates": [45, 5]}}, {"type": "Feature", "properties": {"text": "foo"}, "geometry": {"type": "Point", "coordinates": [45, 5]}}]}')
-        response = proto.create(request, execute=False)
+        response = proto.create(request)
         self.assertEqual(response.status_int, 403)
 
     def test_protocol_create_badrequest(self):
@@ -339,7 +340,7 @@ class Test_protocol(unittest.TestCase):
         # we need an actual Request object here, for body_file to do its job
         request = Request({})
         request.body_file = StringIO('{"type": "Feature", "properties": {"text": "foo"}, "geometry": {"type": "Point", "coordinates": [45, 5]}}')
-        response = proto.create(request, execute=False)
+        response = proto.create(request)
         self.assertEqual(response.status_int, 400)
 
     def test_protocol_create(self):
@@ -348,7 +349,7 @@ class Test_protocol(unittest.TestCase):
         # we need an actual Request object here, for body_file to do its job
         request = Request({})
         request.body_file = StringIO('{"type": "FeatureCollection", "features": [{"type": "Feature", "properties": {"text": "foo"}, "geometry": {"type": "Point", "coordinates": [45, 5]}}, {"type": "Feature", "properties": {"text": "foo"}, "geometry": {"type": "Point", "coordinates": [45, 5]}}]}')
-        proto.create(request, execute=False)
+        proto.create(request)
         self.assertEqual(len(request.response_callbacks), 1)
         self.assertEqual(len(Session.new), 2)
         for obj in Session.new:
@@ -450,5 +451,6 @@ class Test_protocol(unittest.TestCase):
                 pass
         proto = Protocol(MockSession, MappedClass, "geom")
         request = testing.DummyRequest()
-        proto.delete(request, 'a')
-        self.assertEqual(len(request.response_callbacks), 1)
+        response = proto.delete(request, 'a')
+        self.assertTrue(isinstance(response, Response))
+        self.assertEqual(response.status_int, 204)
