@@ -43,13 +43,18 @@ from geojson import Feature, FeatureCollection, loads, GeoJSON
 from papyrus.within_distance import within_distance
 
 
-def _get_class_attr(mapped_class, attr_key):
-    """ """
-    return class_mapper(mapped_class).get_property(attr_key).class_attribute
+def _get_col_epsg(mapped_class, geom_attr_key):
+    """Get the EPSG code associated with a geometry attribute.
 
-def _get_column_epsg(mapped_class, geom_attr_key):
-    """ """
-    return class_mapper(mapped_class).columns[geom_attr_key].type.srid
+    Arguments:
+
+    geom_attr_key
+        the key of the geometry property as defined in the SQLAlchemy
+        mapper. If you use ``declarative_base`` this is the name of
+        the geometry attribute as defined in the mapped class.
+    """
+    col = class_mapper(mapped_class).get_property(geom_attr_key).columns[0]
+    return col.type.srid
 
 def create_geom_filter(request, mapped_class, geom_attr_key, **kwargs):
     """Create MapFish geometry filter based on the request params. Either
@@ -66,7 +71,8 @@ def create_geom_filter(request, mapped_class, geom_attr_key, **kwargs):
 
     geom_attr_key
         the key of the geometry property as defined in the SQLAlchemy
-        mapper.
+        mapper. If you use ``declarative_base`` this is the name of
+        the geometry attribute as defined in the mapped class.
 
     \**kwargs
         additional arguments passed to ``within_distance()``.
@@ -95,8 +101,8 @@ def create_geom_filter(request, mapped_class, geom_attr_key, **kwargs):
         geometry = asShape(geometry)
     if geometry is None:
         return None
-    geom_attr = _get_class_attr(mapped_class, geom_attr_key)
-    column_epsg = _get_column_epsg(mapped_class, geom_attr_key)
+    geom_attr = getattr(mapped_class, geom_attr_key)
+    column_epsg = _get_col_epsg(mapped_class, geom_attr_key)
     epsg = column_epsg if epsg is None else epsg
     if epsg != column_epsg:
         geom_attr = functions.transform(geom_attr, epsg)
@@ -157,7 +163,9 @@ def create_filter(request, mapped_class, geom_attr_key, **kwargs):
 
     geom_attr_key
         the key of the geometry property as defined in the SQLAlchemy
-          mapper.
+        mapper. If you use ``declarative_base`` this is the name of
+        the geometry attribute as defined in the mapped class.
+
 
     \**kwargs
         additional arguments passed to ``create_geom_filter()``.
@@ -194,7 +202,8 @@ class Protocol(object):
 
       geom_attr_key
           the key of the geometry property as defined in the SQLAlchemy
-          mapper.
+          mapper. If you use ``declarative_base`` this is the name of
+          the geometry attribute as defined in the mapped class.
 
       readonly
           ``True`` if this protocol is read-only, ``False`` otherwise. If
