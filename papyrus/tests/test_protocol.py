@@ -72,13 +72,6 @@ class MappedClass(Base):
             self.geom = WKBSpatialElement(buffer(shape.wkb), srid=4326)
             self.geom.shape = shape
         self.text = feature.properties.get('text', None)
- 
-    @property
-    def __geo_interface__(self):
-        id = self.id
-        geometry = loads(str(self.geom.geom_wkb))
-        properties = dict(text=self.text)
-        return Feature(id=id, geometry=geometry, properties=properties)
 
 # create a session in the same way it's done in a typical Pyramid app
 engine = create_engine('postgresql://user:user@no_connection/no_db', echo=True)
@@ -403,9 +396,6 @@ class Test_protocol(unittest.TestCase):
             @staticmethod
             def query(mapped_class):
                 return {'a': MappedClass(Feature())}
-            @staticmethod
-            def commit():
-                pass
         proto = Protocol(MockSession, MappedClass, "geom")
         # we need an actual Request object here, for body_file to do its job
         request = Request({})
@@ -445,9 +435,6 @@ class Test_protocol(unittest.TestCase):
                 return {'a': MappedClass(Feature())}
             @staticmethod
             def delete(obj):
-                pass
-            @staticmethod
-            def commit():
                 pass
         proto = Protocol(MockSession, MappedClass, "geom")
         request = testing.DummyRequest()
