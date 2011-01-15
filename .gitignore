@@ -2,3 +2,4 @@
 *.egg
 papyrus.egg-info/
 dist
+.coverage
