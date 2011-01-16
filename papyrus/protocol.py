@@ -44,20 +44,20 @@ from geojson import Feature, FeatureCollection, loads, GeoJSON
 from papyrus.within_distance import within_distance
 
 
-def _get_col_epsg(mapped_class, geom_attr_key):
+def _get_col_epsg(mapped_class, geom_attr):
     """Get the EPSG code associated with a geometry attribute.
 
     Arguments:
 
-    geom_attr_key
+    geom_attr
         the key of the geometry property as defined in the SQLAlchemy
         mapper. If you use ``declarative_base`` this is the name of
         the geometry attribute as defined in the mapped class.
     """
-    col = class_mapper(mapped_class).get_property(geom_attr_key).columns[0]
+    col = class_mapper(mapped_class).get_property(geom_attr).columns[0]
     return col.type.srid
 
-def create_geom_filter(request, mapped_class, geom_attr_key, **kwargs):
+def create_geom_filter(request, mapped_class, geom_attr, **kwargs):
     """Create MapFish geometry filter based on the request params. Either
     a box or within or geometry filter, depending on the request params.
     Additional named arguments are passed to the spatial filter.
@@ -70,7 +70,7 @@ def create_geom_filter(request, mapped_class, geom_attr_key, **kwargs):
     mapped_class
         the SQLAlchemy mapped class.
 
-    geom_attr_key
+    geom_attr
         the key of the geometry property as defined in the SQLAlchemy
         mapper. If you use ``declarative_base`` this is the name of
         the geometry attribute as defined in the mapped class.
@@ -102,8 +102,8 @@ def create_geom_filter(request, mapped_class, geom_attr_key, **kwargs):
         geometry = asShape(geometry)
     if geometry is None:
         return None
-    geom_attr = getattr(mapped_class, geom_attr_key)
-    column_epsg = _get_col_epsg(mapped_class, geom_attr_key)
+    column_epsg = _get_col_epsg(mapped_class, geom_attr)
+    geom_attr = getattr(mapped_class, geom_attr)
     epsg = column_epsg if epsg is None else epsg
     if epsg != column_epsg:
         geom_attr = functions.transform(geom_attr, epsg)
@@ -151,7 +151,7 @@ def create_attr_filter(request, mapped_class):
             filters.append(f)
     return and_(*filters) if len(filters) > 0 else None
 
-def create_filter(request, mapped_class, geom_attr_key, **kwargs):
+def create_filter(request, mapped_class, geom_attr, **kwargs):
     """ Create MapFish default filter based on the request params.
     
     Arguments:
@@ -162,7 +162,7 @@ def create_filter(request, mapped_class, geom_attr_key, **kwargs):
     mapped_class
         the SQLAlchemy mapped class.
 
-    geom_attr_key
+    geom_attr
         the key of the geometry property as defined in the SQLAlchemy
         mapper. If you use ``declarative_base`` this is the name of
         the geometry attribute as defined in the mapped class.
@@ -172,7 +172,7 @@ def create_filter(request, mapped_class, geom_attr_key, **kwargs):
         additional arguments passed to ``create_geom_filter()``.
     """
     attr_filter = create_attr_filter(request, mapped_class)
-    geom_filter = create_geom_filter(request, mapped_class, geom_attr_key, **kwargs)
+    geom_filter = create_geom_filter(request, mapped_class, geom_attr, **kwargs)
     if geom_filter is None and attr_filter is None:
         return None
     return and_(geom_filter, attr_filter)
@@ -201,7 +201,7 @@ class Protocol(object):
       mapped_class
           the class mapped to a database table in the ORM.
 
-      geom_attr_key
+      geom_attr
           the key of the geometry property as defined in the SQLAlchemy
           mapper. If you use ``declarative_base`` this is the name of
           the geometry attribute as defined in the mapped class.
@@ -231,10 +231,10 @@ class Protocol(object):
             and the database object about to be deleted.
     """
 
-    def __init__(self, Session, mapped_class, geom_attr_key, readonly=False, **kwargs):
+    def __init__(self, Session, mapped_class, geom_attr, readonly=False, **kwargs):
         self.Session = Session
         self.mapped_class = mapped_class
-        self.geom_attr_key = geom_attr_key
+        self.geom_attr = geom_attr
         self.readonly = readonly
         self.before_create = None
         if kwargs.has_key('before_create'):
@@ -289,8 +289,7 @@ class Protocol(object):
         if 'offset' in request.params:
             offset = int(request.params['offset'])
         if filter is None:
-            # create MapFish default filter
-            filter = create_filter(request, self.mapped_class, self.geom_attr_key)
+            filter = create_filter(request, self.mapped_class, self.geom_attr)
         query = self.Session().query(self.mapped_class).filter(filter)
         order_by = self._get_order_by(request)
         if order_by is not None:
@@ -304,7 +303,7 @@ class Protocol(object):
     def count(self, request, filter=None):
         """ Return the number of records matching the given filter. """
         if filter is None:
-            filter = create_filter(request, self.mapped_class, self.geom_attr_key)
+            filter = create_filter(request, self.mapped_class, self.geom_attr)
         return str(self.Session().query(self.mapped_class).filter(filter).count())
 
     def read(self, request, filter=None, id=None):
@@ -315,6 +314,8 @@ class Protocol(object):
             o = self.Session().query(self.mapped_class).get(id)
             if o is None:
                 return HTTPNotFound()
+            # FIXME: we return a Feature here, not a mapped object, do
+            # we really want that?
             ret = self._filter_attrs(o.__geo_interface__, request)
         else:
             objs = self._query(request, filter)
