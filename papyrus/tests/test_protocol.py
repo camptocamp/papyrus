@@ -353,8 +353,10 @@ class Test_protocol(unittest.TestCase):
         from sqlalchemy import MetaData, Column, types
         from sqlalchemy.ext.declarative import declarative_base
         from geoalchemy import GeometryColumn, Geometry, WKBSpatialElement
+        from geojson import Feature
         from geojson.geometry import Default
         from shapely.geometry import asShape
+
         Base = declarative_base(metadata=MetaData())
         class MappedClass(Base):
             __tablename__ = "table"
@@ -372,9 +374,53 @@ class Test_protocol(unittest.TestCase):
                     self.geom = WKBSpatialElement(buffer(shape.wkb), srid=4326)
                     self.geom.shape = shape
                 self.text = feature.properties.get('text', None)
+            @property
+            def __geo_interface__(self):
+                id = self.id
+                if hasattr(self.geom, 'shape') and self.geom.shape is not None:
+                    geometry = self.geom.shape
+                else:
+                    geometry = loads(str(self.geom.geom_wkb))
+                properties = dict(text=self.text)
+                return Feature(id=id, geometry=geometry, properties=properties)
         return MappedClass
 
-    def test_protocol_query(self):
+    def test__filter_attrs(self):
+        from papyrus.protocol import Protocol, create_attr_filter
+        from geojson import Feature
+
+        Session = self._getSession()
+        engine = self._getEngine()
+        Session.bind = engine
+        MappedClass = self._getMappedClass()
+
+        proto = Protocol(Session, MappedClass, "geom")
+        feature = Feature(properties={'foo': 'foo', 'bar': 'bar', 'foobar': 'foobar'})
+        request = testing.DummyRequest(params={'attrs': 'bar,foo'})
+
+        feature = proto._filter_attrs(feature, request)
+
+        self.assertEqual(feature.properties, {'foo': 'foo', 'bar': 'bar'})
+
+    def test__filter_attrs_no_geom(self):
+        from papyrus.protocol import Protocol, create_attr_filter
+        from geojson import Feature
+        from shapely.geometry import Point
+
+        Session = self._getSession()
+        engine = self._getEngine()
+        Session.bind = engine
+        MappedClass = self._getMappedClass()
+
+        proto = Protocol(Session, MappedClass, "geom")
+        feature = Feature(geometry=Point(1.0, 2.0))
+        request = testing.DummyRequest(params={'no_geom': 'true'})
+
+        feature = proto._filter_attrs(feature, request)
+
+        self.assertEqual(feature.geometry, None)
+
+    def test___query(self):
         from papyrus.protocol import Protocol, create_attr_filter
 
         Session = self._getSession()
@@ -426,7 +472,60 @@ class Test_protocol(unittest.TestCase):
         self.assertTrue("ORDER BY" in query_to_str(query, engine))
         self.assertTrue("DESC" in query_to_str(query, engine))
 
-    def test_protocol_create_forbidden(self):
+    def test_read_id(self):
+        from papyrus.protocol import Protocol
+        from pyramid.httpexceptions import HTTPNotFound
+        from shapely.geometry import Point
+        from geojson import Feature
+
+        class Session(object):
+            def query(self, mapped_class):
+                feature = Feature(id='a', geometry=Point(1, 2),
+                                  properties=dict(text='foo'))
+                return {'a': mapped_class(feature)}
+
+        proto = Protocol(Session, self._getMappedClass(), 'geom')
+        request = testing.DummyRequest()
+
+        feature = proto.read(request, id='a')
+        self.assertEqual(feature.id, 'a')
+        self.assertEqual(feature.properties['text'], 'foo')
+
+    def test_read_notfound(self):
+        from papyrus.protocol import Protocol
+        from pyramid.httpexceptions import HTTPNotFound
+
+        class Session(object):
+            def query(self, mapped_class):
+                return {'a': None}
+
+        proto = Protocol(Session, self._getMappedClass(), 'geom')
+        request = testing.DummyRequest()
+
+        resp = proto.read(request, id='a')
+        self.assertTrue(isinstance(resp, HTTPNotFound))
+
+    def test_read_many(self):
+        from papyrus.protocol import Protocol
+        from pyramid.httpexceptions import HTTPNotFound
+        from shapely.geometry import Point
+        from geojson import Feature, FeatureCollection
+
+        MappedClass = self._getMappedClass()
+
+        proto = Protocol(self._getSession(), self._getMappedClass(), 'geom')
+
+        def _query(request, filter):
+            f1 = Feature(geometry=Point(1, 2))
+            f2 = Feature(geometry=Point(2, 3))
+            return [MappedClass(f1), MappedClass(f2)]
+        proto._query = _query
+
+        features = proto.read(testing.DummyRequest())
+        self.assertTrue(isinstance(features, FeatureCollection))
+        self.assertEqual(len(features.features), 2)
+
+    def test_create_forbidden(self):
         from papyrus.protocol import Protocol
         from pyramid.request import Request
         from StringIO import StringIO
@@ -443,7 +542,7 @@ class Test_protocol(unittest.TestCase):
         response = proto.create(request)
         self.assertEqual(response.status_int, 403)
 
-    def test_protocol_create_badrequest(self):
+    def test_create_badrequest(self):
         from papyrus.protocol import Protocol
         from pyramid.request import Request
         from StringIO import StringIO
@@ -460,7 +559,7 @@ class Test_protocol(unittest.TestCase):
         response = proto.create(request)
         self.assertEqual(response.status_int, 400)
 
-    def test_protocol_create(self):
+    def test_create(self):
         from papyrus.protocol import Protocol
         from pyramid.request import Request
         from pyramid.response import Response
@@ -505,7 +604,7 @@ class Test_protocol(unittest.TestCase):
         request._process_response_callbacks(response)
         self.assertEqual(response.status_int, 201)
 
-    def test_protocol_update_forbidden(self):
+    def test_update_forbidden(self):
         from papyrus.protocol import Protocol
         from pyramid.request import Request
         from StringIO import StringIO
@@ -522,7 +621,7 @@ class Test_protocol(unittest.TestCase):
         response = proto.update(request, 1)
         self.assertEqual(response.status_int, 403)
 
-    def test_protocol_update_notfound(self):
+    def test_update_notfound(self):
         from papyrus.protocol import Protocol
         from pyramid.request import Request
         from StringIO import StringIO
@@ -544,7 +643,7 @@ class Test_protocol(unittest.TestCase):
         response = proto.update(request, 1)
         self.assertEqual(response.status_int, 404)
 
-    def test_protocol_update_badrequest(self):
+    def test_update_badrequest(self):
         from papyrus.protocol import Protocol
         from pyramid.request import Request
         from StringIO import StringIO
@@ -566,7 +665,7 @@ class Test_protocol(unittest.TestCase):
         response = proto.update(request, 'a')
         self.assertEqual(response.status_int, 400)
 
-    def test_protocol_update(self):
+    def test_update(self):
         from papyrus.protocol import Protocol
         from geojson import Feature
         from pyramid.request import Request
@@ -614,7 +713,7 @@ class Test_protocol(unittest.TestCase):
         request._process_response_callbacks(response)
         self.assertEqual(response.status_int, 201)
 
-    def test_protocol_delete_forbidden(self):
+    def test_delete_forbidden(self):
         from papyrus.protocol import Protocol
 
         Session = self._getSession()
@@ -627,7 +726,7 @@ class Test_protocol(unittest.TestCase):
         response = proto.delete(request, 1)
         self.assertEqual(response.status_int, 403)
 
-    def test_protocol_delete_notfound(self):
+    def test_delete_notfound(self):
         from papyrus.protocol import Protocol
 
         Session = self._getSession()
@@ -645,7 +744,7 @@ class Test_protocol(unittest.TestCase):
         response = proto.delete(request, 1)
         self.assertEqual(response.status_int, 404)
 
-    def test_protocol_delete(self):
+    def test_delete(self):
         from papyrus.protocol import Protocol
         from geojson import Feature
         from pyramid.response import Response
