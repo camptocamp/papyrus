@@ -244,6 +244,8 @@ class Test_protocol(unittest.TestCase):
         self.assertTrue(isinstance(filter, sql.expression.ClauseElement))
         self.assertTrue(sql.and_(MappedClass.text.like("foo")).compare(filter))
 
+    def test_create_attr_filter_ilike(self):
+        from papyrus.protocol import create_attr_filter
         request = testing.DummyRequest(
             params={"queryable": "text", "text__ilike": "foo"}
         )
@@ -251,7 +253,7 @@ class Test_protocol(unittest.TestCase):
         self.assertTrue(isinstance(filter, sql.expression.ClauseElement))
         self.assertTrue(sql.and_(MappedClass.text.ilike("foo")).compare(filter))
 
-    def test_create_attr_filter_ilike(self):
+    def test_create_attr_filter_and(self):
         from papyrus.protocol import create_attr_filter
         request = testing.DummyRequest(
             params={"queryable": "text,id", "text__ilike": "foo", "id__eq": "1"}
@@ -263,6 +265,22 @@ class Test_protocol(unittest.TestCase):
         from papyrus.protocol import create_attr_filter
         request = testing.DummyRequest(
             params={"text__ilike": "foo", "id__eq": "1"}
+        )
+        filter = create_attr_filter(request, MappedClass)
+        self.assertEqual(filter, None)
+
+    def test_create_attr_filter_unknown_op(self):
+        from papyrus.protocol import create_attr_filter
+        request = testing.DummyRequest(
+            params={"queryable": "text", "text__foo": "foo"}
+        )
+        filter = create_attr_filter(request, MappedClass)
+        self.assertEqual(filter, None)
+
+    def test_create_attr_filter_attr_not_queryable(self):
+        from papyrus.protocol import create_attr_filter
+        request = testing.DummyRequest(
+            params={"queryable": "id", "text__ilike": "foo"}
         )
         filter = create_attr_filter(request, MappedClass)
         self.assertEqual(filter, None)
