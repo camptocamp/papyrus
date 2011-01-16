@@ -493,7 +493,15 @@ class Test_protocol(unittest.TestCase):
         Session.bind = engine
         MappedClass = self._getMappedClass()
 
-        proto = Protocol(Session, MappedClass, "geom")
+        # a before_update callback
+        def before_create(request, feature, obj):
+            if not hasattr(request, '_log'):
+                request._log = []
+            request._log.append(dict(feature=feature, obj=obj))
+
+        proto = Protocol(Session, MappedClass, "geom",
+                         before_create=before_create)
+
         # we need an actual Request object here, for body_file to do its job
         request = Request({})
         request.body_file = StringIO('{"type": "FeatureCollection", "features": [{"type": "Feature", "properties": {"text": "foo"}, "geometry": {"type": "Point", "coordinates": [45, 5]}}, {"type": "Feature", "properties": {"text": "foo"}, "geometry": {"type": "Point", "coordinates": [45, 5]}}]}')
@@ -501,10 +509,19 @@ class Test_protocol(unittest.TestCase):
         self.assertEqual(len(request.response_callbacks), 1)
         self.assertEqual(len(Session.new), 2)
         for obj in Session.new:
-            self.assertEqual(obj.text, "foo")
+            self.assertEqual(obj.text, 'foo')
             self.assertEqual(obj.geom.shape.x, 45)
             self.assertEqual(obj.geom.shape.y, 5)
         Session.rollback()
+
+        # test before_create
+        self.assertTrue(hasattr(request, '_log'))
+        self.assertEqual(len(request._log), 2)
+        self.assertEqual(request._log[0]['feature'].properties['text'], 'foo')
+        self.assertEqual(request._log[0]['obj'], None)
+        self.assertEqual(request._log[1]['feature'].properties['text'], 'foo')
+        self.assertEqual(request._log[1]['obj'], None)
+
         # test response status
         response = Response(status_int=400)
         request._process_response_callbacks(response)
@@ -588,16 +605,32 @@ class Test_protocol(unittest.TestCase):
         class MockSession(object):
             @staticmethod
             def query(mapped_class):
-                return {'a': MappedClass(Feature())}
-        proto = Protocol(MockSession, MappedClass, "geom")
+                return {'a': MappedClass(Feature(id='a'))}
+
+        # a before_update callback
+        def before_update(request, feature, obj):
+            request._log = dict(feature=feature, obj=obj)
+
+        proto = Protocol(MockSession, MappedClass, "geom",
+                         before_update=before_update)
+
         # we need an actual Request object here, for body_file to do its job
         request = Request({})
         request.body_file = StringIO('{"type": "Feature", "id": "a", "properties": {"text": "foo"}, "geometry": {"type": "Point", "coordinates": [45, 5]}}')
+
         obj = proto.update(request, "a")
+
         self.assertEqual(len(request.response_callbacks), 1)
         self.assertTrue(isinstance(obj, MappedClass))
         self.assertTrue(isinstance(obj.geom, WKBSpatialElement))
         self.assertEqual(obj.text, "foo")
+
+        # test before_update
+        self.assertTrue(hasattr(request, '_log'))
+        self.assertEqual(request._log["feature"].id, 'a')
+        self.assertEqual(request._log["feature"].properties['text'], 'foo')
+        self.assertTrue(isinstance(request._log["obj"], MappedClass))
+
         # test response status
         response = Response(status_int=400)
         request._process_response_callbacks(response)
@@ -652,8 +685,18 @@ class Test_protocol(unittest.TestCase):
             @staticmethod
             def delete(obj):
                 pass
-        proto = Protocol(MockSession, MappedClass, "geom")
+
+        # a before_update callback
+        def before_delete(request, obj):
+            request._log = dict(obj=obj)
+
+        proto = Protocol(MockSession, MappedClass, "geom",
+                         before_delete=before_delete)
         request = testing.DummyRequest()
         response = proto.delete(request, 'a')
         self.assertTrue(isinstance(response, Response))
         self.assertEqual(response.status_int, 204)
+
+        # test before_delete
+        self.assertTrue(hasattr(request, '_log'))
+        self.assertTrue(isinstance(request._log["obj"], MappedClass))
