@@ -60,17 +60,6 @@ class create_geom_filter_Tests(unittest.TestCase):
             id = Column(types.Integer, primary_key=True)
             text = Column(types.Unicode)
             geom = GeometryColumn(Geometry(dimension=2, srid=4326))
-            def __init__(self, feature):
-                self.id = feature.id
-                self.__update__(feature)
-            def __update__(self, feature):
-                geometry = feature.geometry
-                if geometry is not None and \
-                   not isinstance(geometry, geojson.geometry.Default):
-                    shape = asShape(feature.geometry)
-                    self.geom = WKBSpatialElement(buffer(shape.wkb), srid=4326)
-                    self.geom.shape = shape
-                self.text = feature.properties.get('text', None)
         return MappedClass
 
     def _getEngine(self):
@@ -208,17 +197,6 @@ class create_attr_filter_Tests(unittest.TestCase):
             id = Column(types.Integer, primary_key=True)
             text = Column(types.Unicode)
             geom = GeometryColumn(Geometry(dimension=2, srid=4326))
-            def __init__(self, feature):
-                self.id = feature.id
-                self.__update__(feature)
-            def __update__(self, feature):
-                geometry = feature.geometry
-                if geometry is not None and \
-                   not isinstance(geometry, geojson.geometry.Default):
-                    shape = asShape(feature.geometry)
-                    self.geom = WKBSpatialElement(buffer(shape.wkb), srid=4326)
-                    self.geom.shape = shape
-                self.text = feature.properties.get('text', None)
         return MappedClass
 
     def test_create_attr_filter_eq(self):
