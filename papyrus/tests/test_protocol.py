@@ -377,10 +377,7 @@ class Test_protocol(unittest.TestCase):
             @property
             def __geo_interface__(self):
                 id = self.id
-                if hasattr(self.geom, 'shape') and self.geom.shape is not None:
-                    geometry = self.geom.shape
-                else:
-                    geometry = loads(str(self.geom.geom_wkb))
+                geometry = self.geom.shape
                 properties = dict(text=self.text)
                 return Feature(id=id, geometry=geometry, properties=properties)
         return MappedClass
