@@ -485,6 +485,7 @@ class Test_protocol(unittest.TestCase):
     def test_protocol_create(self):
         from papyrus.protocol import Protocol
         from pyramid.request import Request
+        from pyramid.response import Response
         from StringIO import StringIO
 
         Session = self._getSession()
@@ -504,6 +505,10 @@ class Test_protocol(unittest.TestCase):
             self.assertEqual(obj.geom.shape.x, 45)
             self.assertEqual(obj.geom.shape.y, 5)
         Session.rollback()
+        # test response status
+        response = Response(status_int=400)
+        request._process_response_callbacks(response)
+        self.assertEqual(response.status_int, 201)
 
     def test_protocol_update_forbidden(self):
         from papyrus.protocol import Protocol
@@ -570,6 +575,7 @@ class Test_protocol(unittest.TestCase):
         from papyrus.protocol import Protocol
         from geojson import Feature
         from pyramid.request import Request
+        from pyramid.response import Response
         from geoalchemy import WKBSpatialElement
         from StringIO import StringIO
 
@@ -592,6 +598,10 @@ class Test_protocol(unittest.TestCase):
         self.assertTrue(isinstance(obj, MappedClass))
         self.assertTrue(isinstance(obj.geom, WKBSpatialElement))
         self.assertEqual(obj.text, "foo")
+        # test response status
+        response = Response(status_int=400)
+        request._process_response_callbacks(response)
+        self.assertEqual(response.status_int, 201)
 
     def test_protocol_delete_forbidden(self):
         from papyrus.protocol import Protocol
