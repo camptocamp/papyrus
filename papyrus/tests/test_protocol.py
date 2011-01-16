@@ -190,7 +190,7 @@ class Test_protocol(unittest.TestCase):
         filter = create_geom_filter(request, MappedClass, "geom")
         self.assertEqual(filter, None)
 
-    def test_create_attr_filter(self):
+    def test_create_attr_filter_eq(self):
         from papyrus.protocol import create_attr_filter
         request = testing.DummyRequest(
             params={"queryable": "id", "id__eq": "1"}
@@ -199,6 +199,8 @@ class Test_protocol(unittest.TestCase):
         self.assertTrue(isinstance(filter, sql.expression.ClauseElement))
         self.assertTrue(sql.and_(MappedClass.id == "1").compare(filter))
 
+    def test_create_attr_filter_lt(self):
+        from papyrus.protocol import create_attr_filter
         request = testing.DummyRequest(
             params={"queryable": "id", "id__lt": "1"}
         )
@@ -206,6 +208,8 @@ class Test_protocol(unittest.TestCase):
         self.assertTrue(isinstance(filter, sql.expression.ClauseElement))
         self.assertTrue(sql.and_(MappedClass.id < "1").compare(filter))
 
+    def test_create_attr_filter_lte(self):
+        from papyrus.protocol import create_attr_filter
         request = testing.DummyRequest(
             params={"queryable": "id", "id__lte": "1"}
         )
@@ -213,6 +217,8 @@ class Test_protocol(unittest.TestCase):
         self.assertTrue(isinstance(filter, sql.expression.ClauseElement))
         self.assertTrue(sql.and_(MappedClass.id <= "1").compare(filter))
 
+    def test_create_attr_filter_gt(self):
+        from papyrus.protocol import create_attr_filter
         request = testing.DummyRequest(
             params={"queryable": "id", "id__gt": "1"}
         )
@@ -220,6 +226,8 @@ class Test_protocol(unittest.TestCase):
         self.assertTrue(isinstance(filter, sql.expression.ClauseElement))
         self.assertTrue(sql.and_(MappedClass.id > "1").compare(filter))
 
+    def test_create_attr_filter_gte(self):
+        from papyrus.protocol import create_attr_filter
         request = testing.DummyRequest(
             params={"queryable": "id", "id__gte": "1"}
         )
@@ -227,6 +235,8 @@ class Test_protocol(unittest.TestCase):
         self.assertTrue(isinstance(filter, sql.expression.ClauseElement))
         self.assertTrue(sql.and_(MappedClass.id >= "1").compare(filter))
 
+    def test_create_attr_filter_like(self):
+        from papyrus.protocol import create_attr_filter
         request = testing.DummyRequest(
             params={"queryable": "text", "text__like": "foo"}
         )
@@ -241,18 +251,21 @@ class Test_protocol(unittest.TestCase):
         self.assertTrue(isinstance(filter, sql.expression.ClauseElement))
         self.assertTrue(sql.and_(MappedClass.text.ilike("foo")).compare(filter))
 
+    def test_create_attr_filter_ilike(self):
+        from papyrus.protocol import create_attr_filter
         request = testing.DummyRequest(
             params={"queryable": "text,id", "text__ilike": "foo", "id__eq": "1"}
         )
         filter = create_attr_filter(request, MappedClass)
         self.assertTrue((sql.and_(MappedClass.text.ilike("foo"), MappedClass.id == "1")).compare(filter))
 
+    def test_create_attr_filter_no_queryable(self):
+        from papyrus.protocol import create_attr_filter
         request = testing.DummyRequest(
             params={"text__ilike": "foo", "id__eq": "1"}
         )
         filter = create_attr_filter(request, MappedClass)
         self.assertEqual(filter, None)
-
 
     def test_asbool(self):
         from papyrus.protocol import asbool
