@@ -601,6 +601,56 @@ class Test_protocol(unittest.TestCase):
         request._process_response_callbacks(response)
         self.assertEqual(response.status_int, 201)
 
+    def test_create_empty(self):
+        from papyrus.protocol import Protocol
+        from pyramid.request import Request
+        from pyramid.response import Response
+        from StringIO import StringIO
+
+        Session = self._getSession()
+        engine = self._getEngine()
+        Session.bind = engine
+        MappedClass = self._getMappedClass()
+
+        proto = Protocol(Session, MappedClass, "geom")
+
+        # we need an actual Request object here, for body_file to do its job
+        request = Request({})
+        request.body_file = StringIO('{"type": "FeatureCollection", "features": []}')
+        resp = proto.create(request)
+        self.assertEqual(resp, None)
+
+    def test_create_update(self):
+        from papyrus.protocol import Protocol
+        from pyramid.request import Request
+        from geojson import Feature, FeatureCollection
+        from shapely.geometry import Point
+        from StringIO import StringIO
+
+        MappedClass = self._getMappedClass()
+
+        # a mock session specific to this test
+        class MockSession(object):
+            def query(self, mapped_class):
+                return {'a': mapped_class(Feature(id='a')),
+                        'b': mapped_class(Feature(id='b'))}
+
+        proto = Protocol(MockSession, MappedClass, 'geom')
+
+        # we need an actual Request object here, for body_file to do its job
+        request = Request({})
+        request.body_file = StringIO('{"type": "FeatureCollection", "features": [{"type": "Feature", "id": "a", "properties": {"text": "foo"}, "geometry": {"type": "Point", "coordinates": [45, 5]}}, {"type": "Feature", "id": "b", "properties": {"text": "bar"}, "geometry": {"type": "Point", "coordinates": [46, 6]}}]}')
+        features = proto.create(request)
+
+        self.assertTrue(isinstance(features, FeatureCollection))
+        self.assertEqual(len(features.features), 2)
+        self.assertEqual(features.features[0].id, 'a')
+        self.assertEqual(features.features[0].text, 'foo')
+        self.assertTrue(features.features[0].geom.shape.equals(Point(45, 5)))
+        self.assertEqual(features.features[1].id, 'b')
+        self.assertEqual(features.features[1].text, 'bar')
+        self.assertTrue(features.features[1].geom.shape.equals(Point(46, 6)))
+
     def test_update_forbidden(self):
         from papyrus.protocol import Protocol
         from pyramid.request import Request
@@ -630,8 +680,7 @@ class Test_protocol(unittest.TestCase):
 
         # a mock session specific to this test
         class MockSession(object):
-            @staticmethod
-            def query(mapped_class):
+            def query(self, mapped_class):
                 return {}
         proto = Protocol(MockSession, MappedClass, "geom")
         # we need an actual Request object here, for body_file to do its job
@@ -645,17 +694,13 @@ class Test_protocol(unittest.TestCase):
         from pyramid.request import Request
         from StringIO import StringIO
 
-        Session = self._getSession()
-        engine = self._getEngine()
-        Session.bind = engine
-        MappedClass = self._getMappedClass()
-
         # a mock session specific to this test
         class MockSession(object):
-            @staticmethod
-            def query(mapped_class):
+            def query(self, mapped_class):
                 return {'a': {}}
-        proto = Protocol(MockSession, MappedClass, "geom")
+
+        proto = Protocol(MockSession, self._getMappedClass(), "geom")
+
         # we need an actual Request object here, for body_file to do its job
         request = Request({})
         request.body_file = StringIO('{"type": "Point", "coordinates": [45, 5]}')
@@ -670,15 +715,11 @@ class Test_protocol(unittest.TestCase):
         from geoalchemy import WKBSpatialElement
         from StringIO import StringIO
 
-        Session = self._getSession()
-        engine = self._getEngine()
-        Session.bind = engine
         MappedClass = self._getMappedClass()
 
         # a mock session specific to this test
         class MockSession(object):
-            @staticmethod
-            def query(mapped_class):
+            def query(self, mapped_class):
                 return {'a': MappedClass(Feature(id='a'))}
 
         # a before_update callback
@@ -726,17 +767,12 @@ class Test_protocol(unittest.TestCase):
     def test_delete_notfound(self):
         from papyrus.protocol import Protocol
 
-        Session = self._getSession()
-        engine = self._getEngine()
-        Session.bind = engine
-        MappedClass = self._getMappedClass()
-
         # a mock session specific to this test
         class MockSession(object):
-            @staticmethod
-            def query(mapped_class):
+            def query(self, mapped_class):
                 return {}
-        proto = Protocol(MockSession, MappedClass, "geom")
+
+        proto = Protocol(MockSession, self._getMappedClass(), "geom")
         request = testing.DummyRequest()
         response = proto.delete(request, 1)
         self.assertEqual(response.status_int, 404)
@@ -746,18 +782,13 @@ class Test_protocol(unittest.TestCase):
         from geojson import Feature
         from pyramid.response import Response
 
-        Session = self._getSession()
-        engine = self._getEngine()
-        Session.bind = engine
         MappedClass = self._getMappedClass()
 
         # a mock session specific to this test
         class MockSession(object):
-            @staticmethod
-            def query(mapped_class):
-                return {'a': MappedClass(Feature())}
-            @staticmethod
-            def delete(obj):
+            def query(self, mapped_class):
+                return {'a': mapped_class(Feature())}
+            def delete(self, obj):
                 pass
 
         # a before_update callback
