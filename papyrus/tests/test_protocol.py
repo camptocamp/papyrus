@@ -49,7 +49,7 @@ def _compiled_to_string(compiled_filter):
 
 class create_geom_filter_Tests(unittest.TestCase):
 
-    def _getMappedClass(self):
+    def _get_mapped_class(self):
         from sqlalchemy import MetaData, Column, types
         from sqlalchemy.ext.declarative import declarative_base
         from geoalchemy import GeometryColumn, Geometry, WKBSpatialElement
@@ -62,7 +62,7 @@ class create_geom_filter_Tests(unittest.TestCase):
             geom = GeometryColumn(Geometry(dimension=2, srid=4326))
         return MappedClass
 
-    def _getEngine(self):
+    def _get_engine(self):
         from sqlalchemy import create_engine
         return create_engine('postgresql://user:user@no_connection/no_db', echo=True)
 
@@ -72,9 +72,9 @@ class create_geom_filter_Tests(unittest.TestCase):
         request = testing.DummyRequest(
             params={"bbox": "-180,-90,180,90", "tolerance": "1"}
             )
-        MappedClass = self._getMappedClass()
+        MappedClass = self._get_mapped_class()
         filter = create_geom_filter(request, MappedClass, "geom")
-        compiled_filter = filter.compile(self._getEngine())
+        compiled_filter = filter.compile(self._get_engine())
         params = compiled_filter.params
         filter_str = _compiled_to_string(compiled_filter)
         self.assertEqual(filter_str, '(ST_Expand(GeomFromWKB(%(GeomFromWKB_1)s, %(GeomFromWKB_2)s), %(ST_Expand_1)s) && "table".geom) AND (ST_Expand("table".geom, %(ST_Expand_2)s) && GeomFromWKB(%(GeomFromWKB_3)s, %(GeomFromWKB_4)s)) AND ST_Distance("table".geom, GeomFromWKB(%(GeomFromWKB_5)s, %(GeomFromWKB_6)s)) <= %(ST_Distance_1)s')
@@ -89,9 +89,9 @@ class create_geom_filter_Tests(unittest.TestCase):
         request = testing.DummyRequest(
             params={"bbox": "-180,-90,180,90", "tolerance": "1", "epsg": "900913"}
             )
-        MappedClass = self._getMappedClass()
+        MappedClass = self._get_mapped_class()
         filter = create_geom_filter(request, MappedClass, "geom")
-        compiled_filter = filter.compile(self._getEngine())
+        compiled_filter = filter.compile(self._get_engine())
         params = compiled_filter.params
         filter_str = _compiled_to_string(compiled_filter)
         self.assertEqual(filter_str, '(ST_Expand(GeomFromWKB(%(GeomFromWKB_1)s, %(GeomFromWKB_2)s), %(ST_Expand_1)s) && ST_Transform("table".geom, %(param_1)s)) AND (ST_Expand(ST_Transform("table".geom, %(param_2)s), %(ST_Expand_2)s) && GeomFromWKB(%(GeomFromWKB_3)s, %(GeomFromWKB_4)s)) AND ST_Distance(ST_Transform("table".geom, %(param_3)s), GeomFromWKB(%(GeomFromWKB_5)s, %(GeomFromWKB_6)s)) <= %(ST_Distance_1)s')
@@ -107,9 +107,9 @@ class create_geom_filter_Tests(unittest.TestCase):
         request = testing.DummyRequest(
             params={"lon": "40", "lat": "5", "tolerance": "1"}
             )
-        MappedClass = self._getMappedClass()
+        MappedClass = self._get_mapped_class()
         filter = create_geom_filter(request, MappedClass, "geom")
-        compiled_filter = filter.compile(self._getEngine())
+        compiled_filter = filter.compile(self._get_engine())
         params = compiled_filter.params
         filter_str = _compiled_to_string(compiled_filter)
         self.assertEqual(filter_str, '(ST_Expand(GeomFromWKB(%(GeomFromWKB_1)s, %(GeomFromWKB_2)s), %(ST_Expand_1)s) && "table".geom) AND (ST_Expand("table".geom, %(ST_Expand_2)s) && GeomFromWKB(%(GeomFromWKB_3)s, %(GeomFromWKB_4)s)) AND ST_Distance("table".geom, GeomFromWKB(%(GeomFromWKB_5)s, %(GeomFromWKB_6)s)) <= %(ST_Distance_1)s')
@@ -124,9 +124,9 @@ class create_geom_filter_Tests(unittest.TestCase):
         request = testing.DummyRequest(
             params={"lon": "40", "lat": "5", "tolerance": "1", "epsg": "900913"}
             )
-        MappedClass = self._getMappedClass()
+        MappedClass = self._get_mapped_class()
         filter = create_geom_filter(request, MappedClass, "geom")
-        compiled_filter = filter.compile(self._getEngine())
+        compiled_filter = filter.compile(self._get_engine())
         params = compiled_filter.params
         filter_str = _compiled_to_string(compiled_filter)
         self.assertEqual(filter_str, '(ST_Expand(GeomFromWKB(%(GeomFromWKB_1)s, %(GeomFromWKB_2)s), %(ST_Expand_1)s) && ST_Transform("table".geom, %(param_1)s)) AND (ST_Expand(ST_Transform("table".geom, %(param_2)s), %(ST_Expand_2)s) && GeomFromWKB(%(GeomFromWKB_3)s, %(GeomFromWKB_4)s)) AND ST_Distance(ST_Transform("table".geom, %(param_3)s), GeomFromWKB(%(GeomFromWKB_5)s, %(GeomFromWKB_6)s)) <= %(ST_Distance_1)s')
@@ -145,9 +145,9 @@ class create_geom_filter_Tests(unittest.TestCase):
         request = testing.DummyRequest(
             {"geometry": dumps(poly), "tolerance": "1"}
         )
-        MappedClass = self._getMappedClass()
+        MappedClass = self._get_mapped_class()
         filter = create_geom_filter(request, MappedClass, "geom")
-        compiled_filter = filter.compile(self._getEngine())
+        compiled_filter = filter.compile(self._get_engine())
         params = compiled_filter.params
         filter_str = _compiled_to_string(compiled_filter)
         self.assertEqual(filter_str, '(ST_Expand(GeomFromWKB(%(GeomFromWKB_1)s, %(GeomFromWKB_2)s), %(ST_Expand_1)s) && "table".geom) AND (ST_Expand("table".geom, %(ST_Expand_2)s) && GeomFromWKB(%(GeomFromWKB_3)s, %(GeomFromWKB_4)s)) AND ST_Distance("table".geom, GeomFromWKB(%(GeomFromWKB_5)s, %(GeomFromWKB_6)s)) <= %(ST_Distance_1)s')
@@ -162,12 +162,12 @@ class create_geom_filter_Tests(unittest.TestCase):
         from shapely.geometry.polygon import Polygon
         from geojson import dumps
         poly = Polygon(((1, 2), (1, 3), (2, 3), (2, 2), (1, 2)))
-        MappedClass = self._getMappedClass()
+        MappedClass = self._get_mapped_class()
         request = testing.DummyRequest(
             {"geometry": dumps(poly), "tolerance": "1", "epsg": "900913"}
         )
         filter = create_geom_filter(request, MappedClass, "geom")
-        compiled_filter = filter.compile(self._getEngine())
+        compiled_filter = filter.compile(self._get_engine())
         params = compiled_filter.params
         filter_str = _compiled_to_string(compiled_filter)
         self.assertEqual(filter_str, '(ST_Expand(GeomFromWKB(%(GeomFromWKB_1)s, %(GeomFromWKB_2)s), %(ST_Expand_1)s) && ST_Transform("table".geom, %(param_1)s)) AND (ST_Expand(ST_Transform("table".geom, %(param_2)s), %(ST_Expand_2)s) && GeomFromWKB(%(GeomFromWKB_3)s, %(GeomFromWKB_4)s)) AND ST_Distance(ST_Transform("table".geom, %(param_3)s), GeomFromWKB(%(GeomFromWKB_5)s, %(GeomFromWKB_6)s)) <= %(ST_Distance_1)s')
@@ -180,14 +180,14 @@ class create_geom_filter_Tests(unittest.TestCase):
     def test_geom_filter_no_params(self):
         from papyrus.protocol import create_geom_filter
         request = testing.DummyRequest()
-        MappedClass = self._getMappedClass()
+        MappedClass = self._get_mapped_class()
         filter = create_geom_filter(request, MappedClass, "geom")
         self.assertEqual(filter, None)
 
 
 class create_attr_filter_Tests(unittest.TestCase):
 
-    def _getMappedClass(self):
+    def _get_mapped_class(self):
         from sqlalchemy import MetaData, Column, types
         from sqlalchemy.ext.declarative import declarative_base
         from geoalchemy import GeometryColumn, Geometry, WKBSpatialElement
@@ -205,7 +205,7 @@ class create_attr_filter_Tests(unittest.TestCase):
         request = testing.DummyRequest(
             params={"queryable": "id", "id__eq": "1"}
         )
-        MappedClass = self._getMappedClass()
+        MappedClass = self._get_mapped_class()
         filter = create_attr_filter(request, MappedClass)
         self.assertTrue(isinstance(filter, sql.expression.ClauseElement))
         self.assertTrue(sql.and_(MappedClass.id == "1").compare(filter))
@@ -216,7 +216,7 @@ class create_attr_filter_Tests(unittest.TestCase):
         request = testing.DummyRequest(
             params={"queryable": "id", "id__lt": "1"}
         )
-        MappedClass = self._getMappedClass()
+        MappedClass = self._get_mapped_class()
         filter = create_attr_filter(request, MappedClass)
         self.assertTrue(isinstance(filter, sql.expression.ClauseElement))
         self.assertTrue(sql.and_(MappedClass.id < "1").compare(filter))
@@ -227,7 +227,7 @@ class create_attr_filter_Tests(unittest.TestCase):
         request = testing.DummyRequest(
             params={"queryable": "id", "id__lte": "1"}
         )
-        MappedClass = self._getMappedClass()
+        MappedClass = self._get_mapped_class()
         filter = create_attr_filter(request, MappedClass)
         self.assertTrue(isinstance(filter, sql.expression.ClauseElement))
         self.assertTrue(sql.and_(MappedClass.id <= "1").compare(filter))
@@ -238,7 +238,7 @@ class create_attr_filter_Tests(unittest.TestCase):
         request = testing.DummyRequest(
             params={"queryable": "id", "id__gt": "1"}
         )
-        MappedClass = self._getMappedClass()
+        MappedClass = self._get_mapped_class()
         filter = create_attr_filter(request, MappedClass)
         self.assertTrue(isinstance(filter, sql.expression.ClauseElement))
         self.assertTrue(sql.and_(MappedClass.id > "1").compare(filter))
@@ -249,7 +249,7 @@ class create_attr_filter_Tests(unittest.TestCase):
         request = testing.DummyRequest(
             params={"queryable": "id", "id__gte": "1"}
         )
-        MappedClass = self._getMappedClass()
+        MappedClass = self._get_mapped_class()
         filter = create_attr_filter(request, MappedClass)
         self.assertTrue(isinstance(filter, sql.expression.ClauseElement))
         self.assertTrue(sql.and_(MappedClass.id >= "1").compare(filter))
@@ -260,7 +260,7 @@ class create_attr_filter_Tests(unittest.TestCase):
         request = testing.DummyRequest(
             params={"queryable": "text", "text__like": "foo"}
         )
-        MappedClass = self._getMappedClass()
+        MappedClass = self._get_mapped_class()
         filter = create_attr_filter(request, MappedClass)
         self.assertTrue(isinstance(filter, sql.expression.ClauseElement))
         self.assertTrue(sql.and_(MappedClass.text.like("foo")).compare(filter))
@@ -271,7 +271,7 @@ class create_attr_filter_Tests(unittest.TestCase):
         request = testing.DummyRequest(
             params={"queryable": "text", "text__ilike": "foo"}
         )
-        MappedClass = self._getMappedClass()
+        MappedClass = self._get_mapped_class()
         filter = create_attr_filter(request, MappedClass)
         self.assertTrue(isinstance(filter, sql.expression.ClauseElement))
         self.assertTrue(sql.and_(MappedClass.text.ilike("foo")).compare(filter))
@@ -282,7 +282,7 @@ class create_attr_filter_Tests(unittest.TestCase):
         request = testing.DummyRequest(
             params={"queryable": "text,id", "text__ilike": "foo", "id__eq": "1"}
         )
-        MappedClass = self._getMappedClass()
+        MappedClass = self._get_mapped_class()
         filter = create_attr_filter(request, MappedClass)
         self.assertTrue((sql.and_(MappedClass.text.ilike("foo"), MappedClass.id == "1")).compare(filter))
 
@@ -292,7 +292,7 @@ class create_attr_filter_Tests(unittest.TestCase):
         request = testing.DummyRequest(
             params={"text__ilike": "foo", "id__eq": "1"}
         )
-        MappedClass = self._getMappedClass()
+        MappedClass = self._get_mapped_class()
         filter = create_attr_filter(request, MappedClass)
         self.assertEqual(filter, None)
 
@@ -302,7 +302,7 @@ class create_attr_filter_Tests(unittest.TestCase):
         request = testing.DummyRequest(
             params={"queryable": "text", "text__foo": "foo"}
         )
-        MappedClass = self._getMappedClass()
+        MappedClass = self._get_mapped_class()
         filter = create_attr_filter(request, MappedClass)
         self.assertEqual(filter, None)
 
@@ -312,7 +312,7 @@ class create_attr_filter_Tests(unittest.TestCase):
         request = testing.DummyRequest(
             params={"queryable": "id", "text__ilike": "foo"}
         )
-        MappedClass = self._getMappedClass()
+        MappedClass = self._get_mapped_class()
         filter = create_attr_filter(request, MappedClass)
         self.assertEqual(filter, None)
 
@@ -340,16 +340,18 @@ class asbool_Tests(unittest.TestCase):
 
 class Test_protocol(unittest.TestCase):
 
-    def _getEngine(self):
+    def _get_engine(self):
         from sqlalchemy import create_engine
         return create_engine('postgresql://user:user@no_connection/no_db', echo=True)
 
-    def _getSession(self):
+    def _get_session(self, engine):
         from sqlalchemy import orm
         sm = orm.sessionmaker(autoflush=True, autocommit=False)
-        return orm.scoped_session(sm)
+        Session = orm.scoped_session(sm)
+        Session.configure(bind=engine)
+        return Session
 
-    def _getMappedClass(self):
+    def _get_mapped_class(self):
         from sqlalchemy import MetaData, Column, types
         from sqlalchemy.ext.declarative import declarative_base
         from geoalchemy import GeometryColumn, Geometry, WKBSpatialElement
@@ -386,10 +388,9 @@ class Test_protocol(unittest.TestCase):
         from papyrus.protocol import Protocol, create_attr_filter
         from geojson import Feature
 
-        Session = self._getSession()
-        engine = self._getEngine()
-        Session.bind = engine
-        MappedClass = self._getMappedClass()
+        engine = self._get_engine()
+        Session = self._get_session(engine)
+        MappedClass = self._get_mapped_class()
 
         proto = Protocol(Session, MappedClass, "geom")
         feature = Feature(properties={'foo': 'foo', 'bar': 'bar', 'foobar': 'foobar'})
@@ -404,10 +405,10 @@ class Test_protocol(unittest.TestCase):
         from geojson import Feature
         from shapely.geometry import Point
 
-        Session = self._getSession()
-        engine = self._getEngine()
+        engine = self._get_engine()
+        Session = self._get_session(engine)
         Session.bind = engine
-        MappedClass = self._getMappedClass()
+        MappedClass = self._get_mapped_class()
 
         proto = Protocol(Session, MappedClass, "geom")
         feature = Feature(geometry=Point(1.0, 2.0))
@@ -420,10 +421,9 @@ class Test_protocol(unittest.TestCase):
     def test___query(self):
         from papyrus.protocol import Protocol, create_attr_filter
 
-        Session = self._getSession()
-        engine = self._getEngine()
-        Session.bind = engine
-        MappedClass = self._getMappedClass()
+        engine = self._get_engine()
+        Session = self._get_session(engine)
+        MappedClass = self._get_mapped_class()
 
         proto = Protocol(Session, MappedClass, "geom")
 
@@ -481,7 +481,7 @@ class Test_protocol(unittest.TestCase):
                                   properties=dict(text='foo'))
                 return {'a': mapped_class(feature)}
 
-        proto = Protocol(Session, self._getMappedClass(), 'geom')
+        proto = Protocol(Session, self._get_mapped_class(), 'geom')
         request = testing.DummyRequest()
 
         feature = proto.read(request, id='a')
@@ -496,7 +496,7 @@ class Test_protocol(unittest.TestCase):
             def query(self, mapped_class):
                 return {'a': None}
 
-        proto = Protocol(Session, self._getMappedClass(), 'geom')
+        proto = Protocol(Session, self._get_mapped_class(), 'geom')
         request = testing.DummyRequest()
 
         resp = proto.read(request, id='a')
@@ -508,9 +508,11 @@ class Test_protocol(unittest.TestCase):
         from shapely.geometry import Point
         from geojson import Feature, FeatureCollection
 
-        MappedClass = self._getMappedClass()
+        engine = self._get_engine()
+        Session = self._get_session(engine)
+        MappedClass = self._get_mapped_class()
 
-        proto = Protocol(self._getSession(), self._getMappedClass(), 'geom')
+        proto = Protocol(Session, MappedClass, 'geom')
 
         def _query(request, filter):
             f1 = Feature(geometry=Point(1, 2))
@@ -527,10 +529,9 @@ class Test_protocol(unittest.TestCase):
         from pyramid.request import Request
         from StringIO import StringIO
 
-        Session = self._getSession()
-        engine = self._getEngine()
-        Session.bind = engine
-        MappedClass = self._getMappedClass()
+        engine = self._get_engine()
+        Session = self._get_session(engine)
+        MappedClass = self._get_mapped_class()
 
         proto = Protocol(Session, MappedClass, "geom", readonly=True)
         # we need an actual Request object here, for body_file to do its job
@@ -544,10 +545,9 @@ class Test_protocol(unittest.TestCase):
         from pyramid.request import Request
         from StringIO import StringIO
 
-        Session = self._getSession()
-        engine = self._getEngine()
-        Session.bind = engine
-        MappedClass = self._getMappedClass()
+        engine = self._get_engine()
+        Session = self._get_session(engine)
+        MappedClass = self._get_mapped_class()
 
         proto = Protocol(Session, MappedClass, "geom")
         # we need an actual Request object here, for body_file to do its job
@@ -562,10 +562,9 @@ class Test_protocol(unittest.TestCase):
         from pyramid.response import Response
         from StringIO import StringIO
 
-        Session = self._getSession()
-        engine = self._getEngine()
-        Session.bind = engine
-        MappedClass = self._getMappedClass()
+        engine = self._get_engine()
+        Session = self._get_session(engine)
+        MappedClass = self._get_mapped_class()
 
         # a before_update callback
         def before_create(request, feature, obj):
@@ -607,10 +606,9 @@ class Test_protocol(unittest.TestCase):
         from pyramid.response import Response
         from StringIO import StringIO
 
-        Session = self._getSession()
-        engine = self._getEngine()
-        Session.bind = engine
-        MappedClass = self._getMappedClass()
+        engine = self._get_engine()
+        Session = self._get_session(engine)
+        MappedClass = self._get_mapped_class()
 
         proto = Protocol(Session, MappedClass, "geom")
 
@@ -627,7 +625,7 @@ class Test_protocol(unittest.TestCase):
         from shapely.geometry import Point
         from StringIO import StringIO
 
-        MappedClass = self._getMappedClass()
+        MappedClass = self._get_mapped_class()
 
         # a mock session specific to this test
         class MockSession(object):
@@ -656,10 +654,9 @@ class Test_protocol(unittest.TestCase):
         from pyramid.request import Request
         from StringIO import StringIO
 
-        Session = self._getSession()
-        engine = self._getEngine()
-        Session.bind = engine
-        MappedClass = self._getMappedClass()
+        engine = self._get_engine()
+        Session = self._get_session(engine)
+        MappedClass = self._get_mapped_class()
 
         proto = Protocol(Session, MappedClass, "geom", readonly=True)
         # we need an actual Request object here, for body_file to do its job
@@ -673,10 +670,9 @@ class Test_protocol(unittest.TestCase):
         from pyramid.request import Request
         from StringIO import StringIO
 
-        Session = self._getSession()
-        engine = self._getEngine()
-        Session.bind = engine
-        MappedClass = self._getMappedClass()
+        engine = self._get_engine()
+        Session = self._get_session(engine)
+        MappedClass = self._get_mapped_class()
 
         # a mock session specific to this test
         class MockSession(object):
@@ -699,7 +695,7 @@ class Test_protocol(unittest.TestCase):
             def query(self, mapped_class):
                 return {'a': {}}
 
-        proto = Protocol(MockSession, self._getMappedClass(), "geom")
+        proto = Protocol(MockSession, self._get_mapped_class(), "geom")
 
         # we need an actual Request object here, for body_file to do its job
         request = Request({})
@@ -715,7 +711,7 @@ class Test_protocol(unittest.TestCase):
         from geoalchemy import WKBSpatialElement
         from StringIO import StringIO
 
-        MappedClass = self._getMappedClass()
+        MappedClass = self._get_mapped_class()
 
         # a mock session specific to this test
         class MockSession(object):
@@ -754,10 +750,9 @@ class Test_protocol(unittest.TestCase):
     def test_delete_forbidden(self):
         from papyrus.protocol import Protocol
 
-        Session = self._getSession()
-        engine = self._getEngine()
-        Session.bind = engine
-        MappedClass = self._getMappedClass()
+        engine = self._get_engine()
+        Session = self._get_session(engine)
+        MappedClass = self._get_mapped_class()
 
         proto = Protocol(Session, MappedClass, "geom", readonly=True)
         request = testing.DummyRequest()
@@ -772,7 +767,7 @@ class Test_protocol(unittest.TestCase):
             def query(self, mapped_class):
                 return {}
 
-        proto = Protocol(MockSession, self._getMappedClass(), "geom")
+        proto = Protocol(MockSession, self._get_mapped_class(), "geom")
         request = testing.DummyRequest()
         response = proto.delete(request, 1)
         self.assertEqual(response.status_int, 404)
@@ -782,7 +777,7 @@ class Test_protocol(unittest.TestCase):
         from geojson import Feature
         from pyramid.response import Response
 
-        MappedClass = self._getMappedClass()
+        MappedClass = self._get_mapped_class()
 
         # a mock session specific to this test
         class MockSession(object):
