@@ -345,7 +345,7 @@ class Test_protocol(unittest.TestCase):
         return create_engine('postgresql://user:user@no_connection/no_db', echo=True)
 
     def _getSession(self):
-        from sqlalchemy import create_engine, orm
+        from sqlalchemy import orm
         sm = orm.sessionmaker(autoflush=True, autocommit=False)
         return orm.scoped_session(sm)
 
