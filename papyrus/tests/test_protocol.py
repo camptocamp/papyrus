@@ -184,7 +184,6 @@ class create_geom_filter_Tests(unittest.TestCase):
         filter = create_geom_filter(request, MappedClass, "geom")
         self.assertEqual(filter, None)
 
-
 class create_attr_filter_Tests(unittest.TestCase):
 
     def _get_mapped_class(self):

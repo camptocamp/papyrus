@@ -67,7 +67,7 @@ def __compile_within_distance(element, compiler, **kw):
         function(compiler, parse_clause(arguments.pop(0), compiler),
         parse_clause(arguments.pop(0), compiler), arguments.pop(0), *arguments))
 
-def __within_distance_pg(compiler, geom1, geom2, distance):
+def __within_distance_pg(compiler, geom1, geom2, distance, additional_params):
     """Implementation of within_distance for PostGIS
 
     ST_DWithin in early versions of PostGIS 1.3 does not work when
@@ -79,7 +79,7 @@ def __within_distance_pg(compiler, geom1, geom2, distance):
                     func.ST_Expand(geom1, distance).op('&&')(geom2),
                     func.ST_Distance(geom1, geom2) <= distance)
 
-def __within_distance_mysql(compiler, geom1, geom2, distance):
+def __within_distance_mysql(compiler, geom1, geom2, distance, additional_params):
     """Implementation of within_distance for MySQL
 
     MySQL does not support the function distance, so we are doing
@@ -111,7 +111,7 @@ def __within_distance_mysql(compiler, geom1, geom2, distance):
                 )
             )
 
-def __within_distance_spatialite(compiler, geom1, geom2, distance):
+def __within_distance_spatialite(compiler, geom1, geom2, distance, additional_params):
     """Implementation of within_distance for Spatialite
     """
     if isinstance(geom1, GeometryExtensionColumn) and \

@@ -57,7 +57,8 @@ def _get_col_epsg(mapped_class, geom_attr):
     col = class_mapper(mapped_class).get_property(geom_attr).columns[0]
     return col.type.srid
 
-def create_geom_filter(request, mapped_class, geom_attr, **kwargs):
+def create_geom_filter(request, mapped_class, geom_attr,
+                       within_distance_additional_params={}):
     """Create MapFish geometry filter based on the request params. Either
     a box or within or geometry filter, depending on the request params.
     Additional named arguments are passed to the spatial filter.
@@ -75,8 +76,8 @@ def create_geom_filter(request, mapped_class, geom_attr, **kwargs):
         mapper. If you use ``declarative_base`` this is the name of
         the geometry attribute as defined in the mapped class.
 
-    \**kwargs
-        additional arguments passed to ``within_distance()``.
+    within_distance_additional_params
+        additional_params to pass to the ``within_distance`` function.
     """
     tolerance = 0
     if 'tolerance' in request.params:
@@ -108,11 +109,8 @@ def create_geom_filter(request, mapped_class, geom_attr, **kwargs):
     if epsg != column_epsg:
         geom_attr = functions.transform(geom_attr, epsg)
     wkb_geometry = WKBSpatialElement(buffer(geometry.wkb), epsg)
-    if 'additional_params' in kwargs:
-        return within_distance(geom_attr, wkb_geometry, tolerance,
-                               kwargs['additional_params'])
-    else:
-        return within_distance(geom_attr, wkb_geometry, tolerance)
+    return within_distance(geom_attr, wkb_geometry, tolerance,
+                           within_distance_additional_params)
 
 def create_attr_filter(request, mapped_class):
     """Create an ``and_`` SQLAlchemy filter (a ClauseList object) based
