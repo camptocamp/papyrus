@@ -428,54 +428,71 @@ class Test_protocol(unittest.TestCase):
 
         proto = Protocol(Session, MappedClass, "geom")
 
+        request = testing.DummyRequest()
         with patch('sqlalchemy.orm.query.Query.all', lambda q : q):
-            request = testing.DummyRequest()
             query = proto._query(request)
-            self.assertTrue("SELECT" in query_to_str(query, engine))
+        self.assertTrue("SELECT" in query_to_str(query, engine))
 
+        request = testing.DummyRequest(params={"queryable": "id", "id__eq": "1"})
         with patch('sqlalchemy.orm.query.Query.all', lambda q : q):
-            request = testing.DummyRequest(params={"queryable": "id", "id__eq": "1"})
             query = proto._query(request)
-            self.assertTrue("WHERE" in query_to_str(query, engine))
+        self.assertTrue("WHERE" in query_to_str(query, engine))
 
+        request = testing.DummyRequest(params={"queryable": "id", "id__eq": "1"})
         with patch('sqlalchemy.orm.query.Query.all', lambda q : q):
-            request = testing.DummyRequest(params={"queryable": "id", "id__eq": "1"})
             filter = create_attr_filter(request, MappedClass)
             query = proto._query(testing.DummyRequest(), filter=filter)
-            self.assertTrue("WHERE" in query_to_str(query, engine))
+        self.assertTrue("WHERE" in query_to_str(query, engine))
 
+        request = testing.DummyRequest(params={"limit": "2"})
         with patch('sqlalchemy.orm.query.Query.all', lambda q : q):
-            request = testing.DummyRequest(params={"limit": "2"})
             query = proto._query(request)
-            self.assertTrue("LIMIT 2" in query_to_str(query, engine))
+        self.assertTrue("LIMIT 2" in query_to_str(query, engine))
 
+        request = testing.DummyRequest(params={"maxfeatures": "2"})
         with patch('sqlalchemy.orm.query.Query.all', lambda q : q):
-            request = testing.DummyRequest(params={"maxfeatures": "2"})
             query = proto._query(request)
-            self.assertTrue("LIMIT 2" in query_to_str(query, engine))
+        self.assertTrue("LIMIT 2" in query_to_str(query, engine))
 
+        request = testing.DummyRequest(params={"limit": "2", "offset": "10"})
         with patch('sqlalchemy.orm.query.Query.all', lambda q : q):
-            request = testing.DummyRequest(params={"limit": "2", "offset": "10"})
             query = proto._query(request)
-            self.assertTrue("OFFSET 10" in query_to_str(query, engine))
+        self.assertTrue("OFFSET 10" in query_to_str(query, engine))
 
+        request = testing.DummyRequest(params={"order_by": "text"})
         with patch('sqlalchemy.orm.query.Query.all', lambda q : q):
-            request = testing.DummyRequest(params={"order_by": "text"})
             query = proto._query(request)
-            self.assertTrue("ORDER BY" in query_to_str(query, engine))
-            self.assertTrue("ASC" in query_to_str(query, engine))
+        self.assertTrue("ORDER BY" in query_to_str(query, engine))
+        self.assertTrue("ASC" in query_to_str(query, engine))
 
+        request = testing.DummyRequest(params={"sort": "text"})
         with patch('sqlalchemy.orm.query.Query.all', lambda q : q):
-            request = testing.DummyRequest(params={"sort": "text"})
             query = proto._query(request)
-            self.assertTrue("ORDER BY" in query_to_str(query, engine))
-            self.assertTrue("ASC" in query_to_str(query, engine))
+        self.assertTrue("ORDER BY" in query_to_str(query, engine))
+        self.assertTrue("ASC" in query_to_str(query, engine))
 
+        request = testing.DummyRequest(params={"order_by": "text", "dir": "DESC"})
         with patch('sqlalchemy.orm.query.Query.all', lambda q : q):
-            request = testing.DummyRequest(params={"order_by": "text", "dir": "DESC"})
             query = proto._query(request)
-            self.assertTrue("ORDER BY" in query_to_str(query, engine))
-            self.assertTrue("DESC" in query_to_str(query, engine))
+        self.assertTrue("ORDER BY" in query_to_str(query, engine))
+        self.assertTrue("DESC" in query_to_str(query, engine))
+
+    def test_count(self):
+        from papyrus.protocol import Protocol
+        from mock import patch
+
+        engine = self._get_engine()
+        Session = self._get_session(engine)
+        MappedClass = self._get_mapped_class()
+
+        proto = Protocol(Session, MappedClass, "geom")
+
+        # We make Query.count return the query and just check it includes
+        # "SELECT". Yes, not so good!
+        request = testing.DummyRequest()
+        with patch('sqlalchemy.orm.query.Query.count', lambda q : q):
+            query = proto.count(request)
+        self.assertTrue("SELECT" in query_to_str(query, engine))
 
     def test_read_id(self):
         from papyrus.protocol import Protocol

@@ -277,7 +277,7 @@ class Protocol(object):
         else:
             return None
 
-    def _query(self, request, filter=None, execute=True):
+    def _query(self, request, filter=None):
         """ Build a query based on the filter and the request params,
             and send the query to the database. """
         limit = None
@@ -295,16 +295,13 @@ class Protocol(object):
         if order_by is not None:
             query = query.order_by(order_by)
         query = query.limit(limit).offset(offset)
-        if execute:
-            return query.all()
-        else:
-            return query
+        return query.all()
 
     def count(self, request, filter=None):
         """ Return the number of records matching the given filter. """
         if filter is None:
             filter = create_filter(request, self.mapped_class, self.geom_attr)
-        return str(self.Session().query(self.mapped_class).filter(filter).count())
+        return self.Session().query(self.mapped_class).filter(filter).count()
 
     def read(self, request, filter=None, id=None):
         """ Build a query based on the filter or the idenfier, send the query
