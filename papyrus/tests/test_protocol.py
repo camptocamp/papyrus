@@ -429,8 +429,6 @@ class Test_protocol(unittest.TestCase):
 
         request = testing.DummyRequest()
         query = proto._query(request, execute=False)
-        stmt = query.statement
-        stmtm_str = stmt.compile(engine)
         self.assertTrue("SELECT" in query_to_str(query, engine))
 
         request = testing.DummyRequest(params={"queryable": "id", "id__eq": "1"})
