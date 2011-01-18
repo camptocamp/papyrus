@@ -1,3 +1,3 @@
-Protocol
+within_distance
 
-- the _get_order_by function is incorrect - looking at __table__.c[column_name] isn't right
+- move the within_distance out of papyrus in geoalchemy
