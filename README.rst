@@ -28,6 +28,18 @@ application ``setup.py``::
         'papyrus'
         ]
 
+Run Papyrus Tests
+-----------------
+
+To run the Papyrus tests the ``nose``, ``mock``, and ``psycopg2`` packages must
+be installed in the Python environment. Also install ``coverage`` to be able to
+to get a coverage report when running the tests.
+
+To run the tests and get a coverage report use the following command at the
+root of the Papyrus tree::
+
+    $ nosetests --with-coverage
+
 GeoJSON Renderer
 ----------------
 
