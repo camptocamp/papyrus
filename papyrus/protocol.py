@@ -261,19 +261,16 @@ class Protocol(object):
 
     def _get_order_by(self, request):
         """ Return an SA order_by """
-        column_name = None
+        attr = None
         if 'sort' in request.params:
-            column_name = request.params['sort']
+            attr = request.params['sort']
         elif 'order_by' in request.params:
-            column_name = request.params['order_by']
-        if column_name and column_name in self.mapped_class.__table__.c:
-            column = self.mapped_class.__table__.c[column_name]
-            if 'dir' in request.params and request.params['dir'].upper() == 'DESC':
-                return desc(column)
-            else:
-                return asc(column)
-        else:
+            attr = request.params['order_by']
+        if attr is None or not hasattr(self.mapped_class, attr):
             return None
+        params = request.params
+        fn = desc if 'dir' in params and params['dir'].upper() == 'DESC' else asc
+        return fn(getattr(self.mapped_class, attr))
 
     def _query(self, request, filter=None):
         """ Build a query based on the filter and the request params,
