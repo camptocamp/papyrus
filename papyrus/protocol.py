@@ -94,8 +94,7 @@ def create_geom_filter(request, mapped_class, geom_attr,
         geometry = Point(float(request.params['lon']),
                          float(request.params['lat']))
     elif 'geometry' in request.params:
-        factory = lambda ob: GeoJSON.to_instance(ob)
-        geometry = loads(request.params['geometry'], object_hook=factory)
+        geometry = loads(request.params['geometry'], object_hook=GeoJSON.to_instance)
         geometry = asShape(geometry)
     if geometry is None:
         return None
@@ -307,8 +306,7 @@ class Protocol(object):
         if self.readonly:
             return HTTPForbidden()
         content = request.environ['wsgi.input'].read(int(request.environ['CONTENT_LENGTH']))
-        factory = lambda ob: GeoJSON.to_instance(ob)
-        collection = loads(content, object_hook=factory)
+        collection = loads(content, object_hook=GeoJSON.to_instance)
         if not isinstance(collection, FeatureCollection):
             return HTTPBadRequest()
         session = self.Session()
@@ -344,8 +342,7 @@ class Protocol(object):
         if obj is None:
             return HTTPNotFound()
         content = request.environ['wsgi.input'].read(int(request.environ['CONTENT_LENGTH']))
-        factory = lambda ob: GeoJSON.to_instance(ob)
-        feature = loads(content, object_hook=factory)
+        feature = loads(content, object_hook=GeoJSON.to_instance)
         if not isinstance(feature, Feature):
             return HTTPBadRequest()
         if self.before_update is not None:
