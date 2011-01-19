@@ -79,15 +79,11 @@ def create_geom_filter(request, mapped_class, geom_attr,
     within_distance_additional_params
         additional_params to pass to the ``within_distance`` function.
     """
-    tolerance = 0
-    if 'tolerance' in request.params:
-        tolerance = float(request.params['tolerance'])
+    tolerance = float(request.params.get('tolerance', 0.0))
     epsg = None
     if 'epsg' in request.params:
         epsg = int(request.params['epsg'])
-    box = None
-    if 'bbox' in request.params:
-        box = request.params['bbox']
+    box = request.params.get('bbox')
     geometry = None
     if box is not None:
         box = map(float, box.split(','))
@@ -234,15 +230,9 @@ class Protocol(object):
         self.mapped_class = mapped_class
         self.geom_attr = geom_attr
         self.readonly = readonly
-        self.before_create = None
-        if kwargs.has_key('before_create'):
-            self.before_create = kwargs['before_create']
-        self.before_update = None
-        if kwargs.has_key('before_update'):
-            self.before_update = kwargs['before_update']
-        self.before_delete = None
-        if kwargs.has_key('before_delete'):
-            self.before_delete = kwargs['before_delete']
+        self.before_create = kwargs.get('before_create')
+        self.before_update = kwargs.get('before_update')
+        self.before_delete = kwargs.get('before_delete')
 
     def _filter_attrs(self, feature, request):
         """ Remove some attributes from the feature and set the geometry to None
