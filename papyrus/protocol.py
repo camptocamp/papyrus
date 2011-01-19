@@ -342,11 +342,11 @@ class Protocol(object):
             if create:
                 session.add(obj)
             objects.append(obj)
+        session.flush()
+        collection = FeatureCollection(objects) if len(objects) > 0 else None
         callback = create_response_callback(201)
         request.add_response_callback(callback)
-        if len(objects) > 0:
-            return FeatureCollection(objects)
-        return
+        return collection
 
     def update(self, request, id):
         """ Read the GeoJSON feature from the request body and update the
@@ -365,6 +365,7 @@ class Protocol(object):
         if self.before_update is not None:
             self.before_update(request, feature, obj)
         obj.__update__(feature)
+        session.flush()
         callback = create_response_callback(201)
         request.add_response_callback(callback)
         return obj

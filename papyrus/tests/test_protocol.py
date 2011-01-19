@@ -590,13 +590,19 @@ class Test_protocol(unittest.TestCase):
         Session = self._get_session(engine)
         MappedClass = self._get_mapped_class()
 
+        class MockSession(object):
+            def add(self, o):
+                Session.add(o)
+            def flush(self):
+                pass
+
         # a before_update callback
         def before_create(request, feature, obj):
             if not hasattr(request, '_log'):
                 request._log = []
             request._log.append(dict(feature=feature, obj=obj))
 
-        proto = Protocol(Session, MappedClass, "geom",
+        proto = Protocol(MockSession, MappedClass, "geom",
                          before_create=before_create)
 
         # we need an actual Request object here, for body_file to do its job
@@ -656,6 +662,8 @@ class Test_protocol(unittest.TestCase):
             def query(self, mapped_class):
                 return {'a': mapped_class(Feature(id='a')),
                         'b': mapped_class(Feature(id='b'))}
+            def flush(self):
+                pass
 
         proto = Protocol(MockSession, MappedClass, 'geom')
 
@@ -741,6 +749,8 @@ class Test_protocol(unittest.TestCase):
         class MockSession(object):
             def query(self, mapped_class):
                 return {'a': MappedClass(Feature(id='a'))}
+            def flush(self):
+                pass
 
         # a before_update callback
         def before_update(request, feature, obj):
