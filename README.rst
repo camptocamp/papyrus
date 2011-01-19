@@ -14,11 +14,10 @@ Papyrus can be installed with ``easy_install``::
 (Installing Papyrus in an isolated ``virtualenv`` is recommended.)
 
 Often you'll want to make Papyrus a dependency of your Pyramid application. For
-that add ``papyrus`` to the ``requires`` list defined in the Pyramid
+that add ``papyrus`` to the ``install_requires`` list defined in the Pyramid
 application ``setup.py``::
 
-    requires = [
-        'pyramid',
+    install_requires = [
         'pyramid',
         'SQLAlchemy',
         'transaction',
