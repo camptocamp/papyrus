@@ -174,8 +174,7 @@ def create_filter(request, mapped_class, geom_attr, **kwargs):
 def asbool(val):
     # Convert the passed value to a boolean.
     if isinstance(val, str) or isinstance(val, unicode):
-        low = val.lower()
-        return low != 'false' and low != '0'
+        return val.lower() not in ['false', '0']
     else:
         return bool(val)
 
@@ -251,16 +250,13 @@ class Protocol(object):
 
     def _get_order_by(self, request):
         """ Return an SA order_by """
-        attr = None
-        if 'sort' in request.params:
-            attr = request.params['sort']
-        elif 'order_by' in request.params:
-            attr = request.params['order_by']
+        attr = request.params.get('sort', request.params.get('order_by'))
         if attr is None or not hasattr(self.mapped_class, attr):
             return None
-        params = request.params
-        fn = desc if 'dir' in params and params['dir'].upper() == 'DESC' else asc
-        return fn(getattr(self.mapped_class, attr))
+        if request.params.get('dir', '').upper() == 'DESC':
+            return desc(getattr(self.mapped_class, attr))
+        else:
+            return asc(getattr(self.mapped_class, attr))
 
     def _query(self, request, filter=None):
         """ Build a query based on the filter and the request params,
