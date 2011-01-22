@@ -19,6 +19,7 @@ application ``setup.py``::
 
     install_requires = [
         'pyramid',
+        'pyramid_handlers',
         'SQLAlchemy',
         'transaction',
         'repoze.tm2',
@@ -26,6 +27,11 @@ application ``setup.py``::
         'WebError',
         'papyrus'
         ]
+
+Note: the ``pyramid_handlers`` package is required for creating *handlers* and
+*actions* (instead of *view callbables*) in your Pyramid application. Handlers
+basically emulate Pylons' controllers, so people coming from Pylons may want to
+use ``pyramid_handlers`` in their Pyramid applications.
 
 Run Papyrus Tests
 -----------------
@@ -38,6 +44,10 @@ To run the tests and get a coverage report use the following command at the
 root of the Papyrus tree::
 
     $ nosetests --with-coverage
+
+(Except for the code in ``within_distance.py``, which I'd like to move to
+GeoAlchemy - where it should be, the Papyrus code is 100% covered by tests.
+Let's try to maintain that!)
 
 GeoJSON Renderer
 ----------------
@@ -236,6 +246,7 @@ looks like::
     from pyramid.config import Configurator
     import pyramid_beaker
     import pyramid_sqla
+    import pyramid_handlers
     from pyramid_sqla.static import add_static_route
 
     from papyrus.renderers import geojson_renderer_factory
@@ -260,6 +271,7 @@ looks like::
                               'pyramid.events.BeforeRender')
 
         # Set up routes and views
+        config.include(pyramid_handlers.includeme)
         config.add_handler('spots_read_many', '/spots',
                            'myproject.handlers:spotsHandler',
                            action='read_many', request_method='GET')
@@ -337,3 +349,6 @@ calling ``add_route`` on the ``Configurator``::
     config.add_route('spots_create', '/spots', request_method='POST')
     config.add_route('spots_update', '/spots/{id}', request_method='PUT')
     config.add_route('spots_delete', '/spots/{id}', request_method='DELETE')
+
+Note: if you use view callables as described in this section the
+``pyramid_handlers`` package isn't required as an application's dependency.
