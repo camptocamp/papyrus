@@ -19,6 +19,7 @@ application ``setup.py``::
 
     install_requires = [
         'pyramid',
+        'pyramid_sqla',
         'pyramid_handlers',
         'SQLAlchemy',
         'transaction',
@@ -28,10 +29,15 @@ application ``setup.py``::
         'papyrus'
         ]
 
-Note: the ``pyramid_handlers`` package is required for creating *handlers* and
-*actions* (instead of *view callbables*) in your Pyramid application. Handlers
-basically emulate Pylons' controllers, so people coming from Pylons may want to
-use ``pyramid_handlers`` in their Pyramid applications.
+Notes:
+
+* the ``pyramid_sqla`` is useful when using SQLAlchemy in the Pyramid
+  application.
+
+* the ``pyramid_handlers`` package is required for creating *handlers* and
+  *actions* (instead of *view callbables*) in your Pyramid application.
+  Handlers basically emulate Pylons' controllers, so people coming from Pylons
+  may want to use ``pyramid_handlers`` in their Pyramid applications.
 
 Run Papyrus Tests
 -----------------
@@ -202,8 +208,14 @@ service in a handler class.
 Here is what our handler looks like (typically defined in the application's
 ``handlers.py`` file)::
 
+    from pyramid_handlers import action
+
     from myproject.models import Session, Spot
     from papyrus.protocol import Protocol
+
+    # create the protocol object. 'geom' is the name
+    # of the geometry attribute in the Spot model class
+    proto = Protocol(Session, Spot, 'geom')
 
     class SpotsHandler(object):
         def __init__(self, request):
