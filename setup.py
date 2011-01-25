@@ -1,8 +1,12 @@
 from setuptools import setup, find_packages
 import sys, os
 
-version = '0.1'
+version = '0.2'
 
+here = os.path.abspath(os.path.dirname(__file__))
+README = open(os.path.join(here, 'README.rst')).read()
+TODO = open(os.path.join(here, 'TODO.rst')).read()
+CHANGES = open(os.path.join(here, 'CHANGES.rst')).read()
 
 install_requires = [
     'pyramid',
@@ -34,6 +38,5 @@ setup(name='papyrus',
       entry_points="""
       # -*- Entry points: -*-
       """,
-      long_description="""\
-      """,
+      long_description=README + '\n\n' + TODO + '\n\n' + CHANGES,
       )
