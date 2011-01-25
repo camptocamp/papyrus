@@ -1,3 +1,19 @@
 within_distance
 
 - move the within_distance out of papyrus in geoalchemy
+
+misc
+
+- create an helper for config.add_handler and config.add_renderer
+  
+  def add_handlers(name, handler_class):
+      ...
+
+  config.add_directive('add_papyrus_handlers', add_handlers)
+
+  usage:
+
+  import papyrus
+
+  config.include(papyrus)
+  config.add_papyrus_handlers('spots', 'myproject.handlers:SpotsHandler')
