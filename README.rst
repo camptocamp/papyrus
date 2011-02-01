@@ -158,7 +158,7 @@ models in a ``models.py`` file, so we do likewise here. Here's what our
         __tablename__ = 'spots'
         id = Column(Integer, primary_key=True)
         name = Column(Unicode, nullable=False)
-        geom = GeometryColumn(name='the_geom', key='geom', Point(srid=4326))
+        geom = GeometryColumn('the_geom', Point(srid=4326))
 
         def __init__(self, feature):
             self.id = feature.id
@@ -168,7 +168,7 @@ models in a ``models.py`` file, so we do likewise here. Here's what our
             geometry = feature.geometry
             if geometry is not None and \
                not isinstance(geometry, geojson.geometry.Default):
-                shape = asShape(feature.geometry)
+                shape = asShape(geometry)
                 self.geom = WKBSpatialElement(buffer(shape.wkb), srid=4326)
                 self.geom.shape = shape
             self.name = feature.properties.get('name', None)
@@ -285,22 +285,22 @@ looks like::
         # Set up routes and views
         config.include(pyramid_handlers.includeme)
         config.add_handler('spots_read_many', '/spots',
-                           'myproject.handlers:spotsHandler',
+                           'myproject.handlers:SpotsHandler',
                            action='read_many', request_method='GET')
         config.add_handler('spots_read_one', '/spots/{id}',
-                           'myproject.handlers:spotsHandler',
+                           'myproject.handlers:SpotsHandler',
                            action='read_one', request_method='GET')
         config.add_handler('spots_count', '/spots/count',
-                           'myproject.handlers:spotsHandler',
+                           'myproject.handlers:SpotsHandler',
                            action='count', request_method='GET')
         config.add_handler('spots_create', '/spots',
-                           'myproject.handlers:spotsHandler',
+                           'myproject.handlers:SpotsHandler',
                            action='create', request_method='POST')
         config.add_handler('spots_update', '/spots/{id}',
-                           'myproject.handlers:spotsHandler',
+                           'myproject.handlers:SpotsHandler',
                            action='update', request_method='PUT')
         config.add_handler('spots_delete', '/spots/{id}',
-                           'myproject.handlers:spotsHandler',
+                           'myproject.handlers:SpotsHandler',
                            action='delete', request_method='DELETE')
         config.add_handler('home', '/', 'myproject.handlers:MainHandler',
                            action='index')
