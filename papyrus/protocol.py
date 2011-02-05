@@ -41,8 +41,6 @@ from geoalchemy.functions import functions
 
 from geojson import Feature, FeatureCollection, loads, GeoJSON
 
-from papyrus.within_distance import within_distance
-
 
 def _get_col_epsg(mapped_class, geom_attr):
     """Get the EPSG code associated with a geometry attribute.
@@ -104,8 +102,8 @@ def create_geom_filter(request, mapped_class, geom_attr,
     if epsg != column_epsg:
         geom_attr = functions.transform(geom_attr, epsg)
     wkb_geometry = WKBSpatialElement(buffer(geometry.wkb), epsg)
-    return within_distance(geom_attr, wkb_geometry, tolerance,
-                           within_distance_additional_params)
+    return functions._within_distance(geom_attr, wkb_geometry, tolerance,
+                                      within_distance_additional_params)
 
 def create_attr_filter(request, mapped_class):
     """Create an ``and_`` SQLAlchemy filter (a ClauseList object) based

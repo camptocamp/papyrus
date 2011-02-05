@@ -12,7 +12,7 @@ install_requires = [
     'pyramid',
     'geojson>=1.0,<=1.0.99',
     'shapely>=1.2,<=1.2.99',
-    'geoalchemy>=0.4,<=0.4.99'
+    'geoalchemy>=0.5,<=0.5.99'
     ]
 
 tests_require = install_requires + [
