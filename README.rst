@@ -51,9 +51,8 @@ root of the Papyrus tree::
 
     $ nosetests --with-coverage
 
-(Except for the code in ``within_distance.py``, which I'd like to move to
-GeoAlchemy - where it should be, the Papyrus code is 100% covered by tests.
-Let's try to maintain that!)
+Currently, 100% of the Papyrus code is covered by tests, I'd like to preserve
+that.
 
 GeoJSON Renderer
 ----------------
@@ -127,8 +126,9 @@ Database Model
 
 First of all we need an SQLAlchemy/GeoAlchemy mapping for that table.  The
 ``pyramid_routesalchemy`` and ``pyramid_sqla`` templates places SQLAlchemy
-models in a ``models.py`` file, so we do likewise here. Here's what our
-``models.py`` file looks like::
+models in a ``models.py`` file, we'll do likewise here.
+
+Here's what our ``models.py`` file looks like::
 
     from sqlalchemy import Column
     from sqlalchemy import Integer
@@ -170,14 +170,14 @@ models in a ``models.py`` file, so we do likewise here. Here's what our
                not isinstance(geometry, geojson.geometry.Default):
                 shape = asShape(geometry)
                 self.geom = WKBSpatialElement(buffer(shape.wkb), srid=4326)
-                self.geom.shape = shape
+                self._shape = shape
             self.name = feature.properties.get('name', None)
        
         @property
         def __geo_interface__(self):
             id = self.id
-            if hasattr(self.geom, 'shape') and self.geom.shape is not None:
-                geometry = self.geom.shape
+            if hasattr(self, '_shape') and self._shape is not None:
+                geometry = self_shape
             else:
                 geometry = loads(str(self.geom.geom_wkb))
             properties = dict(name=self.name)
@@ -189,17 +189,42 @@ models in a ``models.py`` file, so we do likewise here. Here's what our
 
 Note that the ``Spot`` class implements the Python Geo Interface (though the
 ``__geo_interface__`` property), and defines ``__init__`` and ``__update__``
-methods.  Implementing the Python Geo Interface is required for being able to
-serialize ``Spot`` objects into GeoJSON. The ``__init__`` and ``__update__``
-methods are required for inserting and updating objects, respectively. Both the
-``__init__`` and ``__update__`` methods receive a GeoJSON feature
-(``geojson.Feature``) as an argument.
+methods.
 
-Now that database model is defined we can now create the core of our MapFish
-web service.
+Implementing the Python Geo Interface is required for being able to serialize
+``Spot`` objects into GeoJSON (for example using Papyrus' GeoJSON renderer).
+
+The ``__init__`` and ``__update__`` methods are required for inserting and
+updating objects, respectively. Both the ``__init__`` and ``__update__``
+methods receive a GeoJSON feature (``geojson.Feature``) as an argument.
+
+The GeoInterface Mixin
+~~~~~~~~~~~~~~~~~~~~~~
+
+Papyrus provides a mixin to help create SQLAlchemy/GeoAlchemy mapped classes
+that implement the Python Geo Interface, and define ``__init__`` and
+``__update__`` as expected by the MapFish protocol. The mixin is named
+``GeoInterface``, and is provided by the ``papyrus.geo_interface`` module.
+
+With the mixin, our ``Spot`` class looks like as follows:
+
+    from papyrus.geo_interface import GeoInterface
+
+    class Spot(GeoInterface, Base):
+        __tablename__ = 'spots'
+        id = Column(Integer, primary_key=True)
+        name = Column(Unicode, nullable=False)
+        geom = GeometryColumn('the_geom', Point(srid=4326))
+
+``GeoInterface`` represents a convenience method, and writing its own
+``__geo_interface__``, ``__init__``, and ``__update__`` definitions is
+recommended.
 
 Handler
 ~~~~~~~
+
+Now that database model is defined we can now create the core of our MapFish
+web service.
 
 The web service itself can be defined in a *handler* class, or through *view*
 callables, typically functions. This section shows how to define a MapFish web
