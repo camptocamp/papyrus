@@ -206,7 +206,7 @@ that implement the Python Geo Interface, and define ``__init__`` and
 ``__update__`` as expected by the MapFish protocol. The mixin is named
 ``GeoInterface``, and is provided by the ``papyrus.geo_interface`` module.
 
-With the mixin, our ``Spot`` class looks like as follows:
+With the mixin, our ``Spot`` class looks like as follows::
 
     from papyrus.geo_interface import GeoInterface
 
