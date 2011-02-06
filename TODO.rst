@@ -1,11 +1,6 @@
 TODO
 ----
 
-within_distance
-~~~~~~~~~~~~~~~
-
-* move the within_distance out of papyrus in geoalchemy
-
 misc
 ~~~~
 
