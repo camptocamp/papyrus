@@ -282,15 +282,14 @@ The six actions of the ``SpotsHandler`` class entirely define our MapFish web
 service.
 
 We now need to provide *routes* to these actions. This is done by calling
-``add_handler()`` on the ``Configurator``. Here's what the ``__init__.py`` file
-looks like::
+``add_papyrus_handler()`` on the ``Configurator``. Here's what the
+``__init__.py`` file looks like::
 
     from pyramid.config import Configurator
     import pyramid_beaker
     import pyramid_sqla
-    import pyramid_handlers
     from pyramid_sqla.static import add_static_route
-
+    import papyrus
     from papyrus.renderers import geojson_renderer_factory
 
     def main(global_config, **settings):
@@ -313,7 +312,28 @@ looks like::
                               'pyramid.events.BeforeRender')
 
         # Set up routes and views
-        config.include(pyramid_handlers.includeme)
+        config.include(papyrus)
+        config.add_papyrus_handler('spots', '/spots',
+                                   'myproject.handlers.SpotHandler')
+        config.add_handler('home', '/', 'myproject.handlers:MainHandler',
+                           action='index')
+        config.add_handler('main', '/{action}', 'myproject.handlers:MainHandler',
+            path_info=r'/(?!favicon\.ico|robots\.txt|w3c)')
+        add_static_route(config, 'myproject', 'static', cache_max_age=3600)
+
+        return config.make_wsgi_app()
+
+There are multiple things to note in the above code:
+
+* the call to ``add_render`` for the addition of ``geojson`` renderer,
+* the call to ``include`` for the inclusion of ``papyrus`` (this is what makes
+  ``add_papyrus_handler`` available on the ``Configurator``),
+* the call to ``add_papyrus_handler`` for the creation of routes to our handler
+  actions.
+
+The ``add_papyrus_handler`` method is a convenience. Here's what does under the
+hood::
+
         config.add_handler('spots_read_many', '/spots',
                            'myproject.handlers:SpotsHandler',
                            action='read_many', request_method='GET')
@@ -332,16 +352,6 @@ looks like::
         config.add_handler('spots_delete', '/spots/{id}',
                            'myproject.handlers:SpotsHandler',
                            action='delete', request_method='DELETE')
-        config.add_handler('home', '/', 'myproject.handlers:MainHandler',
-                           action='index')
-        config.add_handler('main', '/{action}', 'myproject.handlers:MainHandler',
-            path_info=r'/(?!favicon\.ico|robots\.txt|w3c)')
-        add_static_route(config, 'myproject', 'static', cache_max_age=3600)
-
-        return config.make_wsgi_app()
-
-Note the six calls to ``add_handler``, one for each action of our handler. Note
-also the addition of the ``geojson`` renderer.
 
 View functions
 ~~~~~~~~~~~~~~
