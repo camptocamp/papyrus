@@ -4,7 +4,8 @@ Changes
 0.2
 ~~~
 
-* Introduce the GeoInterface mixin 
+* Add the ``papyrus.geo_inteface.GeoInterface`` mixin
+* Add the ``papyrus.add_papyrus_handler`` configurator directive
 
 0.1
 ~~~
