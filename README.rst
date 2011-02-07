@@ -206,7 +206,7 @@ that implement the Python Geo Interface, and define ``__init__`` and
 ``__update__`` as expected by the MapFish protocol. The mixin is named
 ``GeoInterface``, and is provided by the ``papyrus.geo_interface`` module.
 
-With the mixin, our ``Spot`` class looks like as follows::
+Using ``GeoInterface`` our ``Spot`` class looks like this::
 
     from papyrus.geo_interface import GeoInterface
 
@@ -216,9 +216,14 @@ With the mixin, our ``Spot`` class looks like as follows::
         name = Column(Unicode, nullable=False)
         geom = GeometryColumn('the_geom', Point(srid=4326))
 
-``GeoInterface`` represents a convenience method, and writing its own
-``__geo_interface__``, ``__init__``, and ``__update__`` definitions is
-recommended.
+``GeoInterface`` represents a convenience method. Often, implementing one's own
+``__geo_interface__``, ``__init__``, and ``__update__`` definitions is a better
+choice than relying on ``GeoInterface``.
+
+When using ``GeoInterface`` understanding its `code
+<https://github.com/elemoine/papyrus/blob/master/papyrus/geo_interface.py>`_
+can be useful. It can also be a source of inspiration for those who don't use
+it.
 
 Handler
 ~~~~~~~
