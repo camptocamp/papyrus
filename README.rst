@@ -247,7 +247,7 @@ Here is what our handler looks like (typically defined in the application's
     # of the geometry attribute in the Spot model class
     proto = Protocol(Session, Spot, 'geom')
 
-    class SpotsHandler(object):
+    class SpotHandler(object):
         def __init__(self, request):
             self.request = request
 
@@ -278,7 +278,7 @@ Here is what our handler looks like (typically defined in the application's
             id = self.request.matchdict['id']
             return proto.delete(self.request, id)
 
-The six actions of the ``SpotsHandler`` class entirely define our MapFish web
+The six actions of the ``SpotHandler`` class entirely define our MapFish web
 service.
 
 We now need to provide *routes* to these actions. This is done by calling
@@ -314,7 +314,7 @@ We now need to provide *routes* to these actions. This is done by calling
         # Set up routes and views
         config.include(papyrus)
         config.add_papyrus_handler('spots', '/spots',
-                                   'myproject.handlers.SpotHandler')
+                                   'myproject.handlers:SpotHandler')
         config.add_handler('home', '/', 'myproject.handlers:MainHandler',
                            action='index')
         config.add_handler('main', '/{action}', 'myproject.handlers:MainHandler',
@@ -335,22 +335,22 @@ The ``add_papyrus_handler`` method is a convenience. Here's what does under the
 hood::
 
         config.add_handler('spots_read_many', '/spots',
-                           'myproject.handlers:SpotsHandler',
+                           'myproject.handlers:SpotHandler',
                            action='read_many', request_method='GET')
         config.add_handler('spots_read_one', '/spots/{id}',
-                           'myproject.handlers:SpotsHandler',
+                           'myproject.handlers:SpotHandler',
                            action='read_one', request_method='GET')
         config.add_handler('spots_count', '/spots/count',
-                           'myproject.handlers:SpotsHandler',
+                           'myproject.handlers:SpotHandler',
                            action='count', request_method='GET')
         config.add_handler('spots_create', '/spots',
-                           'myproject.handlers:SpotsHandler',
+                           'myproject.handlers:SpotHandler',
                            action='create', request_method='POST')
         config.add_handler('spots_update', '/spots/{id}',
-                           'myproject.handlers:SpotsHandler',
+                           'myproject.handlers:SpotHandler',
                            action='update', request_method='PUT')
         config.add_handler('spots_delete', '/spots/{id}',
-                           'myproject.handlers:SpotsHandler',
+                           'myproject.handlers:SpotHandler',
                            action='delete', request_method='DELETE')
 
 View functions
