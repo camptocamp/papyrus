@@ -102,7 +102,8 @@ class Test_add_papyrus_routes(unittest.TestCase):
         def dummy_add_view(**kw):
             views.append(kw)
         config.add_view = dummy_add_view
-        config.add_papyrus_routes('prefix', '/base_url', 'papyrus.tests.views')
+        config.add_papyrus_routes('prefix', '/base_url')
+        config.scan()
         self.assertEqual(len(views), 6)
         mapper = config.registry.getUtility(IRoutesMapper)
         routes = mapper.get_routes()
