@@ -3,15 +3,15 @@ import unittest
 class Test_includeme(unittest.TestCase):
     def test_it(self):
         from pyramid.config import Configurator
-        from pyramid_handlers import add_handler
-        from papyrus import includeme
-        from papyrus import add_papyrus_handler
+        import pyramid_handlers
+        import papyrus
         c = Configurator(autocommit=True)
-        c.include(includeme)
+        c.include(pyramid_handlers.includeme)
+        c.include(papyrus.includeme)
         self.failUnless(c.add_handler.im_func.__docobj__ is
-                        add_handler)
+                        pyramid_handlers.add_handler)
         self.failUnless(c.add_papyrus_handler.im_func.__docobj__ is
-                        add_papyrus_handler)
+                        papyrus.add_papyrus_handler)
 
 class Test_add_papyrus_handler(unittest.TestCase):
     def _makeOne(self, autocommit=True):

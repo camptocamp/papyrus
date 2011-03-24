@@ -83,7 +83,5 @@ def add_papyrus_routes(self, route_name_prefix, base_url, view_module):
 def includeme(config):
     """ The function to pass to ``config.include``. Requires the
     ``pyramid_handlers`` module. """
-    import pyramid_handlers
-    config.include(pyramid_handlers)
     config.add_directive('add_papyrus_handler', add_papyrus_handler)
     config.add_directive('add_payrus_routes', add_papyrus_routes)
