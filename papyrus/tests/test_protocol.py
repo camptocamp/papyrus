@@ -28,6 +28,7 @@
 
 """ This module includes unit tests for protocol.py """
 
+from __future__ import with_statement
 
 import unittest
 
