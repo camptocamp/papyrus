@@ -86,3 +86,4 @@ def includeme(config):
     import pyramid_handlers
     config.include(pyramid_handlers)
     config.add_directive('add_papyrus_handler', add_papyrus_handler)
+    config.add_directive('add_payrus_routes', add_papyrus_routes)
