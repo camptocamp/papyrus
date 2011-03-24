@@ -84,4 +84,4 @@ def includeme(config):
     """ The function to pass to ``config.include``. Requires the
     ``pyramid_handlers`` module. """
     config.add_directive('add_papyrus_handler', add_papyrus_handler)
-    config.add_directive('add_payrus_routes', add_papyrus_routes)
+    config.add_directive('add_papyrus_routes', add_papyrus_routes)
