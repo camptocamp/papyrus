@@ -47,7 +47,8 @@ def add_papyrus_routes(self, route_name_prefix, base_url):
 
         import papyrus
         config.include(papyrus)
-        config.add_papyrus_views('spots', '/spots', 'mypackage.views.spot')
+        config.add_papyrus_routes('spots', '/spots')
+        config.scan()
 
     Arguments:
 
