@@ -303,7 +303,7 @@ class Protocol(object):
             create new objects in the database. """
         if self.readonly:
             return HTTPForbidden()
-        content = request.environ['wsgi.input'].read(int(request.environ['CONTENT_LENGTH']))
+        content = request.body
         collection = loads(content, object_hook=GeoJSON.to_instance)
         if not isinstance(collection, FeatureCollection):
             return HTTPBadRequest()
@@ -339,7 +339,7 @@ class Protocol(object):
         obj = session.query(self.mapped_class).get(id)
         if obj is None:
             return HTTPNotFound()
-        content = request.environ['wsgi.input'].read(int(request.environ['CONTENT_LENGTH']))
+        content = request.body
         feature = loads(content, object_hook=GeoJSON.to_instance)
         if not isinstance(feature, Feature):
             return HTTPBadRequest()
