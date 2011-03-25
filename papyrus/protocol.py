@@ -303,8 +303,7 @@ class Protocol(object):
             create new objects in the database. """
         if self.readonly:
             return HTTPForbidden()
-        content = request.body
-        collection = loads(content, object_hook=GeoJSON.to_instance)
+        collection = loads(request.body, object_hook=GeoJSON.to_instance)
         if not isinstance(collection, FeatureCollection):
             return HTTPBadRequest()
         session = self.Session()
@@ -339,8 +338,7 @@ class Protocol(object):
         obj = session.query(self.mapped_class).get(id)
         if obj is None:
             return HTTPNotFound()
-        content = request.body
-        feature = loads(content, object_hook=GeoJSON.to_instance)
+        feature = loads(request.body, object_hook=GeoJSON.to_instance)
         if not isinstance(feature, Feature):
             return HTTPBadRequest()
         if self.before_update is not None:
