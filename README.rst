@@ -122,12 +122,15 @@ First of all we need an SQLAlchemy/GeoAlchemy mapping for that table. To be
 *compliant* with Papyrus' MapFish Protocol implementation the mapped class must
 implement the Python Geo Interface (typically through the ``__geo_interface__``
 property), and must define ``__init__`` and ``__update__`` methods.
+
 Implementing the Python Geo Interface is required for being able to serialize
 ``Spot`` objects into GeoJSON (using Papyrus' GeoJSON renderer). The
 ``__init__`` and ``__update__`` methods are required for inserting and updating
 objects, respectively. Both the ``__init__`` and ``__update__`` methods receive
 a GeoJSON feature (``geojson.Feature``) as an argument.
 
+With GeoInterface
+^^^^^^^^^^^^^^^^^
 
 Papyrus provides a mixin to help create SQLAlchemy/GeoAlchemy mapped classes
 that implement the Python Geo Interface, and define ``__init__`` and
@@ -152,6 +155,9 @@ When using ``GeoInterface`` understanding its `code
 <https://github.com/elemoine/papyrus/blob/master/papyrus/geo_interface.py>`_
 can be useful. It can also be a source of inspiration for those who don't use
 it.
+
+Without GeoInterface
+^^^^^^^^^^^^^^^^^^^^
 
 Without using ``GeoInterface`` our ``Spot`` class could look like this::
 
