@@ -15,29 +15,23 @@ Papyrus can be installed with ``easy_install``::
 
 Often you'll want to make Papyrus a dependency of your Pyramid application. For
 that add ``papyrus`` to the ``install_requires`` list defined in the Pyramid
-application ``setup.py``::
+application ``setup.py``. Example::
 
     install_requires = [
         'pyramid',
-        'pyramid_sqla',
         'pyramid_handlers',
+        'pyramid_tm',
         'SQLAlchemy',
-        'transaction',
-        'repoze.tm2',
-        'zope.sqlalchemy',
         'WebError',
         'papyrus'
         ]
 
 Notes:
 
-* the ``pyramid_sqla`` is useful when using SQLAlchemy in the Pyramid
-  application.
-
 * the ``pyramid_handlers`` package is required for creating *handlers* and
-  *actions* (instead of *view callbables*) in your Pyramid application.
-  Handlers basically emulate Pylons' controllers, so people coming from Pylons
-  may want to use ``pyramid_handlers`` in their Pyramid applications.
+  *actions*, in place *view callbables*.  Handlers basically emulate Pylons'
+  controllers, so people coming from Pylons may want to use
+  ``pyramid_handlers`` in their Pyramid applications.
 
 Run Papyrus Tests
 -----------------
@@ -114,45 +108,52 @@ Papyrus provides an implementation of the `MapFish Protocol
 <http://trac.mapfish.org/trac/mapfish/wiki/MapFishProtocol>`_. This
 implementation relies on `GeoAlchemy <http://www.geoalchemy.org>`_.
 
-This section describes through an example how to build a MapFish web service
-web (i.e. a web service that conforms to the MapFish Protocol) in a Pyramid
-application.
+This section provides an example describing how to build a MapFish web service
+in a Pyramid application. (A MapFish web service is an web service that
+conforms to the MapFish Protocol.)
 
-So let's assume we want to create a ``spots`` MapFish web service that relies
-on a ``spots`` database table.
+We assume we want to create a ``spots`` MapFish web service that relies on
+a ``spots`` database table.
 
-Database Model
-~~~~~~~~~~~~~~
+Set up the database Model
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
-First of all we need an SQLAlchemy/GeoAlchemy mapping for that table.  The
-``pyramid_routesalchemy`` and ``pyramid_sqla`` templates places SQLAlchemy
-models in a ``models.py`` file, we'll do likewise here.
+First of all we need an SQLAlchemy/GeoAlchemy mapping for that table. To be
+*compliant* with Papyrus' MapFish Protocol implementation the mapped class must
+implement the Python Geo Interface (typically through the ``__geo_interface__``
+property), and must define ``__init__`` and ``__update__`` methods.
+Implementing the Python Geo Interface is required for being able to serialize
+``Spot`` objects into GeoJSON (using Papyrus' GeoJSON renderer). The
+``__init__`` and ``__update__`` methods are required for inserting and updating
+objects, respectively. Both the ``__init__`` and ``__update__`` methods receive
+a GeoJSON feature (``geojson.Feature``) as an argument.
 
-Here's what our ``models.py`` file looks like::
 
-    from sqlalchemy import Column
-    from sqlalchemy import Integer
-    from sqlalchemy import Unicode
+Papyrus provides a mixin to help create SQLAlchemy/GeoAlchemy mapped classes
+that implement the Python Geo Interface, and define ``__init__`` and
+``__update__`` as expected by the MapFish protocol. The mixin is named
+``GeoInterface``, and is provided by the ``papyrus.geo_interface`` module.
 
-    from sqlalchemy.exc import IntegrityError
-    from sqlalchemy.ext.declarative import declarative_base
+Using ``GeoInterface`` our ``Spot`` class looks like this::
 
-    from sqlalchemy.orm import scoped_session
-    from sqlalchemy.orm import sessionmaker
+    from papyrus.geo_interface import GeoInterface
 
-    from zope.sqlalchemy import ZopeTransactionExtension
+    class Spot(GeoInterface, Base):
+        __tablename__ = 'spots'
+        id = Column(Integer, primary_key=True)
+        name = Column(Unicode, nullable=False)
+        geom = GeometryColumn('the_geom', Point(srid=4326))
 
-    from geoalchemy import GeometryColumn, Point, WKBSpatialElement
+``GeoInterface`` represents a convenience method. Often, implementing one's own
+``__geo_interface__``, ``__init__``, and ``__update__`` definitions is a better
+choice than relying on ``GeoInterface``.
 
-    import geojson
+When using ``GeoInterface`` understanding its `code
+<https://github.com/elemoine/papyrus/blob/master/papyrus/geo_interface.py>`_
+can be useful. It can also be a source of inspiration for those who don't use
+it.
 
-    from shapely.geometry import asShape
-    from shapely.wkb import loads
-
-    Session = scoped_session(
-                    sessionmaker(extension=ZopeTransactionExtension())
-                    )
-    Base = declarative_base()
+Without using ``GeoInterface`` our ``Spot`` class could look like this::
 
     class Spot(Base):
         __tablename__ = 'spots'
@@ -183,60 +184,91 @@ Here's what our ``models.py`` file looks like::
             properties = dict(name=self.name)
             return geojson.Feature(id=id, geometry=geometry, properties=properties)
 
-    def initialize_sql(engine):
-        Session.configure(bind=engine)
-        Base.metadata.bind = engine
+Notes:
 
-Note that the ``Spot`` class implements the Python Geo Interface (though the
-``__geo_interface__`` property), and defines ``__init__`` and ``__update__``
-methods.
+* the ``pyramid_routesalchemy`` template, provided by Pyramid, places
+  SQLAlchemy models in a ``models.py`` file located at the root of the
+  application's main module (``myapp.models``).
 
-Implementing the Python Geo Interface is required for being able to serialize
-``Spot`` objects into GeoJSON (for example using Papyrus' GeoJSON renderer).
+* the ``akhet`` template, provided by the `Akhet package
+  <http://sluggo.scrapping.cc/python/Akhet/>`_, places SQLAlchemy models in the
+  ``__init__.py`` file of the ``models`` module.
 
-The ``__init__`` and ``__update__`` methods are required for inserting and
-updating objects, respectively. Both the ``__init__`` and ``__update__``
-methods receive a GeoJSON feature (``geojson.Feature``) as an argument.
-
-The GeoInterface Mixin
+Set up the web service
 ~~~~~~~~~~~~~~~~~~~~~~
-
-Papyrus provides a mixin to help create SQLAlchemy/GeoAlchemy mapped classes
-that implement the Python Geo Interface, and define ``__init__`` and
-``__update__`` as expected by the MapFish protocol. The mixin is named
-``GeoInterface``, and is provided by the ``papyrus.geo_interface`` module.
-
-Using ``GeoInterface`` our ``Spot`` class looks like this::
-
-    from papyrus.geo_interface import GeoInterface
-
-    class Spot(GeoInterface, Base):
-        __tablename__ = 'spots'
-        id = Column(Integer, primary_key=True)
-        name = Column(Unicode, nullable=False)
-        geom = GeometryColumn('the_geom', Point(srid=4326))
-
-``GeoInterface`` represents a convenience method. Often, implementing one's own
-``__geo_interface__``, ``__init__``, and ``__update__`` definitions is a better
-choice than relying on ``GeoInterface``.
-
-When using ``GeoInterface`` understanding its `code
-<https://github.com/elemoine/papyrus/blob/master/papyrus/geo_interface.py>`_
-can be useful. It can also be a source of inspiration for those who don't use
-it.
-
-Handler
-~~~~~~~
 
 Now that database model is defined we can now create the core of our MapFish
 web service.
 
-The web service itself can be defined in a *handler* class, or through *view*
-callables, typically functions. This section shows how to define a MapFish web
-service in a handler class.
+The web service can be defined through *view callables*, or through an *handler* class.
+View callables are a concept of Pyramid itself. Handler classes are a concept
+of the ``pyramid_handlers`` package, which is an official Pyramid add-on.
 
-Here is what our handler looks like (typically defined in the application's
-``handlers.py`` file)::
+With view callables
+^^^^^^^^^^^^^^^^^^^
+
+Using view functions here's how our web service implementation would look like::
+
+    from myproject.models import Session, Spot
+    from papyrus.protocol import Protocol
+
+    # 'geom' is the name of the mapped class' geometry property
+    proto = Protocol(Session, Spot, 'geom')
+
+    @view_config(route_name='spots_read_many', renderer='geojson')
+    def read_many(request): 
+        return proto.read(request)
+
+    @view_config(route_name='spots_read_one', renderer='geojson')
+    def read_one(request):
+        id = request.matchdict.get('id', None)
+        return proto.read(request, id=id)
+
+    @view_config(route_name='spots_count', renderer='string')
+    def count(request):
+        return proto.count(request)
+
+    @view_config(route_name='spots_create', renderer='geojson')
+    def create(request):
+        return proto.create(request)
+
+    @view_config(route_name='spots_update', renderer='geojson')
+    def update(request):
+        id = request.matchdict['id']
+        return proto.update(request, id)
+
+    @view_config(route_name='spots_delete')
+    def delete(request):
+        id = request.matchdict['id']
+        return proto.delete(request, id)
+
+These six view functions, typically defined in ``views.py``, entirely define
+our MapFish web service.
+
+We now need to provide *routes* to these actions. This is done by calling
+``add_papyrus_routes()`` on the ``Configurator`` (in ``__init__.py``)::
+
+    import papyrus
+    from papyrus.renderers import geojson_renderer_factory
+    config.include(papyrus.includeme)
+    config.add_renderer('geojson', geojson_renderer_factory)
+    config.add_papyrus_routes('spots', '/spots')
+    config.scan()
+
+``add_papyrus_routes`` is a convenience method, here's what it basically
+does::
+
+    config.add_route('spots_read_many', '/spots', request_method='GET')
+    config.add_route('spots_read_one', '/spots/{id}', request_method='GET')
+    config.add_route('spots_count', '/spots/count', request_method='GET')
+    config.add_route('spots_create', '/spots', request_method='POST')
+    config.add_route('spots_update', '/spots/{id}', request_method='PUT')
+    config.add_route('spots_delete', '/spots/{id}', request_method='DELETE')
+
+With a handler
+^^^^^^^^^^^^^^
+
+Using a handler here's what our web service implementation would look like::
 
     from pyramid_handlers import action
 
@@ -282,125 +314,36 @@ The six actions of the ``SpotHandler`` class entirely define our MapFish web
 service.
 
 We now need to provide *routes* to these actions. This is done by calling
-``add_papyrus_handler()`` on the ``Configurator``. Here's what the
-``__init__.py`` file looks like::
+``add_papyrus_handler()`` on the ``Configurator``::
 
-    from pyramid.config import Configurator
-    import pyramid_beaker
-    import pyramid_sqla
-    from pyramid_sqla.static import add_static_route
     import papyrus
     from papyrus.renderers import geojson_renderer_factory
+    config.include(papyrus)
+    config.add_renderer('geojson', geojson_renderer_factory)
+    config.add_papyrus_handler('spots', '/spots',
+                               'myproject.handlers:SpotHandler')
 
-    def main(global_config, **settings):
-        """ This function returns a Pyramid WSGI application.
-        """
-        config = Configurator(settings=settings)
+Likewise ``add_papyrus_routes`` ``add_papyrus_handler`` is a convenience
+method. Here's what it basically does::
 
-        # Initialize database
-        pyramid_sqla.add_engine(settings, prefix='sqlalchemy.')
+    config.add_handler('spots_read_many', '/spots',
+                       'myproject.handlers:SpotHandler',
+                       action='read_many', request_method='GET')
+    config.add_handler('spots_read_one', '/spots/{id}',
+                       'myproject.handlers:SpotHandler',
+                       action='read_one', request_method='GET')
+    config.add_handler('spots_count', '/spots/count',
+                       'myproject.handlers:SpotHandler',
+                       action='count', request_method='GET')
+    config.add_handler('spots_create', '/spots',
+                       'myproject.handlers:SpotHandler',
+                       action='create', request_method='POST')
+    config.add_handler('spots_update', '/spots/{id}',
+                       'myproject.handlers:SpotHandler',
+                       action='update', request_method='PUT')
+    config.add_handler('spots_delete', '/spots/{id}',
+                       'myproject.handlers:SpotHandler',
+                       action='delete', request_method='DELETE')
 
-        # Configure Beaker sessions
-        session_factory = pyramid_beaker.session_factory_from_settings(settings)
-        config.set_session_factory(session_factory)
-
-        # Configure renderers
-        config.add_renderer('.html', 'pyramid.mako_templating.renderer_factory')
-        config.add_renderer('geojson', geojson_renderer_factory)
-
-        config.add_subscriber('myproject.subscribers.add_renderer_globals',
-                              'pyramid.events.BeforeRender')
-
-        # Set up routes and views
-        config.include(papyrus)
-        config.add_papyrus_handler('spots', '/spots',
-                                   'myproject.handlers:SpotHandler')
-        config.add_handler('home', '/', 'myproject.handlers:MainHandler',
-                           action='index')
-        config.add_handler('main', '/{action}', 'myproject.handlers:MainHandler',
-            path_info=r'/(?!favicon\.ico|robots\.txt|w3c)')
-        add_static_route(config, 'myproject', 'static', cache_max_age=3600)
-
-        return config.make_wsgi_app()
-
-There are multiple things to note in the above code:
-
-* the call to ``add_render`` for the addition of ``geojson`` renderer,
-* the call to ``include`` for the inclusion of ``papyrus`` (this is what makes
-  ``add_papyrus_handler`` available on the ``Configurator``),
-* the call to ``add_papyrus_handler`` for the creation of routes to our handler
-  actions.
-
-The ``add_papyrus_handler`` method is a convenience. Here's what does under the
-hood::
-
-        config.add_handler('spots_read_many', '/spots',
-                           'myproject.handlers:SpotHandler',
-                           action='read_many', request_method='GET')
-        config.add_handler('spots_read_one', '/spots/{id}',
-                           'myproject.handlers:SpotHandler',
-                           action='read_one', request_method='GET')
-        config.add_handler('spots_count', '/spots/count',
-                           'myproject.handlers:SpotHandler',
-                           action='count', request_method='GET')
-        config.add_handler('spots_create', '/spots',
-                           'myproject.handlers:SpotHandler',
-                           action='create', request_method='POST')
-        config.add_handler('spots_update', '/spots/{id}',
-                           'myproject.handlers:SpotHandler',
-                           action='update', request_method='PUT')
-        config.add_handler('spots_delete', '/spots/{id}',
-                           'myproject.handlers:SpotHandler',
-                           action='delete', request_method='DELETE')
-
-View functions
-~~~~~~~~~~~~~~
-
-Using view functions instead of a handler class and actions here's how our
-web service implementation looks like::
-
-    from myproject.models import Session, Spot
-    from papyrus.protocol import Protocol
-
-    # 'geom' is the name of the mapped class' geometry property
-    proto = Protocol(Session, Spot, 'geom')
-
-    @view_config(route_name='spots_read_many', renderer='geojson')
-    def read_many(request): 
-        return proto.read(request)
-
-    @view_config(route_name='spots_read_one', renderer='geojson')
-    def read_one(request):
-        id = request.matchdict.get('id', None)
-        return proto.read(request, id=id)
-
-    @view_config(route_name='spots_count', renderer='string')
-    def count(request):
-        return proto.count(request)
-
-    @view_config(route_name='spots_create', renderer='geojson')
-    def create(request):
-        return proto.create(request)
-
-    @view_config(route_name='spots_update', renderer='geojson')
-    def update(request):
-        id = request.matchdict['id']
-        return proto.update(request, id)
-
-    @view_config(route_name='spots_delete')
-    def delete(request):
-        id = request.matchdict['id']
-        return proto.delete(request, id)
-
-Again we need to add routes, one route for each view function. This is done by
-calling ``add_route`` on the ``Configurator``::
-
-    config.add_route('spots_read_many', '/spots', request_method='GET')
-    config.add_route('spots_read_one', '/spots/{id}', request_method='GET')
-    config.add_route('spots_count', '/spots/count', request_method='GET')
-    config.add_route('spots_create', '/spots', request_method='POST')
-    config.add_route('spots_update', '/spots/{id}', request_method='PUT')
-    config.add_route('spots_delete', '/spots/{id}', request_method='DELETE')
-
-Note: if you use view callables as described in this section the
-``pyramid_handlers`` package isn't required as an application's dependency.
+Note: when using handlers the ``pyramid_handlers`` package must be set as an
+application's dependency.
