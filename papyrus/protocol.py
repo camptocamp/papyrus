@@ -170,7 +170,7 @@ def create_filter(request, mapped_class, geom_attr, **kwargs):
 
 def asbool(val):
     # Convert the passed value to a boolean.
-    if isinstance(val, str) or isinstance(val, unicode):
+    if isinstance(val, basestring):
         return val.lower() not in ['false', '0']
     else:
         return bool(val)
