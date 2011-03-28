@@ -33,8 +33,7 @@ class GeoInterface(object):
 
         * ``feature`` The GeoJSON feature as received from the client.
         """
-        mapper = class_mapper(self.__class__)
-        for p in mapper.iterate_properties:
+        for p in class_mapper(self.__class__).iterate_properties:
             if not isinstance(p, ColumnProperty):
                 continue
             if p.columns[0].primary_key:
@@ -49,8 +48,7 @@ class GeoInterface(object):
 
         * ``feature`` The GeoJSON feature as received from the client.
         """
-        mapper = class_mapper(self.__class__)
-        for p in mapper.iterate_properties:
+        for p in class_mapper(self.__class__).iterate_properties:
             if not isinstance(p, ColumnProperty):
                 continue
             col = p.columns[0]
