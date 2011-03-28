@@ -563,7 +563,7 @@ class Test_protocol(unittest.TestCase):
         request = Request({})
         request.body_file = StringIO('{"type": "FeatureCollection", "features": [{"type": "Feature", "properties": {"text": "foo"}, "geometry": {"type": "Point", "coordinates": [45, 5]}}, {"type": "Feature", "properties": {"text": "foo"}, "geometry": {"type": "Point", "coordinates": [45, 5]}}]}')
         response = proto.create(request)
-        self.assertEqual(response.status_int, 403)
+        self.assertEqual(response.status_int, 405)
 
     def test_create_badrequest(self):
         from papyrus.protocol import Protocol
@@ -696,7 +696,7 @@ class Test_protocol(unittest.TestCase):
         request = Request({})
         request.body_file = StringIO('{"type": "Feature", "id": 1, "properties": {"text": "foo"}, "geometry": {"type": "Point", "coordinates": [45, 5]}}')
         response = proto.update(request, 1)
-        self.assertEqual(response.status_int, 403)
+        self.assertEqual(response.status_int, 405)
 
     def test_update_notfound(self):
         from papyrus.protocol import Protocol
@@ -792,7 +792,7 @@ class Test_protocol(unittest.TestCase):
         proto = Protocol(Session, MappedClass, "geom", readonly=True)
         request = testing.DummyRequest()
         response = proto.delete(request, 1)
-        self.assertEqual(response.status_int, 403)
+        self.assertEqual(response.status_int, 405)
 
     def test_delete_notfound(self):
         from papyrus.protocol import Protocol

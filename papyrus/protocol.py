@@ -26,7 +26,7 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-from pyramid.httpexceptions import HTTPBadRequest, HTTPForbidden, HTTPNotFound
+from pyramid.httpexceptions import HTTPBadRequest, HTTPMethodNotAllowed, HTTPNotFound
 from pyramid.response import Response
 
 from shapely.geometry import asShape
@@ -199,7 +199,8 @@ class Protocol(object):
       readonly
           ``True`` if this protocol is read-only, ``False`` otherwise. If
           ``True``, the methods ``create()``, ``update()`` and  ``delete()``
-          will set 403 as the response status and return right away.
+          will set 405 (Method Not Allowed) as the response status and
+          return right away.
 
       \**kwargs
           before_create
@@ -302,7 +303,7 @@ class Protocol(object):
         """ Read the GeoJSON feature collection from the request body and
             create new objects in the database. """
         if self.readonly:
-            return HTTPForbidden()
+            return HTTPMethodNotAllowed()
         collection = loads(request.body, object_hook=GeoJSON.to_instance)
         if not isinstance(collection, FeatureCollection):
             return HTTPBadRequest()
@@ -333,7 +334,7 @@ class Protocol(object):
         """ Read the GeoJSON feature from the request body and update the
         corresponding object in the database. """
         if self.readonly:
-            return HTTPForbidden()
+            return HTTPMethodNotAllowed()
         session = self.Session()
         obj = session.query(self.mapped_class).get(id)
         if obj is None:
@@ -352,7 +353,7 @@ class Protocol(object):
     def delete(self, request, id):
         """ Remove the targetted feature from the database """
         if self.readonly:
-            return HTTPForbidden()
+            return HTTPMethodNotAllowed()
         session = self.Session()
         obj = session.query(self.mapped_class).get(id)
         if obj is None:
