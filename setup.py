@@ -23,7 +23,13 @@ tests_require = install_requires + [
 setup(name='papyrus',
       version=version,
       description="Geospatial Extensions for Pyramid",
-      classifiers=[], # Get strings from http://pypi.python.org/pypi?%3Aaction=list_classifiers
+      classifiers=[
+        'Framework :: Pylons',
+        'Intended Audience :: Developers',
+        'License :: OSI Approved :: BSD License',
+        'Programming Language :: Python',
+        'Topic :: Internet :: WWW/HTTP',
+      ],
       keywords='FOSS4G, Pylons, Pyramid',
       author='Eric Lemoine',
       author_email='eric.lemoine@gmail.com',
