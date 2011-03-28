@@ -303,7 +303,7 @@ class Protocol(object):
         """ Read the GeoJSON feature collection from the request body and
             create new objects in the database. """
         if self.readonly:
-            return HTTPMethodNotAllowed()
+            return HTTPMethodNotAllowed(headers={'Allow': 'GET, HEAD'})
         collection = loads(request.body, object_hook=GeoJSON.to_instance)
         if not isinstance(collection, FeatureCollection):
             return HTTPBadRequest()
@@ -334,7 +334,7 @@ class Protocol(object):
         """ Read the GeoJSON feature from the request body and update the
         corresponding object in the database. """
         if self.readonly:
-            return HTTPMethodNotAllowed()
+            return HTTPMethodNotAllowed(headers={'Allow': 'GET, HEAD'})
         session = self.Session()
         obj = session.query(self.mapped_class).get(id)
         if obj is None:
@@ -353,7 +353,7 @@ class Protocol(object):
     def delete(self, request, id):
         """ Remove the targetted feature from the database """
         if self.readonly:
-            return HTTPMethodNotAllowed()
+            return HTTPMethodNotAllowed(headers={'Allow': 'GET, HEAD'})
         session = self.Session()
         obj = session.query(self.mapped_class).get(id)
         if obj is None:
