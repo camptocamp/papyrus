@@ -49,7 +49,6 @@ class GeoInterface(object):
 
         * ``feature`` The GeoJSON feature as received from the client.
         """
-        geometry = feature.geometry
         mapper = class_mapper(self.__class__)
         for p in mapper.iterate_properties:
             if not isinstance(p, ColumnProperty):
