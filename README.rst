@@ -29,7 +29,7 @@ application ``setup.py``. Example::
 Notes:
 
 * the ``pyramid_handlers`` package is required for creating *handlers* and
-  *actions*, in place *view callbables*.  Handlers basically emulate Pylons'
+  *actions*, in place *view callable*.  Handlers basically emulate Pylons'
   controllers, so people coming from Pylons may want to use
   ``pyramid_handlers`` in their Pyramid applications.
 
