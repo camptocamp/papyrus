@@ -182,16 +182,6 @@ def create_response_callback(status_int):
         response.status_int = status_int
     return cb
 
-def enforce_readonly(f):
-    """ Method decorator to return a 405 error
-    if the resource is read only."""
-    def wrapped(self, *args, **kwargs):
-        if self.readonly:
-            return HTTPMethodNotAllowed(headers={'Allow': 'GET, HEAD'})
-        else:
-            return f(self, *args, **kwargs)
-    return wrapped
-
 class Protocol(object):
     """ Protocol class.
 
@@ -309,10 +299,11 @@ class Protocol(object):
                     [self._filter_attrs(o.__geo_interface__, request) for o in objs if o is not None])
         return ret
 
-    @enforce_readonly
     def create(self, request):
         """ Read the GeoJSON feature collection from the request body and
             create new objects in the database. """
+        if self.readonly:
+            return HTTPMethodNotAllowed(headers={'Allow': 'GET, HEAD'})
         collection = loads(request.body, object_hook=GeoJSON.to_instance)
         if not isinstance(collection, FeatureCollection):
             return HTTPBadRequest()
@@ -339,10 +330,11 @@ class Protocol(object):
         request.add_response_callback(callback)
         return collection
 
-    @enforce_readonly
     def update(self, request, id):
         """ Read the GeoJSON feature from the request body and update the
         corresponding object in the database. """
+        if self.readonly:
+            return HTTPMethodNotAllowed(headers={'Allow': 'GET, HEAD'})
         session = self.Session()
         obj = session.query(self.mapped_class).get(id)
         if obj is None:
@@ -358,9 +350,10 @@ class Protocol(object):
         request.add_response_callback(callback)
         return obj
 
-    @enforce_readonly
     def delete(self, request, id):
         """ Remove the targetted feature from the database """
+        if self.readonly:
+            return HTTPMethodNotAllowed(headers={'Allow': 'GET, HEAD'})
         session = self.Session()
         obj = session.query(self.mapped_class).get(id)
         if obj is None:
