@@ -1,6 +1,11 @@
 Changes
 -------
 
+0.3.1
+~~~~~
+
+* Add MANIFEST.in file
+
 0.3
 ~~~
 
