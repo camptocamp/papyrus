@@ -12,7 +12,7 @@ class Encoder(GeoJSONEncoder):
 
     def default(self, obj):
         if isinstance(obj, (datetime.date, datetime.datetime)):
-            return str(obj)
+            return obj.isoformat()
         return GeoJSONEncoder.default(self, obj)
 
 def geojson_renderer_factory(info):

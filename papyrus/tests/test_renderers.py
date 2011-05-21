@@ -78,5 +78,5 @@ class Test_geojson_renderer_factory(unittest.TestCase):
             }
         request = testing.DummyRequest()
         result = renderer(f, {'request': request})
-        self.assertEqual(result, '{"geometry": {"type": "Point", "coordinates": [53, -4]}, "type": "Feature", "properties": {"datetime": "2011-05-21 20:55:12"}, "id": 1}')
+        self.assertEqual(result, '{"geometry": {"type": "Point", "coordinates": [53, -4]}, "type": "Feature", "properties": {"datetime": "2011-05-21T20:55:12"}, "id": 1}')
         self.assertEqual(request.response_content_type, 'application/json')
