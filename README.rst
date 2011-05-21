@@ -102,6 +102,11 @@ GeoAlchemy) mapped object::
 In the above example the ``Spot`` objects returned by the ``query`` call must
 implement the Python Geo Interface.
 
+Note: The GeoJSON renderer requires simplejson 2.1 or higher. Indeed, to be
+able to deal with ``decimal.Decimal`` values, which are common when using
+SQLAlchemy, we set ``use_decimal`` to ``True`` when calling the ``dumps``
+function, and only simplejson 2.1 and higher support that argument.
+
 MapFish Web Services
 --------------------
 

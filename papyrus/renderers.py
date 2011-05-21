@@ -11,7 +11,7 @@ class Encoder(GeoJSONEncoder):
     # encoder to deal with objects of these types.
 
     def default(self, obj):
-        if isinstance(obj, (decimal.Decimal, datetime.date, datetime.datetime)):
+        if isinstance(obj, (datetime.date, datetime.datetime)):
             return str(obj)
         return GeoJSONEncoder.default(self, obj)
 
@@ -21,5 +21,5 @@ def geojson_renderer_factory(info):
         if request is not None:
             if not hasattr(request, 'response_content_type'):
                 request.response_content_type = 'application/json'
-        return geojson.dumps(value, cls=Encoder)
+        return geojson.dumps(value, cls=Encoder, use_decimal=True)
     return _render
