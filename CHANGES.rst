@@ -6,6 +6,7 @@ Changes
 
 * Improved GeoJSON renderer: deal with decimal.Decimal, datetime.date,
   and datetime.datetime values.
+* No longer use <= when defining requirements (only >= is used).
 
 0.3.1
 ~~~~~

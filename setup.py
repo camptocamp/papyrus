@@ -9,10 +9,10 @@ TODO = open(os.path.join(here, 'TODO.rst')).read()
 CHANGES = open(os.path.join(here, 'CHANGES.rst')).read()
 
 install_requires = [
-    'pyramid>=1.0,<=1.0.99',
-    'geojson>=1.0,<=1.0.99',
-    'shapely>=1.2,<=1.2.99',
-    'geoalchemy>=0.5,<=0.5.99'
+    'pyramid>=1.0',
+    'geojson>=1.0',
+    'shapely>=1.2',
+    'geoalchemy>=0.5'
     ]
 
 tests_require = install_requires + [
