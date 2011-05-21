@@ -1,6 +1,12 @@
 Changes
 -------
 
+0.4
+~~~
+
+* Improved GeoJSON renderer: deal with decimal.Decimal, datetime.date,
+  and datetime.datetime values.
+
 0.3.1
 ~~~~~
 
