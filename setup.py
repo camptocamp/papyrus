@@ -11,8 +11,8 @@ CHANGES = open(os.path.join(here, 'CHANGES.rst')).read()
 install_requires = [
     'pyramid>=1.0',
     'geojson>=1.0',
-    'shapely>=1.2',
-    'geoalchemy>=0.5'
+    'Shapely>=1.2',
+    'GeoAlchemy>=0.5'
     ]
 
 tests_require = install_requires + [

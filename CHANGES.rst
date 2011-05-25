@@ -7,6 +7,8 @@ Changes
 * Improved GeoJSON renderer: deal with decimal.Decimal, datetime.date,
   and datetime.datetime values.
 * No longer use <= when defining requirements (only >= is used).
+* Correctly spell the names of requirements, using capital letters
+  where needed.
 
 0.3.1
 ~~~~~
