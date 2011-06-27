@@ -15,20 +15,18 @@ class Encoder(GeoJSONEncoder):
             return obj.isoformat()
         return GeoJSONEncoder.default(self, obj)
 
-def _render_json(value, renderer, request):
-    if request is not None:
-        if not hasattr(request, 'response_content_type'):
-            callback = request.params.get('callback')
-            if callback is None:
-                request.response_content_type = 'application/json'
-            else:
-                request.response_content_type = 'text/javascript'
-                return "%(callback)s(%(json)s);"%{'callback': callback, 'json': renderer(value)}
-    return renderer(value)
-
 def geojson_renderer_factory(info):
     def _render(value, system):
+        ret = geojson.dumps(value, cls=Encoder, use_decimal=True)
         request = system.get('request')
-        return _render_json(value, lambda value: geojson.dumps(value, cls=Encoder, use_decimal=True), request)
-
+        if request is not None:
+            if not hasattr(request, 'response_content_type'):
+                callback = request.params.get('callback')
+                if callback is None:
+                    request.response_content_type = 'application/json'
+                else:
+                    request.response_content_type = 'text/javascript'
+                    ret = '%(callback)s(%(json)s);' % {'callback': callback,
+                                                       'json': ret}
+        return ret
     return _render
