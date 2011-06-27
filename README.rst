@@ -49,13 +49,13 @@ following command at the root of the Papyrus tree::
 Currently, 100% of the Papyrus code is covered by tests, I'd like to preserve
 that.
 
-GeoJSON Renderer
+GeoJSON(P) Renderer
 ----------------
 
-Papyrus provides a GeoJSON renderer, based on Sean Gillies' `geojson package
+Papyrus provides a GeoJSON and GeoJSONP renderers, based on Sean Gillies' `geojson package
 <http://trac.gispython.org/lab/wiki/GeoJSON>`_.
 
-To be able to use the GeoJSON renderer the GeoJSON renderer factory must be
+To be able to use the GeoJSON(P) renderer the GeoJSON(P) renderer factory must be
 added to the application configuration.
 
 For that you can either pass the factory to the ``Configurator``
@@ -102,10 +102,18 @@ GeoAlchemy) mapped object::
 In the above example the ``Spot`` objects returned by the ``query`` call must
 implement the Python Geo Interface.
 
-Note: The GeoJSON renderer requires simplejson 2.1 or higher. Indeed, to be
-able to deal with ``decimal.Decimal`` values, which are common when using
-SQLAlchemy, we set ``use_decimal`` to ``True`` when calling the ``dumps``
-function, and only simplejson 2.1 and higher support that argument.
+To use the GeoJSONP the client should provide the argument ``callback`` 
+that represent the name of the returned function.
+
+Notes: 
+
+* The (Geo)JSONP is a common way to do cross domain service call.
+
+* The GeoJSON(P) renderers requires simplejson 2.1 or higher. Indeed, to be
+  able to deal with ``decimal.Decimal`` values, which are common when using
+  SQLAlchemy, we set ``use_decimal`` to ``True`` when calling the ``dumps``
+  function, and only simplejson 2.1 and higher support that argument.
+
 
 MapFish Web Services
 --------------------
