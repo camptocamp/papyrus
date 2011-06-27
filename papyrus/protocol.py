@@ -175,13 +175,6 @@ def asbool(val):
     else:
         return bool(val)
 
-def create_response_callback(status_int):
-    """ Create a response callback for use with
-    ``request.add_response_callback``.  """
-    def cb(request, response):
-        response.status_int = status_int
-    return cb
-
 class Protocol(object):
     """ Protocol class.
 
@@ -326,8 +319,7 @@ class Protocol(object):
             objects.append(obj)
         session.flush()
         collection = FeatureCollection(objects) if len(objects) > 0 else None
-        callback = create_response_callback(201)
-        request.add_response_callback(callback)
+        request.response.status_int = 201
         return collection
 
     def update(self, request, id):
@@ -346,8 +338,7 @@ class Protocol(object):
             self.before_update(request, feature, obj)
         obj.__update__(feature)
         session.flush()
-        callback = create_response_callback(201)
-        request.add_response_callback(callback)
+        request.response.status_int = 201
         return obj
 
     def delete(self, request, id):
