@@ -20,12 +20,14 @@ def geojson_renderer_factory(info):
         ret = geojson.dumps(value, cls=Encoder, use_decimal=True)
         request = system.get('request')
         if request is not None:
-            if not hasattr(request, 'response_content_type'):
+            response = request.response
+            ct = response.content_type
+            if ct == response.default_content_type:
                 callback = request.params.get('callback')
                 if callback is None:
-                    request.response_content_type = 'application/json'
+                    response.content_type = 'application/json'
                 else:
-                    request.response_content_type = 'text/javascript'
+                    response.content_type = 'text/javascript'
                     ret = '%(callback)s(%(json)s);' % {'callback': callback,
                                                        'json': ret}
         return ret
