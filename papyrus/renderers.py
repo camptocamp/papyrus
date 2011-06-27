@@ -40,14 +40,6 @@ def _render_jsonp(value, renderer, request):
     else:
         return renderer(value)
 
-def jsonp_renderer_factory(info):
-    def _render(value, system):
-        
-        request=system.get("request")
-        return _render_jsonp(value, lambda value: json.dumps(value), request)
-
-    return _render
-
 def geojsonp_renderer_factory(info):
     def _render(value, system):
         request = system.get('request')
