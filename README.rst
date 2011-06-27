@@ -110,9 +110,9 @@ Notes:
 * The (Geo)JSONP is a common way to do cross domain service call.
 
 * The GeoJSON(P) renderers requires simplejson 2.1 or higher. Indeed, to be
-able to deal with ``decimal.Decimal`` values, which are common when using
-SQLAlchemy, we set ``use_decimal`` to ``True`` when calling the ``dumps``
-function, and only simplejson 2.1 and higher support that argument.
+  able to deal with ``decimal.Decimal`` values, which are common when using
+  SQLAlchemy, we set ``use_decimal`` to ``True`` when calling the ``dumps``
+  function, and only simplejson 2.1 and higher support that argument.
 
 
 MapFish Web Services
