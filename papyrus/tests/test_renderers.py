@@ -82,25 +82,8 @@ class Test_geojson_renderer_factory(unittest.TestCase):
         self.assertEqual(request.response_content_type, 'application/json')
 
 
-    def _callFUTGEOJSONP(self, name):
-        from papyrus.renderers import geojsonp_renderer_factory
-        return geojsonp_renderer_factory(name)
-
-    def test_geojsonp_nocallback(self):
-        renderer = self._callFUTGEOJSONP(None)
-        f = {
-            'type': 'Feature',
-            'id': 1,
-            'geometry': {'type': 'Point', 'coordinates': [53, -4]},
-            'properties': {'title': 'Dict 1'},
-            }
-        request = testing.DummyRequest()
-        result = renderer(f, {'request': request})
-        self.assertEqual(result, '{"geometry": {"type": "Point", "coordinates": [53, -4]}, "type": "Feature", "properties": {"title": "Dict 1"}, "id": 1}')
-        self.assertEqual(request.response_content_type, 'application/json')
-
     def test_geojsonp(self):
-        renderer = self._callFUTGEOJSONP(None)
+        renderer = self._callFUT(None)
         f = {
             'type': 'Feature',
             'id': 1,

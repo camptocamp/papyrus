@@ -3,7 +3,6 @@ import datetime
 
 import geojson
 from geojson.codec import PyGFPEncoder as GeoJSONEncoder
-import simplejson as json
 
 class Encoder(GeoJSONEncoder):
     # SQLAlchemy's Reflecting Tables mechanism uses decimal.Decimal
@@ -16,33 +15,20 @@ class Encoder(GeoJSONEncoder):
             return obj.isoformat()
         return GeoJSONEncoder.default(self, obj)
 
-def geojson_renderer_factory(info):
-    def _render(value, system):
-        request = system.get('request')
-        if request is not None:
-            if not hasattr(request, 'response_content_type'):
-                request.response_content_type = 'application/json'
-        return geojson.dumps(value, cls=Encoder, use_decimal=True)
-    return _render
-
-def _render_jsonp(value, renderer, request):
-    callback = None
+def _render_json(value, renderer, request):
     if request is not None:
-        if 'callback' in request.params:
-            callback = request.params['callback']
         if not hasattr(request, 'response_content_type'):
+            callback = request.params.get('callback')
             if callback is None:
                 request.response_content_type = 'application/json'
             else:
                 request.response_content_type = 'text/javascript'
-    if callback is not None:
-        return "%(callback)s(%(json)s);"%{'callback': callback, 'json': renderer(value)}
-    else:
-        return renderer(value)
+                return "%(callback)s(%(json)s);"%{'callback': callback, 'json': renderer(value)}
+    return renderer(value)
 
-def geojsonp_renderer_factory(info):
+def geojson_renderer_factory(info):
     def _render(value, system):
         request = system.get('request')
-        return _render_jsonp(value, lambda value: geojson.dumps(value, cls=Encoder, use_decimal=True), request)
+        return _render_json(value, lambda value: geojson.dumps(value, cls=Encoder, use_decimal=True), request)
 
     return _render

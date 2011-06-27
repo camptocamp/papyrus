@@ -52,7 +52,7 @@ that.
 GeoJSON(P) Renderer
 ----------------
 
-Papyrus provides a GeoJSON and GeoJSONP renderer, based on Sean Gillies' `geojson package
+Papyrus provides a GeoJSON and GeoJSONP renderers, based on Sean Gillies' `geojson package
 <http://trac.gispython.org/lab/wiki/GeoJSON>`_.
 
 To be able to use the GeoJSON(P) renderer the GeoJSON(P) renderer factory must be
@@ -66,14 +66,12 @@ constructor::
     config = Configurator(
         renderers=(('.mako', mako_renderer_factory),
                    ('geojson', geojson_renderer_factory))
-                   ('geojsonp', geojsonp_renderer_factory))
         )
 
 Or you can apply the ``add_renderer`` method to the ``Configurator`` instance::
 
     from papyrus.renderers import geojson_renderer_factory
     config.add_renderer('geojson', geojson_renderer_factory)
-    config.add_renderer('geojsonp', geojsonp_renderer_factory)
 
 Make sure that ``add_renderer`` is called before any ``add_view`` call that
 names ``geojson`` as an argument.
@@ -82,18 +80,6 @@ To use the GeoJSON renderer in a view set ``renderer`` to ``geojson`` in the
 view config. Here is a simple example::
 
     @view_config(renderer='geojson')
-    def hello_world(request):
-        return {
-            'type': 'Feature',
-            'id': 1,
-            'geometry': {'type': 'Point', 'coordinates': [53, -4]},
-            'properties': {'title': 'Dict 1'},
-            }
-
-For the GeoJSONP renderer it's the sane but with ``geojsonp`` in place of 
-``geojson``. Here is a simple example::
-
-    @view_config(renderer='geojsonp')
     def hello_world(request):
         return {
             'type': 'Feature',
@@ -116,9 +102,12 @@ GeoAlchemy) mapped object::
 In the above example the ``Spot`` objects returned by the ``query`` call must
 implement the Python Geo Interface.
 
+To use the GeoJSONP the client should provide the argument ``callback`` 
+that represent the name of the returned function.
+
 Notes: 
 
-* The (Geo)JSONP is a way to do cross domain service call.
+* The (Geo)JSONP is a common way to do cross domain service call.
 
 * The GeoJSON(P) renderers requires simplejson 2.1 or higher. Indeed, to be
 able to deal with ``decimal.Decimal`` values, which are common when using
