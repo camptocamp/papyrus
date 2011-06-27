@@ -552,16 +552,16 @@ class Test_protocol(unittest.TestCase):
     def test_create_forbidden(self):
         from papyrus.protocol import Protocol
         from pyramid.request import Request
-        from StringIO import StringIO
 
         engine = self._get_engine()
         Session = self._get_session(engine)
         MappedClass = self._get_mapped_class()
 
         proto = Protocol(Session, MappedClass, "geom", readonly=True)
-        # we need an actual Request object here, for body_file to do its job
+        # we need an actual Request object here, for body to do its job
         request = Request({})
-        request.body_file = StringIO('{"type": "FeatureCollection", "features": [{"type": "Feature", "properties": {"text": "foo"}, "geometry": {"type": "Point", "coordinates": [45, 5]}}, {"type": "Feature", "properties": {"text": "foo"}, "geometry": {"type": "Point", "coordinates": [45, 5]}}]}')
+        request.method = 'POST'
+        request.body = '{"type": "FeatureCollection", "features": [{"type": "Feature", "properties": {"text": "foo"}, "geometry": {"type": "Point", "coordinates": [45, 5]}}, {"type": "Feature", "properties": {"text": "foo"}, "geometry": {"type": "Point", "coordinates": [45, 5]}}]}'
         response = proto.create(request)
         self.assertTrue(response.headers.get('Allow') == "GET, HEAD")
         self.assertEqual(response.status_int, 405)
@@ -569,16 +569,16 @@ class Test_protocol(unittest.TestCase):
     def test_create_badrequest(self):
         from papyrus.protocol import Protocol
         from pyramid.request import Request
-        from StringIO import StringIO
 
         engine = self._get_engine()
         Session = self._get_session(engine)
         MappedClass = self._get_mapped_class()
 
         proto = Protocol(Session, MappedClass, "geom")
-        # we need an actual Request object here, for body_file to do its job
+        # we need an actual Request object here, for body to do its job
         request = Request({})
-        request.body_file = StringIO('{"type": "Feature", "properties": {"text": "foo"}, "geometry": {"type": "Point", "coordinates": [45, 5]}}')
+        request.method = 'POST'
+        request.body = '{"type": "Feature", "properties": {"text": "foo"}, "geometry": {"type": "Point", "coordinates": [45, 5]}}'
         response = proto.create(request)
         self.assertEqual(response.status_int, 400)
 
@@ -586,7 +586,6 @@ class Test_protocol(unittest.TestCase):
         from papyrus.protocol import Protocol
         from pyramid.request import Request
         from pyramid.response import Response
-        from StringIO import StringIO
 
         engine = self._get_engine()
         Session = self._get_session(engine)
@@ -607,9 +606,10 @@ class Test_protocol(unittest.TestCase):
         proto = Protocol(MockSession, MappedClass, "geom",
                          before_create=before_create)
 
-        # we need an actual Request object here, for body_file to do its job
+        # we need an actual Request object here, for body to do its job
         request = Request({})
-        request.body_file = StringIO('{"type": "FeatureCollection", "features": [{"type": "Feature", "properties": {"text": "foo"}, "geometry": {"type": "Point", "coordinates": [45, 5]}}, {"type": "Feature", "properties": {"text": "foo"}, "geometry": {"type": "Point", "coordinates": [45, 5]}}]}')
+        request.method = 'POST'
+        request.body = '{"type": "FeatureCollection", "features": [{"type": "Feature", "properties": {"text": "foo"}, "geometry": {"type": "Point", "coordinates": [45, 5]}}, {"type": "Feature", "properties": {"text": "foo"}, "geometry": {"type": "Point", "coordinates": [45, 5]}}]}'
         proto.create(request)
         self.assertEqual(len(request.response_callbacks), 1)
         self.assertEqual(len(Session.new), 2)
@@ -636,7 +636,6 @@ class Test_protocol(unittest.TestCase):
         from papyrus.protocol import Protocol
         from pyramid.request import Request
         from pyramid.response import Response
-        from StringIO import StringIO
 
         engine = self._get_engine()
         Session = self._get_session(engine)
@@ -644,9 +643,10 @@ class Test_protocol(unittest.TestCase):
 
         proto = Protocol(Session, MappedClass, "geom")
 
-        # we need an actual Request object here, for body_file to do its job
+        # we need an actual Request object here, for body to do its job
         request = Request({})
-        request.body_file = StringIO('{"type": "FeatureCollection", "features": []}')
+        request.method = 'POST'
+        request.body = '{"type": "FeatureCollection", "features": []}'
         resp = proto.create(request)
         self.assertEqual(resp, None)
 
@@ -655,7 +655,6 @@ class Test_protocol(unittest.TestCase):
         from pyramid.request import Request
         from geojson import Feature, FeatureCollection
         from shapely.geometry import Point
-        from StringIO import StringIO
 
         MappedClass = self._get_mapped_class()
 
@@ -669,9 +668,10 @@ class Test_protocol(unittest.TestCase):
 
         proto = Protocol(MockSession, MappedClass, 'geom')
 
-        # we need an actual Request object here, for body_file to do its job
+        # we need an actual Request object here, for body to do its job
         request = Request({})
-        request.body_file = StringIO('{"type": "FeatureCollection", "features": [{"type": "Feature", "id": "a", "properties": {"text": "foo"}, "geometry": {"type": "Point", "coordinates": [45, 5]}}, {"type": "Feature", "id": "b", "properties": {"text": "bar"}, "geometry": {"type": "Point", "coordinates": [46, 6]}}]}')
+        request.method = 'POST'
+        request.body = '{"type": "FeatureCollection", "features": [{"type": "Feature", "id": "a", "properties": {"text": "foo"}, "geometry": {"type": "Point", "coordinates": [45, 5]}}, {"type": "Feature", "id": "b", "properties": {"text": "bar"}, "geometry": {"type": "Point", "coordinates": [46, 6]}}]}'
         features = proto.create(request)
 
         self.assertTrue(isinstance(features, FeatureCollection))
@@ -686,16 +686,16 @@ class Test_protocol(unittest.TestCase):
     def test_update_forbidden(self):
         from papyrus.protocol import Protocol
         from pyramid.request import Request
-        from StringIO import StringIO
 
         engine = self._get_engine()
         Session = self._get_session(engine)
         MappedClass = self._get_mapped_class()
 
         proto = Protocol(Session, MappedClass, "geom", readonly=True)
-        # we need an actual Request object here, for body_file to do its job
+        # we need an actual Request object here, for body to do its job
         request = Request({})
-        request.body_file = StringIO('{"type": "Feature", "id": 1, "properties": {"text": "foo"}, "geometry": {"type": "Point", "coordinates": [45, 5]}}')
+        request.method = 'PUT'
+        request.body = '{"type": "Feature", "id": 1, "properties": {"text": "foo"}, "geometry": {"type": "Point", "coordinates": [45, 5]}}'
         response = proto.update(request, 1)
         self.assertTrue(response.headers.get('Allow') == "GET, HEAD")
         self.assertEqual(response.status_int, 405)
@@ -703,7 +703,6 @@ class Test_protocol(unittest.TestCase):
     def test_update_notfound(self):
         from papyrus.protocol import Protocol
         from pyramid.request import Request
-        from StringIO import StringIO
 
         engine = self._get_engine()
         Session = self._get_session(engine)
@@ -714,16 +713,16 @@ class Test_protocol(unittest.TestCase):
             def query(self, mapped_class):
                 return {}
         proto = Protocol(MockSession, MappedClass, "geom")
-        # we need an actual Request object here, for body_file to do its job
+        # we need an actual Request object here, for body to do its job
         request = Request({})
-        request.body_file = StringIO('{"type": "Feature", "id": 1, "properties": {"text": "foo"}, "geometry": {"type": "Point", "coordinates": [45, 5]}}')
+        request.method = 'PUT'
+        request.body = '{"type": "Feature", "id": 1, "properties": {"text": "foo"}, "geometry": {"type": "Point", "coordinates": [45, 5]}}'
         response = proto.update(request, 1)
         self.assertEqual(response.status_int, 404)
 
     def test_update_badrequest(self):
         from papyrus.protocol import Protocol
         from pyramid.request import Request
-        from StringIO import StringIO
 
         # a mock session specific to this test
         class MockSession(object):
@@ -732,9 +731,10 @@ class Test_protocol(unittest.TestCase):
 
         proto = Protocol(MockSession, self._get_mapped_class(), "geom")
 
-        # we need an actual Request object here, for body_file to do its job
+        # we need an actual Request object here, for body to do its job
         request = Request({})
-        request.body_file = StringIO('{"type": "Point", "coordinates": [45, 5]}')
+        request.method = 'PUT'
+        request.body = '{"type": "Point", "coordinates": [45, 5]}'
         response = proto.update(request, 'a')
         self.assertEqual(response.status_int, 400)
 
@@ -744,7 +744,6 @@ class Test_protocol(unittest.TestCase):
         from pyramid.request import Request
         from pyramid.response import Response
         from geoalchemy import WKBSpatialElement
-        from StringIO import StringIO
 
         MappedClass = self._get_mapped_class()
 
@@ -762,9 +761,10 @@ class Test_protocol(unittest.TestCase):
         proto = Protocol(MockSession, MappedClass, "geom",
                          before_update=before_update)
 
-        # we need an actual Request object here, for body_file to do its job
+        # we need an actual Request object here, for body to do its job
         request = Request({})
-        request.body_file = StringIO('{"type": "Feature", "id": "a", "properties": {"text": "foo"}, "geometry": {"type": "Point", "coordinates": [45, 5]}}')
+        request.method = 'PUT'
+        request.body = '{"type": "Feature", "id": "a", "properties": {"text": "foo"}, "geometry": {"type": "Point", "coordinates": [45, 5]}}'
 
         obj = proto.update(request, "a")
 
