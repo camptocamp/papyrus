@@ -36,15 +36,15 @@ Notes:
 Run Papyrus Tests
 -----------------
 
-To run the Papyrus tests the ``nose``, ``mock``, ``psycopg2``, and
-``pyramid_handlers`` packages must be installed in the Python environment. Also
-install ``coverage`` to be able to get a coverage report when running the
-tests.
+To run the Papyrus tests additional packages need to be installed, namely
+``nose``, ``mock``, ``psycopg2``, ``simplejson``, and ``pyramid_handlers``.
+The ``coverage`` package should also be installed for a coverage report to be
+displayed upon running the tests.
 
-To run the tests and get a coverage report use the following command at the
-root of the Papyrus tree::
+There's no need to manually install these packages, just use the
+following command at the root of the Papyrus tree::
 
-    $ nosetests --with-coverage
+    $ python setup.py nosetests --with-coverage
 
 Currently, 100% of the Papyrus code is covered by tests, I'd like to preserve
 that.

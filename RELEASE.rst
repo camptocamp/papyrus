@@ -8,7 +8,7 @@ correct value, then commit and push that.
 
 Verify that the tests pass, with 100% coverage::
 
-    $ nosetests --with-coverage
+    $ python setup.py nosetests --with-coverage
     ......................................................
     Name                               Stmts   Miss  Cover   Missing
     ----------------------------------------------------------------

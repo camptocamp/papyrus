@@ -15,9 +15,17 @@ install_requires = [
     'GeoAlchemy>=0.5'
     ]
 
+setup_requires = [
+    'nose'
+    ]
+
 tests_require = install_requires + [
+    'coverage',
     'WebTest',
-    'psycopg2'
+    'psycopg2',
+    'simplejson',
+    'pyramid_handlers',
+    'mock'
     ]
 
 setup(name='papyrus',
@@ -39,6 +47,7 @@ setup(name='papyrus',
       include_package_data=True,
       zip_safe=False,
       install_requires=install_requires,
+      setup_requires=setup_requires,
       tests_require=tests_require,
       test_suite="papyrus.tests",
       entry_points="""
