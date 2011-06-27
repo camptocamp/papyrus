@@ -80,3 +80,63 @@ class Test_geojson_renderer_factory(unittest.TestCase):
         result = renderer(f, {'request': request})
         self.assertEqual(result, '{"geometry": {"type": "Point", "coordinates": [53, -4]}, "type": "Feature", "properties": {"datetime": "2011-05-21T20:55:12"}, "id": 1}')
         self.assertEqual(request.response_content_type, 'application/json')
+
+
+    def _callFUTGEOJSONP(self, name):
+        from papyrus.renderers import geojsonp_renderer_factory
+        return geojsonp_renderer_factory(name)
+
+    def test_geojsonp_nocallback(self):
+        renderer = self._callGEOFUTJSONP(None)
+        f = {
+            'type': 'Feature',
+            'id': 1,
+            'geometry': {'type': 'Point', 'coordinates': [53, -4]},
+            'properties': {'title': 'Dict 1'},
+            }
+        request = testing.DummyRequest()
+        result = renderer(f, {'request': request})
+        self.assertEqual(result, '{"geometry": {"type": "Point", "coordinates": [53, -4]}, "type": "Feature", "properties": {"title": "Dict 1"}, "id": 1}')
+        self.assertEqual(request.response_content_type, 'application/json')
+
+    def test_geojsonp(self):
+        renderer = self._callGEOFUTJSONP(None)
+        f = {
+            'type': 'Feature',
+            'id': 1,
+            'geometry': {'type': 'Point', 'coordinates': [53, -4]},
+            'properties': {'title': 'Dict 1'},
+            }
+        request = testing.DummyRequest()
+        request.params['callback'] = 'jsonp_cb'
+        result = renderer(f, {'request': request})
+        self.assertEqual(result, 'jsonp_cb({"geometry": {"type": "Point", "coordinates": [53, -4]}, "type": "Feature", "properties": {"title": "Dict 1"}, "id": 1});')
+        self.assertEqual(request.response_content_type, 'text/javascript')
+
+    def _callFUTJSONP(self, name):
+        from papyrus.renderers import jsonp_renderer_factory
+        return jsonp_renderer_factory(name)
+
+    def test_geojsonp_nocallback(self):
+        renderer = self._callFUTJSONP(None)
+        f = {
+            'name': 'Test',
+            'id': 1
+            }
+        request = testing.DummyRequest()
+        result = renderer(f, {'request': request})
+        self.assertEqual(result, '{"name": "Test", "id": 1}')
+        self.assertEqual(request.response_content_type, 'application/json')
+
+    def test_geojsonp(self):
+        renderer = self._callFUTJSONP(None)
+        f = {
+            'name': 'Test',
+            'id': 1
+            }
+        request = testing.DummyRequest()
+        request.params['callback'] = 'jsonp_cb'
+        result = renderer(f, {'request': request})
+        self.assertEqual(result, 'jsonp_cb({"name": "Test", "id": 1});')
+        self.assertEqual(request.response_content_type, 'text/javascript')
+
