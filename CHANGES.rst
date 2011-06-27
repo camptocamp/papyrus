@@ -1,6 +1,11 @@
 Changes
 -------
 
+0.5
+~~~
+
+* JSONP support in the GeoJSON renderer (patch from @sbrunner)
+
 0.4
 ~~~
 
