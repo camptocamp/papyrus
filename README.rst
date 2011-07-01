@@ -102,9 +102,6 @@ GeoAlchemy) mapped object::
 In the above example the ``Spot`` objects returned by the ``query`` call must
 implement the Python Geo Interface.
 
-To use the GeoJSONP the client should provide the argument ``callback`` 
-that represent the name of the returned function.
-
 Notes: 
 
 * The GeoJSON renderer requires simplejson 2.1 or higher. Indeed, to be able to
