@@ -3,17 +3,19 @@ import unittest
 from pyramid import testing
 
 class Test_geojson_renderer_factory(unittest.TestCase):
-    def _callFUT(self, name):
+    def _callFUT(self, **kwargs):
         from papyrus.renderers import geojson_renderer_factory
-        return geojson_renderer_factory(name)
+        if len(kwargs) == 0:
+            return geojson_renderer_factory({})
+        return geojson_renderer_factory(**kwargs)({})
 
     def test_json(self):
-        renderer = self._callFUT(None)
+        renderer = self._callFUT()
         result = renderer({'a': 1}, {})
         self.assertEqual(result, '{"a": 1}')
 
     def test_geojson(self):
-        renderer = self._callFUT(None)
+        renderer = self._callFUT()
         f = {
             'type': 'Feature',
             'id': 1,
@@ -26,7 +28,7 @@ class Test_geojson_renderer_factory(unittest.TestCase):
         self.assertEqual(request.response.content_type, 'application/json')
 
     def test_geojson_content_type(self):
-        renderer = self._callFUT(None)
+        renderer = self._callFUT()
         f = {
             'type': 'Feature',
             'id': 1,
@@ -40,7 +42,7 @@ class Test_geojson_renderer_factory(unittest.TestCase):
         self.assertEqual(request.response.content_type, 'text/javascript')
 
     def test_Decimal(self):
-        renderer = self._callFUT(None)
+        renderer = self._callFUT()
         import decimal
         f = {
             'type': 'Feature',
@@ -54,7 +56,7 @@ class Test_geojson_renderer_factory(unittest.TestCase):
         self.assertEqual(request.response.content_type, 'application/json')
 
     def test_date(self):
-        renderer = self._callFUT(None)
+        renderer = self._callFUT()
         import datetime
         f = {
             'type': 'Feature',
@@ -68,7 +70,7 @@ class Test_geojson_renderer_factory(unittest.TestCase):
         self.assertEqual(request.response.content_type, 'application/json')
 
     def test_datetime(self):
-        renderer = self._callFUT(None)
+        renderer = self._callFUT()
         import datetime
         f = {
             'type': 'Feature',
@@ -82,8 +84,8 @@ class Test_geojson_renderer_factory(unittest.TestCase):
         self.assertEqual(request.response.content_type, 'application/json')
 
 
-    def test_geojsonp(self):
-        renderer = self._callFUT(None)
+    def test_jsonp(self):
+        renderer = self._callFUT()
         f = {
             'type': 'Feature',
             'id': 1,
@@ -92,6 +94,25 @@ class Test_geojson_renderer_factory(unittest.TestCase):
             }
         request = testing.DummyRequest()
         request.params['callback'] = 'jsonp_cb'
+        result = renderer(f, {'request': request})
+        self.assertEqual(result, 'jsonp_cb({"geometry": {"type": "Point", "coordinates": [53, -4]}, "type": "Feature", "properties": {"title": "Dict 1"}, "id": 1});')
+        self.assertEqual(request.response.content_type, 'text/javascript')
+
+    def test_jsonp_jsonp_param(self):
+        renderer = self._callFUT(jsonp='cb')
+        f = {
+            'type': 'Feature',
+            'id': 1,
+            'geometry': {'type': 'Point', 'coordinates': [53, -4]},
+            'properties': {'title': 'Dict 1'},
+            }
+        request = testing.DummyRequest()
+        request.params['callback'] = 'jsonp_cb'
+        result = renderer(f, {'request': request})
+        self.assertEqual(result, '{"geometry": {"type": "Point", "coordinates": [53, -4]}, "type": "Feature", "properties": {"title": "Dict 1"}, "id": 1}')
+        self.assertEqual(request.response.content_type, 'application/json')
+        request = testing.DummyRequest()
+        request.params['cb'] = 'jsonp_cb'
         result = renderer(f, {'request': request})
         self.assertEqual(result, 'jsonp_cb({"geometry": {"type": "Point", "coordinates": [53, -4]}, "type": "Feature", "properties": {"title": "Dict 1"}, "id": 1});')
         self.assertEqual(request.response.content_type, 'text/javascript')

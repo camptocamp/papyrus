@@ -109,9 +109,17 @@ Notes:
   we set ``use_decimal`` to ``True`` when calling the ``dumps`` function, and
   only simplejson 2.1 and higher support that argument.
 * The GeoJSON renderer supports `JSONP <http://en.wikipedia.org/wiki/JSONP>`_.
-  The renderer indeed checks if there's a ``callback`` paremeter in the query
+  The renderer indeed checks if there's a ``callback`` parameter in the query
   string, and if there's one it wraps the response in a JavaScript call and
   sets the response content type to ``text/javascript``.
+* The application developer can also specify the name of the JSONP callback
+  parameter, using this::
+
+      from papyrus.renderers import geojson_renderer_factory
+      config.add_renderer('geojson', geojson_renderer_factory(jsonp='cb'))
+
+  With this, if the there's a parameter named ``cb`` in the query string, the
+  renderer will return a JSONP response.
 
 MapFish Web Services
 --------------------
