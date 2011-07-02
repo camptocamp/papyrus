@@ -118,7 +118,7 @@ Notes:
       from papyrus.renderers import GeoJSON
       config.add_renderer('geojson', GeoJSON(jsonp_param_name='cb'))
 
-  With this, if the there's a parameter named ``cb`` in the query string, the
+  With this, if there's a parameter named ``cb`` in the query string, the
   renderer will return a JSONP response.
 
 MapFish Web Services
