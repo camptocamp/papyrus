@@ -2,12 +2,11 @@ import unittest
 
 from pyramid import testing
 
-class Test_geojson_renderer_factory(unittest.TestCase):
+class Test_GeoJSON(unittest.TestCase):
     def _callFUT(self, **kwargs):
-        from papyrus.renderers import geojson_renderer_factory
-        if len(kwargs) == 0:
-            return geojson_renderer_factory({})
-        return geojson_renderer_factory(**kwargs)({})
+        from papyrus.renderers import GeoJSON
+        fake_info = {}
+        return GeoJSON(**kwargs)(fake_info)
 
     def test_json(self):
         renderer = self._callFUT()
@@ -98,8 +97,8 @@ class Test_geojson_renderer_factory(unittest.TestCase):
         self.assertEqual(result, 'jsonp_cb({"geometry": {"type": "Point", "coordinates": [53, -4]}, "type": "Feature", "properties": {"title": "Dict 1"}, "id": 1});')
         self.assertEqual(request.response.content_type, 'text/javascript')
 
-    def test_jsonp_jsonp_param(self):
-        renderer = self._callFUT(jsonp='cb')
+    def test_jsonp_param_name(self):
+        renderer = self._callFUT(jsonp_param_name='cb')
         f = {
             'type': 'Feature',
             'id': 1,

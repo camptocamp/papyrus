@@ -62,16 +62,16 @@ For that you can either pass the factory to the ``Configurator``
 constructor::
 
     from pyramid.mako_templating import renderer_factory as mako_renderer_factory
-    from papyrus.renderers import geojson_renderer_factory
+    from papyrus.renderers import GeoJSON
     config = Configurator(
         renderers=(('.mako', mako_renderer_factory),
-                   ('geojson', geojson_renderer_factory))
+                   ('geojson', GeoJSON))
         )
 
 Or you can apply the ``add_renderer`` method to the ``Configurator`` instance::
 
-    from papyrus.renderers import geojson_renderer_factory
-    config.add_renderer('geojson', geojson_renderer_factory)
+    from papyrus.renderers import GeoJSON
+    config.add_renderer('geojson', GeoJSON())
 
 Make sure that ``add_renderer`` is called before any ``add_view`` call that
 names ``geojson`` as an argument.
@@ -115,8 +115,8 @@ Notes:
 * The application developer can also specify the name of the JSONP callback
   parameter, using this::
 
-      from papyrus.renderers import geojson_renderer_factory
-      config.add_renderer('geojson', geojson_renderer_factory(jsonp='cb'))
+      from papyrus.renderers import GeoJSON
+      config.add_renderer('geojson', GeoJSON(jsonp_param_name='cb'))
 
   With this, if the there's a parameter named ``cb`` in the query string, the
   renderer will return a JSONP response.
@@ -275,9 +275,9 @@ We now need to provide *routes* to these actions. This is done by calling
 ``add_papyrus_routes()`` on the ``Configurator`` (in ``__init__.py``)::
 
     import papyrus
-    from papyrus.renderers import geojson_renderer_factory
+    from papyrus.renderers import GeoJSON
     config.include(papyrus.includeme)
-    config.add_renderer('geojson', geojson_renderer_factory)
+    config.add_renderer('geojson', GeoJSON())
     config.add_papyrus_routes('spots', '/spots')
     config.scan()
 
@@ -343,9 +343,9 @@ We now need to provide *routes* to these actions. This is done by calling
 ``add_papyrus_handler()`` on the ``Configurator``::
 
     import papyrus
-    from papyrus.renderers import geojson_renderer_factory
+    from papyrus.renderers import GeoJSON
     config.include(papyrus)
-    config.add_renderer('geojson', geojson_renderer_factory)
+    config.add_renderer('geojson', GeoJSON())
     config.add_papyrus_handler('spots', '/spots',
                                'myproject.handlers:SpotHandler')
 
