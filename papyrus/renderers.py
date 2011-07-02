@@ -43,7 +43,7 @@ class GeoJSON(object):
     The GeoJSON renderer supports `JSONP <http://en.wikipedia.org/wiki/JSONP>`_:
 
     - If there is a parameter in the request's HTTP query string that matches
-      the ``josnp_param_name`` of the registered JSONP renderer (by default,
+      the ``jsonp_param_name`` of the registered JSONP renderer (by default,
       ``callback``), the renderer will return a JSONP response.
     
     - If there is no callback parameter in the request's query string, the
