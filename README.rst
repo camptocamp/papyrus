@@ -65,7 +65,7 @@ constructor::
     from papyrus.renderers import GeoJSON
     config = Configurator(
         renderers=(('.mako', mako_renderer_factory),
-                   ('geojson', GeoJSON))
+                   ('geojson', GeoJSON()))
         )
 
 Or you can apply the ``add_renderer`` method to the ``Configurator`` instance::
