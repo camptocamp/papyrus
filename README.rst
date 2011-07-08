@@ -44,7 +44,7 @@ displayed upon running the tests.
 There's no need to manually install these packages, just use the
 following command at the root of the Papyrus tree::
 
-    $ python setup.py nosetests --with-coverage
+    $ python setup.py nosetests
 
 Currently, 100% of the Papyrus code is covered by tests, I'd like to preserve
 that.
