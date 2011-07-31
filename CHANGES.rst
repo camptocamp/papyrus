@@ -11,6 +11,7 @@ Changes
 
       from papyrus.renderers import GeoJSON
       config.add_renderer('geojson', GeoJSON(jsonp_param_name='cb'))
+* Pyramid 1.1 compliance
 
 0.4
 ~~~
