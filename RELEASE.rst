@@ -29,6 +29,10 @@ Verify that the tests pass, with 100% coverage::
 
     OK
 
+Create Git tag::
+
+    $ git tag -a x.y -m 'version x.y'
+
 Upload the package to PyPI::
 
     $ python setup.py sdist upload
