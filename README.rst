@@ -118,6 +118,13 @@ Notes:
       from papyrus.renderers import GeoJSON
       config.add_renderer('geojson', GeoJSON(jsonp_param_name='cb'))
 
+* By default, list or tuple will be treated by the renderer as
+  FeatureCollection. You can change it with ``type_for_array``:
+
+      from papyrus.renderers import GeoJSON
+      from geojson import GeometryCollection
+      config.add_renderer('geojson', GeoJSON(type_for_array=GeometryCollection))
+
   With this, if there's a parameter named ``cb`` in the query string, the
   renderer will return a JSONP response.
 
