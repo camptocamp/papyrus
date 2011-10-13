@@ -37,21 +37,20 @@ Run Papyrus Tests
 -----------------
 
 To run the Papyrus tests additional packages need to be installed, namely
-``nose``, ``mock``, ``psycopg2``, ``simplejson``, and ``pyramid_handlers``.
-The ``coverage`` package should also be installed for a coverage report to be
-displayed upon running the tests.
+``nose``, ``mock``, ``psycopg2``, ``simplejson``, ``pyramid_handlers``, and
+``coverage``. There's no need to manually install these packages, as they will
+be installed when the ``setup.py nosetests`` command is run.
 
-There's no need to manually install these packages, just use the
-following command at the root of the Papyrus tree::
+However, for these packages to install correctly, you have to have header files
+for ``PostgreSQL``, ``Python``, and ``GEOS``. On Debian-based systems install
+the following system packages: ``libpq-dev``, ``python-dev``, ``libgeos-c1``.
+
+To run the tests::
 
     $ python setup.py nosetests
 
 Currently, 100% of the Papyrus code is covered by tests, I'd like to preserve
 that.
-
-Notes:
-
-* You need to have the following system packages installed to run the tests : ``libpq-dev``, ``python-dev``, ``libgeos-c1``.
 
 GeoJSON Renderer
 ----------------
@@ -238,9 +237,10 @@ Set up the web service
 Now that database model is defined we can now create the core of our MapFish
 web service.
 
-The web service can be defined through *view callables*, or through an *handler* class.
-View callables are a concept of Pyramid itself. Handler classes are a concept
-of the ``pyramid_handlers`` package, which is an official Pyramid add-on.
+The web service can be defined through *view callables*, or through an
+*handler* class.  View callables are a concept of Pyramid itself. Handler
+classes are a concept of the ``pyramid_handlers`` package, which is an official
+Pyramid add-on.
 
 With view callables
 ^^^^^^^^^^^^^^^^^^^
