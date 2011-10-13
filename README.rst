@@ -49,6 +49,10 @@ following command at the root of the Papyrus tree::
 Currently, 100% of the Papyrus code is covered by tests, I'd like to preserve
 that.
 
+Notes:
+
+* You need to have the following system packages installed to run the tests : ``libpq-dev``, ``python-dev``, ``libgeos-c1``.
+
 GeoJSON Renderer
 ----------------
 
