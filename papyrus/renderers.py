@@ -49,6 +49,16 @@ class GeoJSON(object):
     
     - If there is no callback parameter in the request's query string, the
       renderer will return a 'plain' JSON response.
+
+    The GeoJSON renderer will, by default, treat tuple/list as FeatureCollection:
+
+    - You can change it with the ``type_for_array`` parameter.
+
+    .. code-block:: python
+
+        from geojson import GeometryCollection
+        config.add_renderer('geojson', GeoJSON(type_for_array=GeometryCollection)
+
     """
 
     def __init__(self, jsonp_param_name='callback', type_for_array=FeatureCollection):
