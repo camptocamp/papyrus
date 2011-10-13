@@ -3,6 +3,7 @@ import datetime
 
 import geojson
 from geojson.codec import PyGFPEncoder as GeoJSONEncoder
+from geojson import FeatureCollection
 
 class Encoder(GeoJSONEncoder):
     # SQLAlchemy's Reflecting Tables mechanism uses decimal.Decimal
@@ -50,11 +51,14 @@ class GeoJSON(object):
       renderer will return a 'plain' JSON response.
     """
 
-    def __init__(self, jsonp_param_name='callback'):
+    def __init__(self, jsonp_param_name='callback', type_for_array=FeatureCollection):
         self.jsonp_param_name = jsonp_param_name
+        self.type_for_array = type_for_array
 
     def __call__(self, info):
         def _render(value, system):
+            if isinstance(value, (list, tuple)):
+                value = self.type_for_array(value)
             ret = geojson.dumps(value, cls=Encoder, use_decimal=True)
             request = system.get('request')
             if request is not None:
