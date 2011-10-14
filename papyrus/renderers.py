@@ -3,7 +3,6 @@ import datetime
 
 import geojson
 from geojson.codec import PyGFPEncoder as GeoJSONEncoder
-from geojson import FeatureCollection
 
 class Encoder(GeoJSONEncoder):
     # SQLAlchemy's Reflecting Tables mechanism uses decimal.Decimal
@@ -50,25 +49,27 @@ class GeoJSON(object):
     - If there is no callback parameter in the request's query string, the
       renderer will return a 'plain' JSON response.
 
-    The GeoJSON renderer will, by default, treat tuple/list as FeatureCollection:
-
-    - You can change it with the ``type_for_array`` parameter.
+    By default the renderer treats lists and tuples as feature collections. If
+    you want lists and tuples to be treated as geometry collections, set
+    ``collection_type`` to ``'GeometryCollection'``:
 
     .. code-block:: python
 
-        from geojson import GeometryCollection
-        config.add_renderer('geojson', GeoJSON(type_for_array=GeometryCollection)
+        config.add_renderer('geojson', GeoJSON(collection_type='GeometryCollection')
 
     """
 
-    def __init__(self, jsonp_param_name='callback', type_for_array=FeatureCollection):
+    def __init__(self, jsonp_param_name='callback',
+                 collection_type=geojson.factory.FeatureCollection):
         self.jsonp_param_name = jsonp_param_name
-        self.type_for_array = type_for_array
+        if isinstance(collection_type, basestring):
+            collection_type = getattr(geojson.factory, collection_type)
+        self.collection_type = collection_type
 
     def __call__(self, info):
         def _render(value, system):
             if isinstance(value, (list, tuple)):
-                value = self.type_for_array(value)
+                value = self.collection_type(value)
             ret = geojson.dumps(value, cls=Encoder, use_decimal=True)
             request = system.get('request')
             if request is not None:

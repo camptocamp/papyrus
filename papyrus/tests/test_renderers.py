@@ -129,9 +129,8 @@ class Test_GeoJSON(unittest.TestCase):
         self.assertEqual(result, '{"type": "FeatureCollection", "features": [{"geometry": {"type": "Point", "coordinates": [53, -4]}, "type": "Feature", "id": 1, "properties": {"title": "Dict 1"}}]}')
         self.assertEqual(request.response.content_type, 'application/json')
 
-    def test_type_for_array(self):
-        from geojson import GeometryCollection
-        renderer = self._callFUT(type_for_array=GeometryCollection)
+    def test_collection_type(self):
+        renderer = self._callFUT(collection_type='GeometryCollection')
         f = {
             'type': 'Point', 'coordinates': [53, -4]
             }

@@ -125,12 +125,11 @@ Notes:
   renderer will return a JSONP response.
 
 * By default, lists and tuples passed to the renderer will be rendered
-  as FeatureCollection. You can change this using the ``type_for_array``
+  as FeatureCollection. You can change this using the ``collection_type``
   argument::
 
       from papyrus.renderers import GeoJSON
-      from geojson import GeometryCollection
-      config.add_renderer('geojson', GeoJSON(type_for_array=GeometryCollection))
+      config.add_renderer('geojson', GeoJSON(collection_type='GeometryCollection'))
 
 MapFish Web Services
 --------------------

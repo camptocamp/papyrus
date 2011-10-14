@@ -1,6 +1,15 @@
 Changes
 -------
 
+0.6
+~~~
+
+* When passed a list or a tuple the GeoJSON renderer produces
+  a ``FeatureCollection`` by default. This behavior can be changed
+  with the ``collection_type`` argument to GeoJSON (patch
+  from @tonio).
+* Pyramid 1.2 compliance (a change in the tests)
+
 0.5
 ~~~
 
