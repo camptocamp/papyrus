@@ -26,20 +26,21 @@ class GeoInterface(object):
             geom = GeometryColumn(Point)
     """
 
-    def __init__(self, feature):
+    def __init__(self, feature=None):
         """ Called by the protocol on object creation.
 
         Arguments:
 
         * ``feature`` The GeoJSON feature as received from the client.
         """
-        for p in class_mapper(self.__class__).iterate_properties:
-            if not isinstance(p, ColumnProperty):
-                continue
-            if p.columns[0].primary_key:
-                primary_key = p.key
-        setattr(self, primary_key, feature.id)
-        self.__update__(feature)
+        if feature:
+            for p in class_mapper(self.__class__).iterate_properties:
+                if not isinstance(p, ColumnProperty):
+                    continue
+                if p.columns[0].primary_key:
+                    primary_key = p.key
+            setattr(self, primary_key, feature.id)
+            self.__update__(feature)
 
     def __update__(self, feature):
         """ Called by the protocol on object update.
