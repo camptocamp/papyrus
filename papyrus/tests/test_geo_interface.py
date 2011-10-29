@@ -118,6 +118,12 @@ class GeoInterfaceTests(unittest.TestCase):
         json = dumps(obj)
         self.assertEqual(json, '{"geometry": {"type": "Point", "coordinates": [53.0, -4.0]}, "type": "Feature", "properties": {"text": "foo"}, "id": 1}')
 
+    def test_geo_interface_declarative_no_feature(self):
+        from geojson import dumps
+        mapped_class = self._get_mapped_class_declarative()
+        obj = mapped_class()
+        self.assertRaises(ValueError, dumps, obj)
+
     def test_geo_interface_declarative_shape_unset(self):
         from geojson import Feature, Point, dumps
         mapped_class = self._get_mapped_class_declarative()
