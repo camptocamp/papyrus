@@ -1,6 +1,13 @@
 Changes
 -------
 
+0.7
+~~~
+
+* Make ``feature`` argument optional in the GeoInterface constructor. This
+  change allow better integration with FormAlchemy for classes that implement
+  the GeoInterface.
+
 0.6
 ~~~
 
