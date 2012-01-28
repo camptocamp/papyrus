@@ -22,7 +22,7 @@ Changes
 
 * JSONP support in the GeoJSON renderer (patch from @sbrunner)
 * New GeoJSON renderer implementation and API. The
-  ``papyrus.renderers.geojson_renderer_factory`` function is replaced by the 
+  ``papyrus.renderers.geojson_renderer_factory`` function is replaced by the
   ``papyrus.renderers.GeoJSON`` class. The new usage is::
 
       from papyrus.renderers import GeoJSON

@@ -105,7 +105,7 @@ GeoAlchemy) mapped object::
 In the above example the ``Spot`` objects returned by the ``query`` call must
 implement the Python Geo Interface.
 
-Notes: 
+Notes:
 
 * The GeoJSON renderer requires simplejson 2.1 or higher. Indeed, to be able to
   deal with ``decimal.Decimal`` values, which are common when using SQLAlchemy,
@@ -209,7 +209,7 @@ Without using ``GeoInterface`` our ``Spot`` class could look like this::
                 self.geom = WKBSpatialElement(buffer(shape.wkb), srid=4326)
                 self._shape = shape
             self.name = feature.properties.get('name', None)
-       
+
         @property
         def __geo_interface__(self):
             id = self.id
@@ -253,7 +253,7 @@ Using view functions here's how our web service implementation would look like::
     proto = Protocol(Session, Spot, 'geom')
 
     @view_config(route_name='spots_read_many', renderer='geojson')
-    def read_many(request): 
+    def read_many(request):
         return proto.read(request)
 
     @view_config(route_name='spots_read_one', renderer='geojson')
