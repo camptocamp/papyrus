@@ -12,18 +12,18 @@ Verify that the tests pass, with 100% coverage::
     ......................................................
     Name                               Stmts   Miss  Cover   Missing
     ----------------------------------------------------------------
-    papyrus                               29      0   100%   
-    papyrus.geo_interface                 47      0   100%   
-    papyrus.protocol                     180      0   100%   
-    papyrus.renderers                     17      0   100%   
-    papyrus.tests                          0      0   100%   
-    papyrus.tests.test_geo_interface     112      0   100%   
-    papyrus.tests.test_init               90      0   100%   
-    papyrus.tests.test_protocol          606      0   100%   
-    papyrus.tests.test_renderers          49      0   100%   
-    papyrus.tests.views                    7      0   100%   
+    papyrus                               29      0   100%
+    papyrus.geo_interface                 47      0   100%
+    papyrus.protocol                     180      0   100%
+    papyrus.renderers                     17      0   100%
+    papyrus.tests                          0      0   100%
+    papyrus.tests.test_geo_interface     112      0   100%
+    papyrus.tests.test_init               90      0   100%
+    papyrus.tests.test_protocol          606      0   100%
+    papyrus.tests.test_renderers          49      0   100%
+    papyrus.tests.views                    7      0   100%
     ----------------------------------------------------------------
-    TOTAL                               1137      0   100%   
+    TOTAL                               1137      0   100%
     ----------------------------------------------------------------------
     Ran 54 tests in 0.998s
 
