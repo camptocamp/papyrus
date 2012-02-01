@@ -177,6 +177,11 @@ Using ``GeoInterface`` our ``Spot`` class looks like this::
         name = Column(Unicode, nullable=False)
         geom = GeometryColumn('the_geom', Point(srid=4326))
 
+    # For SQLAlchemy/GeoAlchemy to be able to create the geometry
+    # column when Spot.__table__.create or metadata.create_all is
+    # called.
+    GeometryDDL(Spot.__table__)
+
 ``GeoInterface`` represents a convenience method. Often, implementing one's own
 ``__geo_interface__``, ``__init__``, and ``__update__`` definitions is a better
 choice than relying on ``GeoInterface``.
@@ -219,6 +224,11 @@ Without using ``GeoInterface`` our ``Spot`` class could look like this::
                 geometry = loads(str(self.geom.geom_wkb))
             properties = dict(name=self.name)
             return geojson.Feature(id=id, geometry=geometry, properties=properties)
+
+    # For SQLAlchemy/GeoAlchemy to be able to create the geometry
+    # column when Spot.__table__.create or metadata.create_all is
+    # called.
+    GeometryDDL(Spot.__table__)
 
 Notes:
 
