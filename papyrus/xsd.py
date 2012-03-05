@@ -55,8 +55,8 @@ def add_column_xsd(tb, column):
         attrs['nillable'] = 'true'
     if column.foreign_keys:
         if len(column.foreign_keys) != 1: # pragma: no cover
-            raise RuntimeError(
-                    'Column %s has more than one foreign key' % (column.name,))
+            # FIXME understand when a column can have multiple foreign keys
+            raise NotImplementedError
         foreign_key = next(iter(column.foreign_keys))
         attrs['type'] = foreign_key._colspec.split('.', 2)[0]
         with tag(tb, 'xsd:element', attrs) as tb:
