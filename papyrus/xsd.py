@@ -1,5 +1,4 @@
 from contextlib import contextmanager
-import sys
 try:
     from xml.etree.cElementTree import ElementTree, TreeBuilder
 except ImportError: # pragma: no cover
