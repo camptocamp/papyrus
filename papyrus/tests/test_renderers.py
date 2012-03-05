@@ -166,7 +166,6 @@ class Test_XSD(unittest.TestCase):
             '. complexType complexContent extension sequence element'))
 
     def test_enum(self):
-        renderer = self._callFUT()
         from sqlalchemy import Column, types
         column = Column('column', types.Enum('red', 'green', 'blue'))
         elements = self._get_elements(column)
@@ -186,7 +185,6 @@ class Test_XSD(unittest.TestCase):
         self.assertEqual(enumerations[2].attrib, {'value': 'blue'})
 
     def test_foreign_key(self):
-        renderer = self._callFUT()
         from sqlalchemy import Column, ForeignKey, types
         column = Column('column', types.Integer, ForeignKey('other.id'))
         elements = self._get_elements(column)
@@ -198,7 +196,6 @@ class Test_XSD(unittest.TestCase):
             'type': 'other'})
 
     def test_integer(self):
-        renderer = self._callFUT()
         from sqlalchemy import Column, types
         column = Column('column', types.Integer)
         elements = self._get_elements(column)
@@ -210,7 +207,6 @@ class Test_XSD(unittest.TestCase):
             'type': 'xsd:integer'})
 
     def test_numeric(self):
-        renderer = self._callFUT()
         from sqlalchemy import Column, types
         column = Column('column', types.Numeric)
         elements = self._get_elements(column)
@@ -222,7 +218,6 @@ class Test_XSD(unittest.TestCase):
             'type': 'xsd:decimal'})
 
     def test_numeric_precision(self):
-        renderer = self._callFUT()
         from sqlalchemy import Column, types
         column = Column('column', types.Numeric(precision=5))
         elements = self._get_elements(column)
@@ -240,7 +235,6 @@ class Test_XSD(unittest.TestCase):
         self.assertEqual(totalDigitss[0].attrib, {'value': '5'})
 
     def test_numeric_precision_scale(self):
-        renderer = self._callFUT()
         from sqlalchemy import Column, types
         column = Column('column', types.Numeric(5, 2))
         elements = self._get_elements(column)
@@ -263,7 +257,6 @@ class Test_XSD(unittest.TestCase):
         self.assertEqual(fractionDigitss[0].attrib, {'value': '2'})
 
     def test_numeric_scale(self):
-        renderer = self._callFUT()
         from sqlalchemy import Column, types
         column = Column('column', types.Numeric(scale=2))
         elements = self._get_elements(column)
@@ -282,7 +275,6 @@ class Test_XSD(unittest.TestCase):
         self.assertEqual(fractionDigitss[0].attrib, {'value': '2'})
 
     def test_string(self):
-        renderer = self._callFUT()
         from sqlalchemy import Column, types
         column = Column('column', types.String)
         elements = self._get_elements(column)
@@ -294,7 +286,6 @@ class Test_XSD(unittest.TestCase):
             'type': 'xsd:string'})
 
     def test_string_length(self):
-        renderer = self._callFUT()
         from sqlalchemy import Column, types
         column = Column('column', types.String(10))
         elements = self._get_elements(column)
@@ -312,7 +303,6 @@ class Test_XSD(unittest.TestCase):
         self.assertEqual(maxLengths[0].attrib, {'value': '10'})
 
     def test_unsupported(self):
-        renderer = self._callFUT()
         from sqlalchemy import Column, types
         class UnsupportedColumn(types.TypeEngine):
             pass
