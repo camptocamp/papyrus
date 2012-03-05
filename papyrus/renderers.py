@@ -1,8 +1,15 @@
 import decimal
 import datetime
+try:
+    from cStringIO import StringIO
+except ImportError: # pragma: no cover
+    from StringIO import StringIO
 
 import geojson
 from geojson.codec import PyGFPEncoder as GeoJSONEncoder
+
+from xsd import get_table_xsd
+
 
 class Encoder(GeoJSONEncoder):
     # SQLAlchemy's Reflecting Tables mechanism uses decimal.Decimal
@@ -84,4 +91,19 @@ class GeoJSON(object):
                         ret = '%(callback)s(%(json)s);' % {'callback': callback,
                                                            'json': ret}
             return ret
+        return _render
+
+
+class XSD(object):
+    """ XSD renderer.
+
+    """
+
+    def __call__(self, table):
+        def _render(value, system):
+            request = system.get('request')
+            if request is not None:
+                response = request.response
+                response.content_type = 'text/xml'
+                return get_table_xsd(StringIO(), value).getvalue()
         return _render
