@@ -306,6 +306,7 @@ class Test_XSD(unittest.TestCase):
         from sqlalchemy import Column, types
         class UnsupportedColumn(types.TypeEngine):
             pass
-        from papyrus.xsd import UnsupportedColumnType
+        from papyrus.xsd import UnsupportedColumnTypeError
         column = Column('column', UnsupportedColumn())
-        self.assertRaises(UnsupportedColumnType, self._get_elements, column)
+        self.assertRaises(UnsupportedColumnTypeError,
+                self._get_elements, column)

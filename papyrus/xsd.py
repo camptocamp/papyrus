@@ -15,7 +15,7 @@ def tag(tb, name, attrs={}):
     tb.end(name)
 
 
-class UnsupportedColumnType(RuntimeError):
+class UnsupportedColumnTypeError(RuntimeError):
 
     def __init__(self, type):
         self.type = type
@@ -110,7 +110,7 @@ def add_column_xsd(tb, column):
                         with tag(tb, 'xsd:maxLength',
                                  {'value': str(column.type.length)}):
                             return tb
-    raise UnsupportedColumnType(column.type)
+    raise UnsupportedColumnTypeError(column.type)
 
 
 def get_columns_xsd(io, name, columns):
