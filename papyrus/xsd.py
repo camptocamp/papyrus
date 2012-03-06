@@ -113,20 +113,25 @@ def add_column_xsd(tb, column):
     raise UnsupportedColumnType(column.type)
 
 
-def get_table_xsd(io, table):
-    """ Returns the XSD for a table """
+def get_columns_xsd(io, name, columns):
+    """ Returns the XSD for a named collection of columns """
     attrs = {}
     attrs['xmlns:gml'] = 'http://www.opengis.net/gml'
     attrs['xmlns:xsd'] = 'http://www.w3.org/2001/XMLSchema'
     tb = TreeBuilder()
     with tag(tb, 'xsd:schema', attrs) as tb:
-        with tag(tb, 'xsd:complexType', {'name': table.name}) as tb:
+        with tag(tb, 'xsd:complexType', {'name': name}) as tb:
             with tag(tb, 'xsd:complexContent') as tb:
                 with tag(tb, 'xsd:extension',
                          {'base': 'gml:AbstractFeatureType'}) as tb:
                     with tag(tb, 'xsd:sequence') as tb:
-                        for column in table.columns:
+                        for column in columns:
                             add_column_xsd(tb, column)
                         pass
     ElementTree(tb.close()).write(io, encoding='utf-8')
     return io
+
+
+def get_table_xsd(io, table):
+    """ Returns the XSD for a table """
+    return get_columns_xsd(io, table.name, table.columns)
