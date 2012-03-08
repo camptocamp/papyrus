@@ -1,8 +1,15 @@
 import decimal
 import datetime
+try:
+    from cStringIO import StringIO
+except ImportError: # pragma: no cover
+    from StringIO import StringIO
 
 import geojson
 from geojson.codec import PyGFPEncoder as GeoJSONEncoder
+
+from xsd import get_table_xsd
+
 
 class Encoder(GeoJSONEncoder):
     # SQLAlchemy's Reflecting Tables mechanism uses decimal.Decimal
@@ -84,4 +91,42 @@ class GeoJSON(object):
                         ret = '%(callback)s(%(json)s);' % {'callback': callback,
                                                            'json': ret}
             return ret
+        return _render
+
+
+class XSD(object):
+    """ XSD renderer.
+
+    An XSD renderer generate an XML schema document from an SQLAlchemy
+    Table object.
+
+    Configure a XSD renderer using the ``add_renderer`` method on
+    the Configurator object:
+
+    .. code-block:: python
+
+        from papyrus.renderers import XSD
+
+        config.add_renderer('xsd', XSD())
+
+    Once this renderer has been registered as above , you can use
+    ``xsd`` as the ``renderer`` parameter to ``@view_config``
+    or to the ``add_view`` method on the Configurator object:
+
+    .. code-block:: python
+
+        from myapp.models import Spot
+
+        @view_config(renderer='xsd')
+        def myview(request):
+            return Spot.__table__
+    """
+
+    def __call__(self, table):
+        def _render(value, system):
+            request = system.get('request')
+            if request is not None:
+                response = request.response
+                response.content_type = 'text/xml'
+                return get_table_xsd(StringIO(), value).getvalue()
         return _render
