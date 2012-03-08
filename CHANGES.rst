@@ -1,6 +1,12 @@
 Changes
 -------
 
+0.8
+~~~
+
+* Add a ``XSD`` renderer for WFS DescribeFeatureType-like responses. Thanks
+  @twpayne.
+
 0.7
 ~~~
 
