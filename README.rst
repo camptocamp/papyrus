@@ -343,17 +343,24 @@ Using view functions here's how our web service implementation would look like::
         id = request.matchdict['id']
         return proto.delete(request, id)
 
-These six view functions, typically defined in ``views.py``, entirely define
-our MapFish web service.
+    @view_config(route_name='spots_md', renderer='xsd')
+    def md(request):
+        return Spot.__table__
+
+View functions are typically defined in a file named ``views.py``. The first
+six views define the MapFish web service. The seventh view (``md``) provides
+a metadata view of the ``Spot`` model/table.
 
 We now need to provide *routes* to these actions. This is done by calling
 ``add_papyrus_routes()`` on the ``Configurator`` (in ``__init__.py``)::
 
     import papyrus
-    from papyrus.renderers import GeoJSON
+    from papyrus.renderers import GeoJSON, XSD
     config.include(papyrus.includeme)
     config.add_renderer('geojson', GeoJSON())
+    config.add_renderer('xsd', XSD())
     config.add_papyrus_routes('spots', '/spots')
+    config.add_route('spots_md', '/spots/md.xsd', request_method='GET')
     config.scan()
 
 ``add_papyrus_routes`` is a convenience method, here's what it basically
@@ -411,6 +418,10 @@ Using a handler here's what our web service implementation would look like::
             id = self.request.matchdict['id']
             return proto.delete(self.request, id)
 
+        @action(renderer='xsd')
+        def md(self):
+            return Spot.__table__
+
 The six actions of the ``SpotHandler`` class entirely define our MapFish web
 service.
 
@@ -423,6 +434,9 @@ We now need to provide *routes* to these actions. This is done by calling
     config.add_renderer('geojson', GeoJSON())
     config.add_papyrus_handler('spots', '/spots',
                                'myproject.handlers:SpotHandler')
+    config.add_handler('spots_md', '/spots/md.xsd',
+                       'myproject.handlers:SpotHandler', action='md',
+                       request_method='GET')
 
 Likewise ``add_papyrus_routes`` ``add_papyrus_handler`` is a convenience
 method. Here's what it basically does::
