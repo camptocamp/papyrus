@@ -157,7 +157,7 @@ constructor::
 Or by applying the ``add_renderer`` method to the ``Configurator`` instance::
 
     from papyrus.renderers import XSD
-    config.add_renderer('geojson', XSD())
+    config.add_renderer('xsd', XSD())
 
 Make sure that ``add_renderer`` is called before any ``add_view`` call that
 names ``xsd`` as an argument.
