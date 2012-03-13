@@ -127,6 +127,6 @@ class XSD(object):
             request = system.get('request')
             if request is not None:
                 response = request.response
-                response.content_type = 'text/xml'
+                response.content_type = 'application/xml'
                 return get_table_xsd(StringIO(), value).getvalue()
         return _render
