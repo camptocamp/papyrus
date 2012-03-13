@@ -159,6 +159,7 @@ class Test_XSD(unittest.TestCase):
         t = Table('table', MetaData(), column)
         request = testing.DummyRequest()
         result = renderer(t, {'request': request})
+        self.assertEqual(request.response.content_type, 'application/xml')
         from xml.etree.ElementTree import XML
         xml = XML(result)
         self.assertEquals(xml.tag, '{http://www.w3.org/2001/XMLSchema}schema')
