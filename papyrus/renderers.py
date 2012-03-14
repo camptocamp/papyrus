@@ -109,6 +109,16 @@ class XSD(object):
 
         config.add_renderer('xsd', XSD())
 
+    By default, the XSD renderer will skip columns which are primary keys.  If
+    you wish to include primary keys then pass ``include_primary_keys=True``
+    when creating the XSD object, for example:
+
+    .. code-block:: python
+
+        from papyrus.renderers import XSD
+
+        config.add_renderer('xsd', XSD(include_primary_keys=True))
+
     Once this renderer has been registered as above , you can use
     ``xsd`` as the ``renderer`` parameter to ``@view_config``
     or to the ``add_view`` method on the Configurator object:
@@ -122,11 +132,16 @@ class XSD(object):
             return Spot.__table__
     """
 
+    def __init__(self, include_primary_keys=False):
+        self.include_primary_keys = include_primary_keys
+
     def __call__(self, table):
         def _render(value, system):
             request = system.get('request')
             if request is not None:
                 response = request.response
                 response.content_type = 'application/xml'
-                return get_table_xsd(StringIO(), value).getvalue()
+                io = get_table_xsd(StringIO(), value,
+                        include_primary_keys=self.include_primary_keys)
+                return io.getvalue()
         return _render
