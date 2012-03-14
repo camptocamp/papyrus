@@ -145,16 +145,16 @@ class Test_GeoJSON(unittest.TestCase):
 
 class Test_XSD(unittest.TestCase):
 
-    def _callFUT(self):
+    def _callFUT(self, **kwargs):
         from papyrus.renderers import XSD
         fake_info = {}
-        return XSD()(fake_info)
+        return XSD(**kwargs)(fake_info)
 
     def _make_xpath(self, components):
         return '/{http://www.w3.org/2001/XMLSchema}'.join(components.split())
 
-    def _get_elements(self, column):
-        renderer = self._callFUT()
+    def _get_elements(self, column, **kwargs):
+        renderer = self._callFUT(**kwargs)
         from sqlalchemy import MetaData, Table
         t = Table('table', MetaData(), column)
         request = testing.DummyRequest()
@@ -195,6 +195,21 @@ class Test_XSD(unittest.TestCase):
             'name': 'column',
             'nillable': 'true',
             'type': 'other'})
+
+    def test_primary_keys(self):
+        from sqlalchemy import Column, types
+        column = Column('column', types.Integer, primary_key=True)
+        elements = self._get_elements(column)
+        self.assertEqual(len(elements), 0)
+
+    def test_include_primary_keys(self):
+        from sqlalchemy import Column, types
+        column = Column('column', types.Integer, primary_key=True)
+        elements = self._get_elements(column, include_primary_keys=True)
+        self.assertEqual(len(elements), 1)
+        self.assertEqual(elements[0].attrib, {
+            'name': 'column',
+            'type': 'xsd:integer'})
 
     def test_integer(self):
         from sqlalchemy import Column, types
