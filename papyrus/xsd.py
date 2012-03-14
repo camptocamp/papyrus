@@ -113,7 +113,7 @@ def add_column_xsd(tb, column):
     raise UnsupportedColumnTypeError(column.type)
 
 
-def get_columns_xsd(io, name, columns):
+def get_columns_xsd(io, name, columns, include_primary_keys=False):
     """ Returns the XSD for a named collection of columns """
     attrs = {}
     attrs['xmlns:gml'] = 'http://www.opengis.net/gml'
@@ -126,12 +126,14 @@ def get_columns_xsd(io, name, columns):
                          {'base': 'gml:AbstractFeatureType'}) as tb:
                     with tag(tb, 'xsd:sequence') as tb:
                         for column in columns:
+                            if column.primary_key and not include_primary_keys:
+                                continue
                             add_column_xsd(tb, column)
-                        pass
     ElementTree(tb.close()).write(io, encoding='utf-8')
     return io
 
 
-def get_table_xsd(io, table):
+def get_table_xsd(io, table, include_primary_keys=False):
     """ Returns the XSD for a table """
-    return get_columns_xsd(io, table.name, table.columns)
+    return get_columns_xsd(io, table.name, table.columns,
+            include_primary_keys=include_primary_keys)
