@@ -1,6 +1,14 @@
 Changes
 -------
 
+0.8.1
+~~~~~
+
+* XSD renderer now uses ``application/xml`` instead of ``text/xml``. @twpayne
+* XSD renderer now skips primary keys by default, and it now has an
+  ``include_primary_keys`` option which can be set to ``True`` to change
+  the behavior. @twpayne
+
 0.8
 ~~~
 
