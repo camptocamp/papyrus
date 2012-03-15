@@ -179,7 +179,7 @@ Table objects.
 Here's another example::
 
     @view_config(renderer='xsd')
-    def features(request):
+    def spots_md(request):
         return Spot.__table__
 
 Where ``Spot`` is an SQLAlchemy mapped class created using SQLAlchemy's
