@@ -185,6 +185,16 @@ Here's another example::
 Where ``Spot`` is an SQLAlchemy mapped class created using SQLAlchemy's
 declarative layer.
 
+Notes:
+
+* By default the XSD renderer skips columns which are primary keys. If you
+  wish to include primary keys then pass ``include_primary_keys=True``
+  when creating the ``XSD`` objects, for example::
+
+      from papyrus.renderers import XSD
+      onfig.add_renderer('xsd', XSD(include_primary_keys=True))
+
+
 MapFish Web Services
 --------------------
 
