@@ -153,12 +153,16 @@ class Test_XSD(unittest.TestCase):
     def _make_xpath(self, components):
         return '/{http://www.w3.org/2001/XMLSchema}'.join(components.split())
 
-    def _get_elements(self, column, **kwargs):
+    def _get_elements(self, key, column, **kwargs):
+        from sqlalchemy import Column, types
+        from sqlalchemy.ext.declarative import declarative_base
         renderer = self._callFUT(**kwargs)
-        from sqlalchemy import MetaData, Table
-        t = Table('table', MetaData(), column)
+        class C(declarative_base()):
+            __tablename__ = 'table'
+            _id = Column(types.Integer, primary_key=True)
+        setattr(C, key, column)
         request = testing.DummyRequest()
-        result = renderer(t, {'request': request})
+        result = renderer(C, {'request': request})
         self.assertEqual(request.response.content_type, 'application/xml')
         from xml.etree.ElementTree import XML
         xml = XML(result)
@@ -168,8 +172,8 @@ class Test_XSD(unittest.TestCase):
 
     def test_enum(self):
         from sqlalchemy import Column, types
-        column = Column('column', types.Enum('red', 'green', 'blue'))
-        elements = self._get_elements(column)
+        column = Column('_column', types.Enum('red', 'green', 'blue'))
+        elements = self._get_elements('column', column)
         self.assertEqual(len(elements), 1)
         self.assertEqual(elements[0].attrib, {
             'minOccurs': '0',
@@ -187,8 +191,8 @@ class Test_XSD(unittest.TestCase):
 
     def test_foreign_key(self):
         from sqlalchemy import Column, ForeignKey, types
-        column = Column('column', types.Integer, ForeignKey('other.id'))
-        elements = self._get_elements(column)
+        column = Column('_column', types.Integer, ForeignKey('other.id'))
+        elements = self._get_elements('column', column)
         self.assertEqual(len(elements), 1)
         self.assertEqual(elements[0].attrib, {
             'minOccurs': '0',
@@ -198,23 +202,24 @@ class Test_XSD(unittest.TestCase):
 
     def test_primary_keys(self):
         from sqlalchemy import Column, types
-        column = Column('column', types.Integer, primary_key=True)
-        elements = self._get_elements(column)
+        column = Column('_column', types.Integer, primary_key=True)
+        elements = self._get_elements('column', column)
         self.assertEqual(len(elements), 0)
 
     def test_include_primary_keys(self):
         from sqlalchemy import Column, types
-        column = Column('column', types.Integer, primary_key=True)
-        elements = self._get_elements(column, include_primary_keys=True)
-        self.assertEqual(len(elements), 1)
-        self.assertEqual(elements[0].attrib, {
+        column = Column('_column', types.Integer, primary_key=True)
+        elements = self._get_elements('column', column,
+                                      include_primary_keys=True)
+        self.assertEqual(len(elements), 2)
+        self.assertEqual(elements[1].attrib, {
             'name': 'column',
             'type': 'xsd:integer'})
 
     def test_integer(self):
         from sqlalchemy import Column, types
-        column = Column('column', types.Integer)
-        elements = self._get_elements(column)
+        column = Column('_column', types.Integer)
+        elements = self._get_elements('column', column)
         self.assertEqual(len(elements), 1)
         self.assertEqual(elements[0].attrib, {
             'minOccurs': '0',
@@ -224,8 +229,8 @@ class Test_XSD(unittest.TestCase):
 
     def test_numeric(self):
         from sqlalchemy import Column, types
-        column = Column('column', types.Numeric)
-        elements = self._get_elements(column)
+        column = Column('_column', types.Numeric)
+        elements = self._get_elements('column', column)
         self.assertEqual(len(elements), 1)
         self.assertEqual(elements[0].attrib, {
             'minOccurs': '0',
@@ -235,8 +240,8 @@ class Test_XSD(unittest.TestCase):
 
     def test_numeric_precision(self):
         from sqlalchemy import Column, types
-        column = Column('column', types.Numeric(precision=5))
-        elements = self._get_elements(column)
+        column = Column('_column', types.Numeric(precision=5))
+        elements = self._get_elements('column', column)
         self.assertEqual(len(elements), 1)
         self.assertEqual(elements[0].attrib, {
             'minOccurs': '0',
@@ -252,8 +257,8 @@ class Test_XSD(unittest.TestCase):
 
     def test_numeric_precision_scale(self):
         from sqlalchemy import Column, types
-        column = Column('column', types.Numeric(5, 2))
-        elements = self._get_elements(column)
+        column = Column('_column', types.Numeric(5, 2))
+        elements = self._get_elements('column', column)
         self.assertEqual(len(elements), 1)
         self.assertEqual(elements[0].attrib, {
             'minOccurs': '0',
@@ -274,8 +279,8 @@ class Test_XSD(unittest.TestCase):
 
     def test_numeric_scale(self):
         from sqlalchemy import Column, types
-        column = Column('column', types.Numeric(scale=2))
-        elements = self._get_elements(column)
+        column = Column('_column', types.Numeric(scale=2))
+        elements = self._get_elements('column', column)
         self.assertEqual(len(elements), 1)
         self.assertEqual(elements[0].attrib, {
             'minOccurs': '0',
@@ -292,8 +297,8 @@ class Test_XSD(unittest.TestCase):
 
     def test_string(self):
         from sqlalchemy import Column, types
-        column = Column('column', types.String)
-        elements = self._get_elements(column)
+        column = Column('_column', types.String)
+        elements = self._get_elements('column', column)
         self.assertEqual(len(elements), 1)
         self.assertEqual(elements[0].attrib, {
             'minOccurs': '0',
@@ -303,8 +308,8 @@ class Test_XSD(unittest.TestCase):
 
     def test_string_length(self):
         from sqlalchemy import Column, types
-        column = Column('column', types.String(10))
-        elements = self._get_elements(column)
+        column = Column('_column', types.String(10))
+        elements = self._get_elements('column', column)
         self.assertEqual(len(elements), 1)
         self.assertEqual(elements[0].attrib, {
             'minOccurs': '0',
@@ -323,6 +328,6 @@ class Test_XSD(unittest.TestCase):
         class UnsupportedColumn(types.TypeEngine):
             pass
         from papyrus.xsd import UnsupportedColumnTypeError
-        column = Column('column', UnsupportedColumn())
+        column = Column('_column', UnsupportedColumn())
         self.assertRaises(UnsupportedColumnTypeError,
-                self._get_elements, column)
+                self._get_elements, 'column', column)
