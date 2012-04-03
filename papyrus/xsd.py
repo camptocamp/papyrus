@@ -1,11 +1,14 @@
 from contextlib import contextmanager
 try:
     from xml.etree.cElementTree import ElementTree, TreeBuilder
-except ImportError: # pragma: no cover
+except ImportError:  # pragma: no cover
     from xml.etree.ElementTree import ElementTree, TreeBuilder
 
-import geoalchemy
 import sqlalchemy
+from sqlalchemy.orm.util import class_mapper
+from sqlalchemy.orm.properties import ColumnProperty
+
+import geoalchemy
 
 
 @contextmanager
@@ -46,15 +49,13 @@ SIMPLE_XSD_TYPES = {
         }
 
 
-def add_column_xsd(tb, column):
-    """ Add the XSD for a single column to tb (a TreeBuilder) """
-    attrs = {}
-    attrs['name'] = column.name
+def add_column_xsd(tb, column, attrs):
+    """ Add the XSD for a column to tb (a TreeBuilder) """
     if column.nullable:
         attrs['minOccurs'] = str(0)
         attrs['nillable'] = 'true'
     if column.foreign_keys:
-        if len(column.foreign_keys) != 1: # pragma: no cover
+        if len(column.foreign_keys) != 1:  # pragma: no cover
             # FIXME understand when a column can have multiple foreign keys
             raise NotImplementedError
         foreign_key = next(iter(column.foreign_keys))
@@ -113,27 +114,30 @@ def add_column_xsd(tb, column):
     raise UnsupportedColumnTypeError(column.type)
 
 
-def get_columns_xsd(io, name, columns, include_primary_keys=False):
-    """ Returns the XSD for a named collection of columns """
+def add_column_property_xsd(tb, column_property, include_primary_keys=False):
+    """ Add the XSD for a column property to tb (a TreeBuilder) """
+    column = column_property.columns[0]
+    if not column.primary_key or include_primary_keys:
+        attrs = {'name': column_property.key}
+        add_column_xsd(tb, column, attrs)
+
+
+def get_class_xsd(io, cls, include_primary_keys=False):
+    """ Returns the XSD for a mapped class """
     attrs = {}
     attrs['xmlns:gml'] = 'http://www.opengis.net/gml'
     attrs['xmlns:xsd'] = 'http://www.w3.org/2001/XMLSchema'
     tb = TreeBuilder()
     with tag(tb, 'xsd:schema', attrs) as tb:
-        with tag(tb, 'xsd:complexType', {'name': name}) as tb:
+        with tag(tb, 'xsd:complexType', {'name': cls.__name__}) as tb:
             with tag(tb, 'xsd:complexContent') as tb:
                 with tag(tb, 'xsd:extension',
                          {'base': 'gml:AbstractFeatureType'}) as tb:
                     with tag(tb, 'xsd:sequence') as tb:
-                        for column in columns:
-                            if column.primary_key and not include_primary_keys:
+                        for p in class_mapper(cls).iterate_properties:
+                            if not isinstance(p, ColumnProperty):
                                 continue
-                            add_column_xsd(tb, column)
+                            add_column_property_xsd(tb, p,
+                                                    include_primary_keys)
     ElementTree(tb.close()).write(io, encoding='utf-8')
     return io
-
-
-def get_table_xsd(io, table, include_primary_keys=False):
-    """ Returns the XSD for a table """
-    return get_columns_xsd(io, table.name, table.columns,
-            include_primary_keys=include_primary_keys)
