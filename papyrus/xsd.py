@@ -116,6 +116,8 @@ def add_column_xsd(tb, column, attrs):
 
 def add_column_property_xsd(tb, column_property, include_primary_keys=False):
     """ Add the XSD for a column property to tb (a TreeBuilder) """
+    if len(column_property.columns) != 1:
+        raise NotImplementedError  # pragma: no cover
     column = column_property.columns[0]
     if not column.primary_key or include_primary_keys:
         attrs = {'name': column_property.key}
