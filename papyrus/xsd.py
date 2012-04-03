@@ -51,115 +51,130 @@ SIMPLE_XSD_TYPES = {
         }
 
 
-def add_column_xsd(tb, column, attrs):
-    """ Add the XSD for a column to tb (a TreeBuilder) """
-    if column.nullable:
-        attrs['minOccurs'] = str(0)
-        attrs['nillable'] = 'true'
-    for cls, xsd_type in SIMPLE_XSD_TYPES.iteritems():
-        if isinstance(column.type, cls):
-            attrs['type'] = xsd_type
-            with tag(tb, 'xsd:element', attrs) as tb:
-                return tb
-    if isinstance(column.type, sqlalchemy.Enum):
-        with tag(tb, 'xsd:element', attrs) as tb:
-            with tag(tb, 'xsd:simpleType') as tb:
-                with tag(tb, 'xsd:restriction', {'base': 'xsd:string'}) as tb:
-                    for enum in column.type.enums:
-                        with tag(tb, 'xsd:enumeration', {'value': enum}):
-                            pass
+class XSDGenerator(object):
+    """ XSD Generator """
+
+    def __init__(self,
+                 include_primary_keys=False,
+                 include_foreign_keys=False,
+                 relationship_property_callback=None,
+                 association_proxy_callback=None):
+        self.include_primary_keys = include_primary_keys
+        self.include_foreign_keys = include_foreign_keys
+        self.relationship_property_callback = relationship_property_callback
+        self.association_proxy_callback = association_proxy_callback
+
+    def add_column_xsd(self, tb, column, attrs):
+        """ Add the XSD for a column to tb (a TreeBuilder) """
+        if column.nullable:
+            attrs['minOccurs'] = str(0)
+            attrs['nillable'] = 'true'
+        for cls, xsd_type in SIMPLE_XSD_TYPES.iteritems():
+            if isinstance(column.type, cls):
+                attrs['type'] = xsd_type
+                with tag(tb, 'xsd:element', attrs) as tb:
                     return tb
-    if isinstance(column.type, sqlalchemy.Numeric):
-        if column.type.scale is None and column.type.precision is None:
-            attrs['type'] = 'xsd:decimal'
-            with tag(tb, 'xsd:element', attrs) as tb:
-                return tb
-        else:
+        if isinstance(column.type, sqlalchemy.Enum):
             with tag(tb, 'xsd:element', attrs) as tb:
                 with tag(tb, 'xsd:simpleType') as tb:
-                    with tag(tb, 'xsd:restriction',
-                             {'base': 'xsd:decimal'}) as tb:
-                        if column.type.scale is not None:
-                            with tag(tb, 'xsd:fractionDigits',
-                                    {'value': str(column.type.scale)}) as tb:
-                                pass
-                        if column.type.precision is not None:
-                            with tag(tb, 'xsd:totalDigits',
-                                     {'value': str(column.type.precision)}) \
-                                    as tb:
+                    with tag(tb, 'xsd:restriction', {'base': 'xsd:string'}) \
+                            as tb:
+                        for enum in column.type.enums:
+                            with tag(tb, 'xsd:enumeration', {'value': enum}):
                                 pass
                         return tb
-    if isinstance(column.type, sqlalchemy.String) \
-        or isinstance(column.type, sqlalchemy.Text) \
-        or isinstance(column.type, sqlalchemy.Unicode) \
-        or isinstance(column.type, sqlalchemy.UnicodeText):
-        if column.type.length is None:
-            attrs['type'] = 'xsd:string'
-            with tag(tb, 'xsd:element', attrs) as tb:
-                return tb
-        else:
-            with tag(tb, 'xsd:element', attrs) as tb:
-                with tag(tb, 'xsd:simpleType') as tb:
-                    with tag(tb, 'xsd:restriction',
-                             {'base': 'xsd:string'}) as tb:
-                        with tag(tb, 'xsd:maxLength',
-                                 {'value': str(column.type.length)}):
+        if isinstance(column.type, sqlalchemy.Numeric):
+            if column.type.scale is None and column.type.precision is None:
+                attrs['type'] = 'xsd:decimal'
+                with tag(tb, 'xsd:element', attrs) as tb:
+                    return tb
+            else:
+                with tag(tb, 'xsd:element', attrs) as tb:
+                    with tag(tb, 'xsd:simpleType') as tb:
+                        with tag(tb, 'xsd:restriction',
+                                 {'base': 'xsd:decimal'}) as tb:
+                            if column.type.scale is not None:
+                                with tag(tb, 'xsd:fractionDigits',
+                                         {'value': str(column.type.scale)}) \
+                                        as tb:
+                                    pass
+                            if column.type.precision is not None:
+                                precision = column.type.precision
+                                with tag(tb, 'xsd:totalDigits',
+                                         {'value': str(precision)}) \
+                                        as tb:
+                                    pass
                             return tb
-    raise UnsupportedColumnTypeError(column.type)
+        if isinstance(column.type, sqlalchemy.String) \
+            or isinstance(column.type, sqlalchemy.Text) \
+            or isinstance(column.type, sqlalchemy.Unicode) \
+            or isinstance(column.type, sqlalchemy.UnicodeText):
+            if column.type.length is None:
+                attrs['type'] = 'xsd:string'
+                with tag(tb, 'xsd:element', attrs) as tb:
+                    return tb
+            else:
+                with tag(tb, 'xsd:element', attrs) as tb:
+                    with tag(tb, 'xsd:simpleType') as tb:
+                        with tag(tb, 'xsd:restriction',
+                                 {'base': 'xsd:string'}) as tb:
+                            with tag(tb, 'xsd:maxLength',
+                                     {'value': str(column.type.length)}):
+                                return tb
+        raise UnsupportedColumnTypeError(column.type)
 
+    def add_column_property_xsd(self, tb, column_property):
+        """ Add the XSD for a column property to the ``TreeBuilder``. """
+        if len(column_property.columns) != 1:
+            raise NotImplementedError  # pragma: no cover
+        column = column_property.columns[0]
+        if column.primary_key and not self.include_primary_keys:
+            return
+        if column.foreign_keys and not self.include_foreign_keys:
+            if len(column.foreign_keys) != 1:  # pragma: no cover
+                # FIXME understand when a column can have multiple
+                # foreign keys
+                raise NotImplementedError()
+            return
+        attrs = {'name': column_property.key}
+        self.add_column_xsd(tb, column, attrs)
 
-def add_column_property_xsd(tb, column_property,
-                            include_primary_keys=False,
-                            include_foreign_keys=False):
-    """ Add the XSD for a column property to tb (a TreeBuilder) """
-    if len(column_property.columns) != 1:
-        raise NotImplementedError  # pragma: no cover
-    column = column_property.columns[0]
-    if column.primary_key and not include_primary_keys:
-        return
-    if column.foreign_keys and not include_foreign_keys:
-        if len(column.foreign_keys) != 1:  # pragma: no cover
-            # FIXME understand when a column can have multiple
-            # foreign keys
-            raise NotImplementedError()
-        return
-    attrs = {'name': column_property.key}
-    add_column_xsd(tb, column, attrs)
+    def add_class_properties_xsd(self, tb, cls):
+        """ Add the XSD for the class properties to the ``TreeBuilder``. And
+        call the user callbacks for relationship properties and association
+        proxies. """
+        for k, p in cls.__dict__.iteritems():
+            try:
+                p = class_mapper(cls).get_property(p.key)
+            except (AttributeError, InvalidRequestError):
+                # p is not a mapper property, it may be
+                # an association proxy
+                pass
+            if isinstance(p, ColumnProperty):
+                self.add_column_property_xsd(tb, p)
+            elif isinstance(p, RelationshipProperty):
+                if callable(self.relationship_property_callback):
+                    self.relationship_property_callback(tb, k, p)
+            elif isinstance(p, AssociationProxy):
+                if callable(self.association_proxy_callback):
+                    relationship_property = class_mapper(cls) \
+                                    .get_property(p.target_collection)
+                    target = relationship_property.argument
+                    self.association_proxy_callback(tb, k, p)
 
+    def get_class_xsd(self, io, cls):
+        """ Returns the XSD for a mapped class. """
+        attrs = {}
+        attrs['xmlns:gml'] = 'http://www.opengis.net/gml'
+        attrs['xmlns:xsd'] = 'http://www.w3.org/2001/XMLSchema'
+        tb = TreeBuilder()
+        with tag(tb, 'xsd:schema', attrs) as tb:
+            with tag(tb, 'xsd:complexType', {'name': cls.__name__}) as tb:
+                with tag(tb, 'xsd:complexContent') as tb:
+                    with tag(tb, 'xsd:extension',
+                             {'base': 'gml:AbstractFeatureType'}) as tb:
+                        with tag(tb, 'xsd:sequence') as tb:
+                            self.add_class_properties_xsd(tb, cls)
 
-def get_class_xsd(io, cls,
-                  include_primary_keys=False,
-                  include_foreign_keys=False,
-                  relationship_property_callback=None,
-                  association_proxy_callback=None):
-    """ Returns the XSD for a mapped class """
-    attrs = {}
-    attrs['xmlns:gml'] = 'http://www.opengis.net/gml'
-    attrs['xmlns:xsd'] = 'http://www.w3.org/2001/XMLSchema'
-    tb = TreeBuilder()
-    with tag(tb, 'xsd:schema', attrs) as tb:
-        with tag(tb, 'xsd:complexType', {'name': cls.__name__}) as tb:
-            with tag(tb, 'xsd:complexContent') as tb:
-                with tag(tb, 'xsd:extension',
-                         {'base': 'gml:AbstractFeatureType'}) as tb:
-                    with tag(tb, 'xsd:sequence') as tb:
-                        for k, p in cls.__dict__.iteritems():
-                            try:
-                                p = class_mapper(cls).get_property(p.key)
-                            except (AttributeError, InvalidRequestError):
-                                # p is not a mapper property, it may be
-                                # an association proxy
-                                pass
-                            if isinstance(p, ColumnProperty):
-                                add_column_property_xsd(tb, p,
-                                                        include_primary_keys,
-                                                        include_foreign_keys)
-                            elif isinstance(p, RelationshipProperty):
-                                if callable(relationship_property_callback):
-                                    relationship_property_callback(tb, k, p)
-                            elif isinstance(p, AssociationProxy):
-                                if callable(association_proxy_callback):
-                                    association_proxy_callback(tb, k, p)
-
-    ElementTree(tb.close()).write(io, encoding='utf-8')
-    return io
+        ElementTree(tb.close()).write(io, encoding='utf-8')
+        return io
