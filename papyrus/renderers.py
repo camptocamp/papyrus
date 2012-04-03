@@ -109,16 +109,6 @@ class XSD(object):
 
         config.add_renderer('xsd', XSD())
 
-    By default, the XSD renderer will skip columns which are primary keys.  If
-    you wish to include primary keys then pass ``include_primary_keys=True``
-    when creating the XSD object, for example:
-
-    .. code-block:: python
-
-        from papyrus.renderers import XSD
-
-        config.add_renderer('xsd', XSD(include_primary_keys=True))
-
     Once this renderer has been registered as above , you can use
     ``xsd`` as the ``renderer`` parameter to ``@view_config``
     or to the ``add_view`` method on the Configurator object:
@@ -130,6 +120,65 @@ class XSD(object):
         @view_config(renderer='xsd')
         def myview(request):
             return Spot.__table__
+
+    By default, the XSD renderer will skip columns which are primary keys or
+    foreign keys.
+
+    If you wish to include primary keys then pass ``include_primary_keys=True``
+    when creating the XSD object, for example:
+
+    .. code-block:: python
+
+        from papyrus.renderers import XSD
+
+        config.add_renderer('xsd', XSD(include_primary_keys=True))
+
+    If you wish to include foreign keys then pass ``include_foreign_keys=True``
+    when creating the XSD object, for example:
+
+    .. code-block:: python
+
+        from papyrus.renderers import XSD
+
+        config.add_renderer('xsd', XSD(include_foreign_keys=True))
+
+    The XSD renderer does not handle SQLAlchemy `relationship properties
+    <http://docs.sqlalchemy.org/en/latest/orm/relationships.html#sqlalchemy.orm.relationship>`_,
+    nor does it handle `association proxies
+    http://docs.sqlalchemy.org/en/latest/orm/extensions/associationproxy.html`_.
+
+    If you wish to handle relationship properties at application level then
+    register a ``relationship_property_callback`` when creating the XSD object.
+    Likewise, if you wish to handle association proxies then register
+    a ``association_proxy_callback``.
+
+    The callbacks are called with the following args:
+
+    * ``tb`` A `TreeBuilder
+      <http://docs.python.org/library/xml.etree.elementtree.html#xml.etree.ElementTree.TreeBuilder>`_
+      object, which can be used to add elements to the XSD.
+    * ``key`` The name of the class property.
+    * ``property`` The class property.
+
+    Callback example:
+
+    .. code-block: python
+
+        from papyrus.xsd import tag
+
+        def callback(tb, key, property):
+            attrs = {}
+            attrs['minOccurs'] = str(0)
+            attrs['nillable'] = 'true'
+            attrs['name'] = property.key
+            with tag(tb, 'xsd:element', attrs) as tb:
+                with tag(tb, 'xsd:simpleType') as tb:
+                    with tag(tb, 'xsd:restriction',
+                             {'base': 'xsd:string'}) as tb:
+                        for enum in ('male', 'female'):
+                            with tag(tb, 'xsd:enumeration',
+                                     {'value': enum}):
+                                pass
     """
 
     def __init__(self,

@@ -198,6 +198,20 @@ Notes:
       from papyrus.renderers import XSD
       onfig.add_renderer('xsd', XSD(include_primary_keys=True))
 
+* By default the XSD renderer skips columns which are foreign keys. Use
+  ``include_foreign_keys=True`` to change that behavior. For example::
+
+      from papyrus.renderers import XSD
+      onfig.add_renderer('xsd', XSD(include_foreign_keys=True))
+
+* The XSD renderer ignores `relationship properties
+  <http://docs.sqlalchemy.org/en/latest/orm/relationships.html#sqlalchemy.orm.relationship>`_.
+  A ``relationship_property_callback`` can be registered to handle relationship
+  properties at the application level.
+
+* Likewise an ``association_proxy_callback`` can be register to handle
+  `association proxies
+  <http://docs.sqlalchemy.org/en/latest/orm/extensions/associationproxy.html>`_.
 
 MapFish Web Services
 --------------------
