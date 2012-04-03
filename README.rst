@@ -196,8 +196,34 @@ Notes:
   when creating the ``XSD`` objects, for example::
 
       from papyrus.renderers import XSD
-      onfig.add_renderer('xsd', XSD(include_primary_keys=True))
+      config.add_renderer('xsd', XSD(include_primary_keys=True))
 
+* By default the XSD renderer skips columns which are foreign keys. Use
+  ``include_foreign_keys=True`` to change that behavior. For example::
+
+      from papyrus.renderers import XSD
+      config.add_renderer('xsd', XSD(include_foreign_keys=True))
+
+* The XSD renderer adds ``xsd:element`` nodes for the column properties it
+  finds in the class. The XSD renderer will ignore other property types. For
+  example it will ignore relationship properties and association proxies. If
+  you want to add ``xsd:element`` nodes for other elements in the class then
+  use a ``sequence_callback``. For example::
+
+      from papyrus.renderers import XSD
+      def callback(tb, cls):
+          attrs = {}
+          attrs['minOccurs'] = str(0)
+          attrs['nillable'] = 'true'
+          attrs['name'] = 'gender'
+          with tag(tb, 'xsd:element', attrs) as tb:
+              with tag(tb, 'xsd:simpleType') as tb:
+                  with tag(tb, 'xsd:restriction', {'base': 'xsd:string'}) as tb:
+                      with tag(tb, 'xsd:enumeration', {'value': 'male'}):
+                              pass
+                      with tag(tb, 'xsd:enumeration', {'value': 'female'}):
+                              pass
+      config.add_renderer('xsd', XSD(sequence_callback=callback))
 
 MapFish Web Services
 --------------------
