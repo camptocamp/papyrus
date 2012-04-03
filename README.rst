@@ -207,11 +207,16 @@ Notes:
 * The XSD renderer ignores `relationship properties
   <http://docs.sqlalchemy.org/en/latest/orm/relationships.html#sqlalchemy.orm.relationship>`_.
   A ``relationship_property_callback`` can be registered to handle relationship
-  properties at the application level.
+  properties at the application level. The callback receives three arguments:
+  an ``xml.etree.ElementTree.TreeBuilder``, the mapped class being
+  serialized, and the relationship property key.
 
 * Likewise an ``association_proxy_callback`` can be registered to handle
   `association proxies
   <http://docs.sqlalchemy.org/en/latest/orm/extensions/associationproxy.html>`_.
+  The callback receives three arguments: an
+  ``xml.etree.ElementTree.TreeBuilder``, the mapped class being serialized, and
+  the name of the association proxy property as defined in the mapped class.
 
 MapFish Web Services
 --------------------

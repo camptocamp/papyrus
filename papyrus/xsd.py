@@ -153,14 +153,13 @@ class XSDGenerator(object):
             if isinstance(p, ColumnProperty):
                 self.add_column_property_xsd(tb, p)
             elif isinstance(p, RelationshipProperty):
-                if callable(self.relationship_property_callback):
-                    self.relationship_property_callback(tb, k, p)
+                cb = self.relationship_property_callback
+                if callable(cb):
+                    cb(tb, cls, k)
             elif isinstance(p, AssociationProxy):
-                if callable(self.association_proxy_callback):
-                    relationship_property = class_mapper(cls) \
-                                    .get_property(p.target_collection)
-                    target = relationship_property.argument
-                    self.association_proxy_callback(tb, k, p)
+                cb = self.association_proxy_callback
+                if callable(cb):
+                    cb(tb, cls, k)
 
     def get_class_xsd(self, io, cls):
         """ Returns the XSD for a mapped class. """

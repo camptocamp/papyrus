@@ -157,20 +157,22 @@ class XSD(object):
     * ``tb`` A `TreeBuilder
       <http://docs.python.org/library/xml.etree.elementtree.html#xml.etree.ElementTree.TreeBuilder>`_
       object, which can be used to add elements to the XSD.
-    * ``key`` The name of the class property.
-    * ``property`` The class property.
+    * ``cls`` The class being serialized.
+    * ``key`` The property key.
 
     Callback example:
 
     .. code-block: python
 
+        from sqlalchemy.orm.util import class_mapper
         from papyrus.xsd import tag
 
-        def callback(tb, key, property):
+        def callback(tb, cls, key):
+            _property = class_mapper(cls).get_property(key)
             attrs = {}
             attrs['minOccurs'] = str(0)
             attrs['nillable'] = 'true'
-            attrs['name'] = property.key
+            attrs['name'] = _property.key
             with tag(tb, 'xsd:element', attrs) as tb:
                 with tag(tb, 'xsd:simpleType') as tb:
                     with tag(tb, 'xsd:restriction',

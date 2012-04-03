@@ -346,6 +346,7 @@ class Test_XSD(unittest.TestCase):
     def test_relationship(self):
         from sqlalchemy import Column, ForeignKey, types
         from sqlalchemy.orm import relationship, properties
+        from sqlalchemy.orm.util import class_mapper
         from sqlalchemy.ext.declarative import declarative_base
         from papyrus.xsd import tag
         class Other(self.base):
@@ -354,13 +355,14 @@ class Test_XSD(unittest.TestCase):
             name = Column(types.Unicode)
         column = Column('_column', types.Integer, ForeignKey('other.id'))
         rel = relationship(Other)
-        def cb(tb, k, p):
+        def cb(tb, cls, key):
+            _property = class_mapper(cls).get_property(key)
             self.assertTrue(
-                    isinstance(p, properties.RelationshipProperty))
+                isinstance(_property, properties.RelationshipProperty))
             attrs = {}
             attrs['minOccurs'] = str(0)
             attrs['nillable'] = 'true'
-            attrs['name'] = p.key
+            attrs['name'] = _property.key
             with tag(tb, 'xsd:element', attrs) as tb:
                 with tag(tb, 'xsd:simpleType') as tb:
                     with tag(tb, 'xsd:restriction',
@@ -389,6 +391,7 @@ class Test_XSD(unittest.TestCase):
     def test_association_proxy(self):
         from sqlalchemy import Column, ForeignKey, types
         from sqlalchemy.orm import relationship, properties
+        from sqlalchemy.orm.util import class_mapper
         from sqlalchemy.ext.declarative import declarative_base
         from sqlalchemy.ext.associationproxy import (association_proxy,
                                                      AssociationProxy)
@@ -400,12 +403,19 @@ class Test_XSD(unittest.TestCase):
         column = Column('_column', types.Integer, ForeignKey('other.id'))
         rel = relationship(Other)
         proxy = association_proxy('rel', 'name')
-        def cb(tb, k, p):
-            self.assertTrue(isinstance(p, AssociationProxy))
+        def cb(tb, cls, key):
+            _proxy = getattr(cls, key)
+            self.assertTrue(isinstance(_proxy, AssociationProxy))
+            self.assertTrue(_proxy.value_attr, 'name')
+            _property = class_mapper(cls).get_property(_proxy.target_collection)
+            self.assertTrue(
+                isinstance(_property, properties.RelationshipProperty))
+            _cls = _property.argument
+            self.assertEquals(_cls, Other)
             attrs = {}
             attrs['minOccurs'] = str(0)
             attrs['nillable'] = 'true'
-            attrs['name'] = k
+            attrs['name'] = key
             with tag(tb, 'xsd:element', attrs) as tb:
                 with tag(tb, 'xsd:simpleType') as tb:
                     with tag(tb, 'xsd:restriction',
