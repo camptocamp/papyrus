@@ -132,8 +132,15 @@ class XSD(object):
             return Spot.__table__
     """
 
-    def __init__(self, include_primary_keys=False):
+    def __init__(self,
+                 include_primary_keys=False,
+                 include_foreign_keys=False,
+                 relationship_property_callback=None,
+                 association_proxy_callback=None):
         self.include_primary_keys = include_primary_keys
+        self.include_foreign_keys = include_foreign_keys
+        self.relationship_property_callback = relationship_property_callback
+        self.association_proxy_callback = association_proxy_callback
 
     def __call__(self, table):
         def _render(cls, system):
@@ -141,7 +148,12 @@ class XSD(object):
             if request is not None:
                 response = request.response
                 response.content_type = 'application/xml'
+                relatcb = self.relationship_property_callback
+                proxycb = self.association_proxy_callback
                 io = get_class_xsd(StringIO(), cls,
-                        include_primary_keys=self.include_primary_keys)
+                    include_primary_keys=self.include_primary_keys,
+                    include_foreign_keys=self.include_foreign_keys,
+                    relationship_property_callback=relatcb,
+                    association_proxy_callback=proxycb)
                 return io.getvalue()
         return _render

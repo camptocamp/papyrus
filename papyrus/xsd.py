@@ -6,7 +6,9 @@ except ImportError:  # pragma: no cover
 
 import sqlalchemy
 from sqlalchemy.orm.util import class_mapper
-from sqlalchemy.orm.properties import ColumnProperty
+from sqlalchemy.orm.properties import ColumnProperty, RelationshipProperty
+from sqlalchemy.exc import InvalidRequestError
+from sqlalchemy.ext.associationproxy import AssociationProxy
 
 import geoalchemy
 
@@ -54,14 +56,6 @@ def add_column_xsd(tb, column, attrs):
     if column.nullable:
         attrs['minOccurs'] = str(0)
         attrs['nillable'] = 'true'
-    if column.foreign_keys:
-        if len(column.foreign_keys) != 1:  # pragma: no cover
-            # FIXME understand when a column can have multiple foreign keys
-            raise NotImplementedError
-        foreign_key = next(iter(column.foreign_keys))
-        attrs['type'] = foreign_key._colspec.split('.', 2)[0]
-        with tag(tb, 'xsd:element', attrs) as tb:
-            return tb
     for cls, xsd_type in SIMPLE_XSD_TYPES.iteritems():
         if isinstance(column.type, cls):
             attrs['type'] = xsd_type
@@ -114,17 +108,30 @@ def add_column_xsd(tb, column, attrs):
     raise UnsupportedColumnTypeError(column.type)
 
 
-def add_column_property_xsd(tb, column_property, include_primary_keys=False):
+def add_column_property_xsd(tb, column_property,
+                            include_primary_keys=False,
+                            include_foreign_keys=False):
     """ Add the XSD for a column property to tb (a TreeBuilder) """
     if len(column_property.columns) != 1:
         raise NotImplementedError  # pragma: no cover
     column = column_property.columns[0]
-    if not column.primary_key or include_primary_keys:
-        attrs = {'name': column_property.key}
-        add_column_xsd(tb, column, attrs)
+    if column.primary_key and not include_primary_keys:
+        return
+    if column.foreign_keys and not include_foreign_keys:
+        if len(column.foreign_keys) != 1:  # pragma: no cover
+            # FIXME understand when a column can have multiple
+            # foreign keys
+            raise NotImplementedError()
+        return
+    attrs = {'name': column_property.key}
+    add_column_xsd(tb, column, attrs)
 
 
-def get_class_xsd(io, cls, include_primary_keys=False):
+def get_class_xsd(io, cls,
+                  include_primary_keys=False,
+                  include_foreign_keys=False,
+                  relationship_property_callback=None,
+                  association_proxy_callback=None):
     """ Returns the XSD for a mapped class """
     attrs = {}
     attrs['xmlns:gml'] = 'http://www.opengis.net/gml'
@@ -136,10 +143,23 @@ def get_class_xsd(io, cls, include_primary_keys=False):
                 with tag(tb, 'xsd:extension',
                          {'base': 'gml:AbstractFeatureType'}) as tb:
                     with tag(tb, 'xsd:sequence') as tb:
-                        for p in class_mapper(cls).iterate_properties:
-                            if not isinstance(p, ColumnProperty):
-                                continue
-                            add_column_property_xsd(tb, p,
-                                                    include_primary_keys)
+                        for k, p in cls.__dict__.iteritems():
+                            try:
+                                p = class_mapper(cls).get_property(p.key)
+                            except (AttributeError, InvalidRequestError):
+                                # p is not a mapper property, it may be
+                                # an association proxy
+                                pass
+                            if isinstance(p, ColumnProperty):
+                                add_column_property_xsd(tb, p,
+                                                        include_primary_keys,
+                                                        include_foreign_keys)
+                            elif isinstance(p, RelationshipProperty):
+                                if callable(relationship_property_callback):
+                                    relationship_property_callback(tb, k, p)
+                            elif isinstance(p, AssociationProxy):
+                                if callable(association_proxy_callback):
+                                    association_proxy_callback(tb, k, p)
+
     ElementTree(tb.close()).write(io, encoding='utf-8')
     return io
