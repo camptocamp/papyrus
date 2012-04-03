@@ -8,7 +8,7 @@ except ImportError: # pragma: no cover
 import geojson
 from geojson.codec import PyGFPEncoder as GeoJSONEncoder
 
-from xsd import get_table_xsd
+from xsd import get_class_xsd
 
 
 class Encoder(GeoJSONEncoder):
@@ -136,12 +136,12 @@ class XSD(object):
         self.include_primary_keys = include_primary_keys
 
     def __call__(self, table):
-        def _render(value, system):
+        def _render(cls, system):
             request = system.get('request')
             if request is not None:
                 response = request.response
                 response.content_type = 'application/xml'
-                io = get_table_xsd(StringIO(), value,
+                io = get_class_xsd(StringIO(), cls,
                         include_primary_keys=self.include_primary_keys)
                 return io.getvalue()
         return _render
