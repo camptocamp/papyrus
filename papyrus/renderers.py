@@ -119,7 +119,7 @@ class XSD(object):
 
         @view_config(renderer='xsd')
         def myview(request):
-            return Spot.__table__
+            return Spot
 
     By default, the XSD renderer will skip columns which are primary keys or
     foreign keys.
