@@ -145,6 +145,10 @@ class Test_GeoJSON(unittest.TestCase):
 
 class Test_XSD(unittest.TestCase):
 
+    def setUp(self):
+        from sqlalchemy.ext.declarative import declarative_base
+        self.base = declarative_base()
+
     def _callFUT(self, **kwargs):
         from papyrus.renderers import XSD
         fake_info = {}
@@ -153,14 +157,14 @@ class Test_XSD(unittest.TestCase):
     def _make_xpath(self, components):
         return '/{http://www.w3.org/2001/XMLSchema}'.join(components.split())
 
-    def _get_elements(self, key, column, **kwargs):
+    def _get_elements(self, props, **kwargs):
         from sqlalchemy import Column, types
-        from sqlalchemy.ext.declarative import declarative_base
         renderer = self._callFUT(**kwargs)
-        class C(declarative_base()):
+        class C(self.base):
             __tablename__ = 'table'
             _id = Column(types.Integer, primary_key=True)
-        setattr(C, key, column)
+        for k, p in props:
+            setattr(C, k, p)
         request = testing.DummyRequest()
         result = renderer(C, {'request': request})
         self.assertEqual(request.response.content_type, 'application/xml')
@@ -173,7 +177,7 @@ class Test_XSD(unittest.TestCase):
     def test_enum(self):
         from sqlalchemy import Column, types
         column = Column('_column', types.Enum('red', 'green', 'blue'))
-        elements = self._get_elements('column', column)
+        elements = self._get_elements((('column', column),))
         self.assertEqual(len(elements), 1)
         self.assertEqual(elements[0].attrib, {
             'minOccurs': '0',
@@ -189,37 +193,44 @@ class Test_XSD(unittest.TestCase):
         self.assertEqual(enumerations[1].attrib, {'value': 'green'})
         self.assertEqual(enumerations[2].attrib, {'value': 'blue'})
 
-    def test_foreign_key(self):
+    def test_foreign_keys(self):
         from sqlalchemy import Column, ForeignKey, types
         column = Column('_column', types.Integer, ForeignKey('other.id'))
-        elements = self._get_elements('column', column)
+        elements = self._get_elements((('column', column),))
+        self.assertEqual(len(elements), 0)
+
+    def test_include_foreign_keys(self):
+        from sqlalchemy import Column, ForeignKey, types
+        column = Column('_column', types.Integer, ForeignKey('other.id'))
+        elements = self._get_elements((('column', column),),
+                                      include_foreign_keys=True)
         self.assertEqual(len(elements), 1)
         self.assertEqual(elements[0].attrib, {
             'minOccurs': '0',
-            'name': 'column',
             'nillable': 'true',
-            'type': 'other'})
+            'name': 'column',
+            'type': 'xsd:integer'})
 
     def test_primary_keys(self):
         from sqlalchemy import Column, types
         column = Column('_column', types.Integer, primary_key=True)
-        elements = self._get_elements('column', column)
+        elements = self._get_elements((('column', column),))
         self.assertEqual(len(elements), 0)
 
     def test_include_primary_keys(self):
         from sqlalchemy import Column, types
         column = Column('_column', types.Integer, primary_key=True)
-        elements = self._get_elements('column', column,
+        elements = self._get_elements((('column', column),),
                                       include_primary_keys=True)
         self.assertEqual(len(elements), 2)
-        self.assertEqual(elements[1].attrib, {
+        self.assertEqual(elements[0].attrib, {
             'name': 'column',
             'type': 'xsd:integer'})
 
     def test_integer(self):
         from sqlalchemy import Column, types
         column = Column('_column', types.Integer)
-        elements = self._get_elements('column', column)
+        elements = self._get_elements((('column', column),))
         self.assertEqual(len(elements), 1)
         self.assertEqual(elements[0].attrib, {
             'minOccurs': '0',
@@ -230,7 +241,7 @@ class Test_XSD(unittest.TestCase):
     def test_numeric(self):
         from sqlalchemy import Column, types
         column = Column('_column', types.Numeric)
-        elements = self._get_elements('column', column)
+        elements = self._get_elements((('column', column),))
         self.assertEqual(len(elements), 1)
         self.assertEqual(elements[0].attrib, {
             'minOccurs': '0',
@@ -241,7 +252,7 @@ class Test_XSD(unittest.TestCase):
     def test_numeric_precision(self):
         from sqlalchemy import Column, types
         column = Column('_column', types.Numeric(precision=5))
-        elements = self._get_elements('column', column)
+        elements = self._get_elements((('column', column),))
         self.assertEqual(len(elements), 1)
         self.assertEqual(elements[0].attrib, {
             'minOccurs': '0',
@@ -258,7 +269,7 @@ class Test_XSD(unittest.TestCase):
     def test_numeric_precision_scale(self):
         from sqlalchemy import Column, types
         column = Column('_column', types.Numeric(5, 2))
-        elements = self._get_elements('column', column)
+        elements = self._get_elements((('column', column),))
         self.assertEqual(len(elements), 1)
         self.assertEqual(elements[0].attrib, {
             'minOccurs': '0',
@@ -280,7 +291,7 @@ class Test_XSD(unittest.TestCase):
     def test_numeric_scale(self):
         from sqlalchemy import Column, types
         column = Column('_column', types.Numeric(scale=2))
-        elements = self._get_elements('column', column)
+        elements = self._get_elements((('column', column),))
         self.assertEqual(len(elements), 1)
         self.assertEqual(elements[0].attrib, {
             'minOccurs': '0',
@@ -298,7 +309,7 @@ class Test_XSD(unittest.TestCase):
     def test_string(self):
         from sqlalchemy import Column, types
         column = Column('_column', types.String)
-        elements = self._get_elements('column', column)
+        elements = self._get_elements((('column', column),))
         self.assertEqual(len(elements), 1)
         self.assertEqual(elements[0].attrib, {
             'minOccurs': '0',
@@ -309,7 +320,7 @@ class Test_XSD(unittest.TestCase):
     def test_string_length(self):
         from sqlalchemy import Column, types
         column = Column('_column', types.String(10))
-        elements = self._get_elements('column', column)
+        elements = self._get_elements((('column', column),))
         self.assertEqual(len(elements), 1)
         self.assertEqual(elements[0].attrib, {
             'minOccurs': '0',
@@ -330,4 +341,103 @@ class Test_XSD(unittest.TestCase):
         from papyrus.xsd import UnsupportedColumnTypeError
         column = Column('_column', UnsupportedColumn())
         self.assertRaises(UnsupportedColumnTypeError,
-                self._get_elements, 'column', column)
+                self._get_elements, (('column', column),))
+
+    def test_relationship(self):
+        from sqlalchemy import Column, ForeignKey, types
+        from sqlalchemy.orm import relationship, properties
+        from sqlalchemy.orm.util import class_mapper
+        from sqlalchemy.ext.declarative import declarative_base
+        from papyrus.xsd import tag
+        class Other(self.base):
+            __tablename__ = 'other'
+            id = Column(types.Integer, primary_key=True)
+            name = Column(types.Unicode)
+        column = Column('_column', types.Integer, ForeignKey('other.id'))
+        rel = relationship(Other)
+        def cb(tb, cls, key):
+            _property = class_mapper(cls).get_property(key)
+            self.assertTrue(
+                isinstance(_property, properties.RelationshipProperty))
+            attrs = {}
+            attrs['minOccurs'] = str(0)
+            attrs['nillable'] = 'true'
+            attrs['name'] = _property.key
+            with tag(tb, 'xsd:element', attrs) as tb:
+                with tag(tb, 'xsd:simpleType') as tb:
+                    with tag(tb, 'xsd:restriction',
+                             {'base': 'xsd:string'}) as tb:
+                        for enum in ('male', 'female'):
+                            with tag(tb, 'xsd:enumeration',
+                                     {'value': enum}):
+                                pass
+
+        elements = self._get_elements((('column', column), ('rel', rel)),
+                                      relationship_property_callback=cb)
+        self.assertEqual(len(elements), 1)
+        self.assertEqual(elements[0].attrib, {
+            'minOccurs': '0',
+            'name': 'rel',
+            'nillable': 'true'})
+        restrictions = elements[0].findall(
+                self._make_xpath('. simpleType restriction'))
+        self.assertEqual(restrictions[0].attrib, {'base': 'xsd:string'})
+        enumerations = restrictions[0].findall(
+                self._make_xpath('. enumeration'))
+        self.assertEqual(len(enumerations), 2)
+        self.assertEqual(enumerations[0].attrib, {'value': 'male'})
+        self.assertEqual(enumerations[1].attrib, {'value': 'female'})
+
+    def test_association_proxy(self):
+        from sqlalchemy import Column, ForeignKey, types
+        from sqlalchemy.orm import relationship, properties
+        from sqlalchemy.orm.util import class_mapper
+        from sqlalchemy.ext.declarative import declarative_base
+        from sqlalchemy.ext.associationproxy import (association_proxy,
+                                                     AssociationProxy)
+        from papyrus.xsd import tag
+        class Other(self.base):
+            __tablename__ = 'other'
+            id = Column(types.Integer, primary_key=True)
+            name = Column(types.Unicode)
+        column = Column('_column', types.Integer, ForeignKey('other.id'))
+        rel = relationship(Other)
+        proxy = association_proxy('rel', 'name')
+        def cb(tb, cls, key):
+            _proxy = getattr(cls, key)
+            self.assertTrue(isinstance(_proxy, AssociationProxy))
+            self.assertTrue(_proxy.value_attr, 'name')
+            _property = class_mapper(cls).get_property(_proxy.target_collection)
+            self.assertTrue(
+                isinstance(_property, properties.RelationshipProperty))
+            _cls = _property.argument
+            self.assertEquals(_cls, Other)
+            attrs = {}
+            attrs['minOccurs'] = str(0)
+            attrs['nillable'] = 'true'
+            attrs['name'] = key
+            with tag(tb, 'xsd:element', attrs) as tb:
+                with tag(tb, 'xsd:simpleType') as tb:
+                    with tag(tb, 'xsd:restriction',
+                             {'base': 'xsd:string'}) as tb:
+                        for enum in ('male', 'female'):
+                            with tag(tb, 'xsd:enumeration',
+                                     {'value': enum}):
+                                pass
+
+        elements = self._get_elements(
+            (('column', column), ('rel', rel), ('proxy', proxy)),
+            association_proxy_callback=cb)
+        self.assertEqual(len(elements), 1)
+        self.assertEqual(elements[0].attrib, {
+            'minOccurs': '0',
+            'name': 'proxy',
+            'nillable': 'true'})
+        restrictions = elements[0].findall(
+                self._make_xpath('. simpleType restriction'))
+        self.assertEqual(restrictions[0].attrib, {'base': 'xsd:string'})
+        enumerations = restrictions[0].findall(
+                self._make_xpath('. enumeration'))
+        self.assertEqual(len(enumerations), 2)
+        self.assertEqual(enumerations[0].attrib, {'value': 'male'})
+        self.assertEqual(enumerations[1].attrib, {'value': 'female'})
