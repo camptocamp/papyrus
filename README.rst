@@ -235,7 +235,7 @@ that implement the Python Geo Interface, and define ``__init__`` and
 ``__update__`` as expected by the MapFish protocol. The mixin is named
 ``GeoInterface``, and is provided by the ``papyrus.geo_interface`` module.
 
-Using ``GeoInterface`` our ``Spot`` class looks like this::
+Using ``GeoInterface`` for our ``Spot`` class looks like this::
 
     from papyrus.geo_interface import GeoInterface
 
@@ -250,14 +250,21 @@ Using ``GeoInterface`` our ``Spot`` class looks like this::
     # called.
     GeometryDDL(Spot.__table__)
 
-``GeoInterface`` represents a convenience method. Often, implementing one's own
-``__geo_interface__``, ``__init__``, and ``__update__`` definitions is a better
-choice than relying on ``GeoInterface``.
+``GeoInterface`` represents a convenience method. Implementing one's own
+``__geo_interface__``, ``__init__``, and ``__update__`` definitions may
+be a better choice than relying on ``GeoInterface``.
 
-When using ``GeoInterface`` understanding its `code
-<https://github.com/elemoine/papyrus/blob/master/papyrus/geo_interface.py>`_
-can be useful. It can also be a source of inspiration for those who don't use
-it.
+Notes:
+
+* When using ``GeoInterface`` understanding its `code
+  <https://github.com/elemoine/papyrus/blob/master/papyrus/geo_interface.py>`_
+  can be useful. It can also be a source of inspiration for those who don't use
+  it.
+
+* One can change the behavior of ``GeoInterface`` by overloading its
+  ``__init__``, ``__update__``, and ``__read__`` functions. The latter is
+  called by the ``__geo_interface__`` property, and is therefore the one to
+  overload to change the behavior of ``__geo_interface__``.
 
 Without GeoInterface
 ^^^^^^^^^^^^^^^^^^^^
