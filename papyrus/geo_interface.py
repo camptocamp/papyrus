@@ -64,12 +64,7 @@ class GeoInterface(object):
             elif not col.primary_key:
                 setattr(self, p.key, feature.properties.get(p.key, None))
 
-    @property
-    def __geo_interface__(self):
-        """ Objects implement the Python Geo Interface, making them
-        candidates to serialization with the ``geojson`` module, or
-        Papyrus' GeoJSON renderer.
-        """
+    def __read__(self):
         id = None
         geom = None
         properties = {}
@@ -91,3 +86,11 @@ class GeoInterface(object):
                 properties[p.key] = val
 
         return geojson.Feature(id=id, geometry=geom, properties=properties)
+
+    @property
+    def __geo_interface__(self):
+        """ GeoInterface objects implement the Python Geo Interface, making
+        them candidates to serialization with the ``geojson`` module, or
+        the Papyrus GeoJSON renderer.
+        """
+        return self.__read__()
