@@ -1,6 +1,14 @@
 Changes
 -------
 
+0.9
+~~~
+
+* Make the XSD renderer work with mapped classes instead of Table objects.
+  #13. @elemoine
+* Make the XSD renderer ignore foreign keys by default. #14. @elemoine
+* Make it easier to overload the behavior of GeoInterface. #15. @elemoine
+
 0.8.1
 ~~~~~
 
