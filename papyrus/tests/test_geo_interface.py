@@ -21,6 +21,25 @@ class GeoInterfaceTests(unittest.TestCase):
             children = orm.relationship(Child, backref="parent")
         return Parent
 
+    def _get_mapped_class_declarative_as_base(self):
+        from sqlalchemy import MetaData, Column, types, orm, schema
+        from sqlalchemy.ext.declarative import declarative_base
+        from geoalchemy import GeometryColumn, Geometry
+        from papyrus.geo_interface import GeoInterface
+        Base = declarative_base(metadata=MetaData(), cls=GeoInterface,
+                                constructor=None)
+        class Child(Base):
+            __tablename__ = 'child'
+            id = Column(types.Integer, primary_key=True)
+            parent_id = Column(types.Integer, schema.ForeignKey('parent.id'))
+        class Parent(Base):
+            __tablename__ = 'parent'
+            id = Column(types.Integer, primary_key=True)
+            text = Column(types.Unicode)
+            geom = GeometryColumn(Geometry(dimension=2, srid=3000))
+            children = orm.relationship(Child, backref="parent")
+        return Parent
+
     def _get_mapped_class_non_declarative(self):
         from sqlalchemy import Table, MetaData, Column, types, orm
         from papyrus.geo_interface import GeoInterface
@@ -41,25 +60,17 @@ class GeoInterfaceTests(unittest.TestCase):
 
     def test_update_declarative(self):
         mapped_class = self._get_mapped_class_declarative()
-        from geojson import Feature, Point
-        from geoalchemy import WKBSpatialElement
-        from shapely import wkb
-        feature = Feature(id=1, properties={'text': 'foo'},
-                          geometry=Point(coordinates=[53, -4]))
-        obj = mapped_class(feature)
-        feature = Feature(id=2, properties={'text': 'bar'},
-                          geometry=Point(coordinates=[55, -5]))
-        obj.__update__(feature)
-        self.assertEqual(obj.id, 1)
-        self.assertEqual(obj.text, 'bar')
-        self.assertTrue(isinstance(obj.geom, WKBSpatialElement))
-        point = wkb.loads(str(obj.geom.desc))
-        self.assertEqual(point.x, 55)
-        self.assertEqual(point.y, -5)
-        self.assertEqual(obj.geom.srid, 3000)
+        self._test_update(mapped_class)
+
+    def test_update_declarative_as_base(self):
+        mapped_class = self._get_mapped_class_declarative_as_base()
+        self._test_update(mapped_class)
 
     def test_update_non_declarative(self):
         mapped_class = self._get_mapped_class_non_declarative()
+        self._test_update(mapped_class)
+
+    def _test_update(self, mapped_class):
         from geojson import Feature, Point
         from geoalchemy import WKBSpatialElement
         from shapely import wkb
@@ -79,22 +90,17 @@ class GeoInterfaceTests(unittest.TestCase):
 
     def test_init_declarative(self):
         mapped_class = self._get_mapped_class_declarative()
-        from geojson import Feature, Point
-        from geoalchemy import WKBSpatialElement
-        from shapely import wkb
-        feature = Feature(id=1, properties={'text': 'foo'},
-                          geometry=Point(coordinates=[53, -4]))
-        obj = mapped_class(feature)
-        self.assertEqual(obj.id, 1)
-        self.assertEqual(obj.text, 'foo')
-        self.assertTrue(isinstance(obj.geom, WKBSpatialElement))
-        point = wkb.loads(str(obj.geom.desc))
-        self.assertEqual(point.x, 53)
-        self.assertEqual(point.y, -4)
-        self.assertEqual(obj.geom.srid, 3000)
+        self._test_init(mapped_class)
+
+    def test_init_declarative_as_base(self):
+        mapped_class = self._get_mapped_class_declarative_as_base()
+        self._test_init(mapped_class)
 
     def test_init_non_declarative(self):
         mapped_class = self._get_mapped_class_non_declarative()
+        self._test_init(mapped_class)
+
+    def _test_init(self, mapped_class):
         from geojson import Feature, Point
         from geoalchemy import WKBSpatialElement
         from shapely import wkb
@@ -110,8 +116,19 @@ class GeoInterfaceTests(unittest.TestCase):
         self.assertEqual(obj.geom.srid, 3000)
 
     def test_geo_interface_declarative(self):
-        from geojson import Feature, Point, dumps
         mapped_class = self._get_mapped_class_declarative()
+        self._test_geo_interface(mapped_class)
+
+    def test_geo_interface_declarative_as_base(self):
+        mapped_class = self._get_mapped_class_declarative_as_base()
+        self._test_geo_interface(mapped_class)
+
+    def test_geo_interface_non_declarative(self):
+        mapped_class = self._get_mapped_class_non_declarative()
+        self._test_geo_interface(mapped_class)
+
+    def _test_geo_interface(self, mapped_class):
+        from geojson import Feature, Point, dumps
         feature = Feature(id=1, properties={'text': 'foo'},
                           geometry=Point(coordinates=[53, -4]))
         obj = mapped_class(feature)
@@ -119,14 +136,28 @@ class GeoInterfaceTests(unittest.TestCase):
         self.assertEqual(json, '{"geometry": {"type": "Point", "coordinates": [53.0, -4.0]}, "type": "Feature", "properties": {"text": "foo"}, "id": 1}')
 
     def test_geo_interface_declarative_no_feature(self):
-        from geojson import dumps
         mapped_class = self._get_mapped_class_declarative()
+        self._test_geo_interface_no_feature(mapped_class)
+
+    def test_geo_interface_declarative_no_feature_as_base(self):
+        mapped_class = self._get_mapped_class_declarative_as_base()
+        self._test_geo_interface_no_feature(mapped_class)
+
+    def _test_geo_interface_no_feature(self, mapped_class):
+        from geojson import dumps
         obj = mapped_class()
         self.assertRaises(ValueError, dumps, obj)
 
     def test_geo_interface_declarative_shape_unset(self):
-        from geojson import Feature, Point, dumps
         mapped_class = self._get_mapped_class_declarative()
+        self._test_geo_interface_declarative_shape_unset(mapped_class)
+
+    def test_geo_interface_declarative_shape_unset_as_base(self):
+        mapped_class = self._get_mapped_class_declarative_as_base()
+        self._test_geo_interface_declarative_shape_unset(mapped_class)
+
+    def _test_geo_interface_declarative_shape_unset(self, mapped_class):
+        from geojson import Feature, Point, dumps
         feature = Feature(id=1, properties={'text': 'foo'},
                           geometry=Point(coordinates=[53, -4]))
         obj = mapped_class(feature)
@@ -134,14 +165,5 @@ class GeoInterfaceTests(unittest.TestCase):
         # the database, so we delete _shape and set geom.geom_wkb
         del(obj._shape)
         obj.geom.geom_wkb = obj.geom.desc
-        json = dumps(obj)
-        self.assertEqual(json, '{"geometry": {"type": "Point", "coordinates": [53.0, -4.0]}, "type": "Feature", "properties": {"text": "foo"}, "id": 1}')
-
-    def test_geo_interface_non_declarative(self):
-        from geojson import Feature, Point, dumps
-        mapped_class = self._get_mapped_class_non_declarative()
-        feature = Feature(id=1, properties={'text': 'foo'},
-                          geometry=Point(coordinates=[53, -4]))
-        obj = mapped_class(feature)
         json = dumps(obj)
         self.assertEqual(json, '{"geometry": {"type": "Point", "coordinates": [53.0, -4.0]}, "type": "Feature", "properties": {"text": "foo"}, "id": 1}')
