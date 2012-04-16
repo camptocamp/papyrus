@@ -144,7 +144,7 @@ class XSDGenerator(object):
         for p in class_mapper(cls).iterate_properties:
             if isinstance(p, ColumnProperty):
                 self.add_column_property_xsd(tb, p)
-        if callable(self.sequence_callback):
+        if self.sequence_callback:
             self.sequence_callback(tb, cls)
 
     def get_class_xsd(self, io, cls):
