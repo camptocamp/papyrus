@@ -6,9 +6,7 @@ except ImportError: # pragma: no cover
 import geojson
 
 from papyrus.geojsonencoder import dumps
-
-from xsd import get_class_xsd
-
+from papyrus.xsd import XSDGenerator
 
 
 class GeoJSON(object):
@@ -98,16 +96,6 @@ class XSD(object):
 
         config.add_renderer('xsd', XSD())
 
-    By default, the XSD renderer will skip columns which are primary keys.  If
-    you wish to include primary keys then pass ``include_primary_keys=True``
-    when creating the XSD object, for example:
-
-    .. code-block:: python
-
-        from papyrus.renderers import XSD
-
-        config.add_renderer('xsd', XSD(include_primary_keys=True))
-
     Once this renderer has been registered as above , you can use
     ``xsd`` as the ``renderer`` parameter to ``@view_config``
     or to the ``add_view`` method on the Configurator object:
@@ -118,11 +106,68 @@ class XSD(object):
 
         @view_config(renderer='xsd')
         def myview(request):
-            return Spot.__table__
+            return Spot
+
+    By default, the XSD renderer will skip columns which are primary keys or
+    foreign keys.
+
+    If you wish to include primary keys then pass ``include_primary_keys=True``
+    when creating the XSD object, for example:
+
+    .. code-block:: python
+
+        from papyrus.renderers import XSD
+
+        config.add_renderer('xsd', XSD(include_primary_keys=True))
+
+    If you wish to include foreign keys then pass ``include_foreign_keys=True``
+    when creating the XSD object, for example:
+
+    .. code-block:: python
+
+        from papyrus.renderers import XSD
+
+        config.add_renderer('xsd', XSD(include_foreign_keys=True))
+
+    The XSD renderer adds ``xsd:element`` nodes for the column properties it
+    finds in the class. The XSD renderer will ignore other property types. For
+    example it will ignore relationship properties and association proxies. If
+    you want to add ``xsd:element`` nodes for other elements in the class then
+    use a ``sequence_callback``. For example:
+
+    .. code-block: python
+
+        from papyrus.renderers import XSD
+        from papyrus.xsd import tag
+
+        def callback(tb, cls):
+            attrs = {}
+            attrs['minOccurs'] = str(0)
+            attrs['nillable'] = 'true'
+            attrs['name'] = 'property_name'
+            with tag(tb, 'xsd:element', attrs) as tb:
+                with tag(tb, 'xsd:simpleType') as tb:
+                    with tag(tb, 'xsd:restriction',
+                             {'base': 'xsd:string'}) as tb:
+                        for enum in ('male', 'female'):
+                            with tag(tb, 'xsd:enumeration',
+                                     {'value': enum}):
+                                pass
+        config.add_renderer('xsd', XSD(sequence_callback=callback))
+
+    The callback receives an ``xml.etree.ElementTree.TreeBuilder`` object
+    and the mapped class being serialized.
     """
 
-    def __init__(self, include_primary_keys=False):
-        self.include_primary_keys = include_primary_keys
+    def __init__(self,
+                 include_primary_keys=False,
+                 include_foreign_keys=False,
+                 sequence_callback=None):
+        self.generator = XSDGenerator(
+            include_primary_keys=include_primary_keys,
+            include_foreign_keys=include_foreign_keys,
+            sequence_callback=sequence_callback
+            )
 
     def __call__(self, table):
         def _render(cls, system):
@@ -130,7 +175,6 @@ class XSD(object):
             if request is not None:
                 response = request.response
                 response.content_type = 'application/xml'
-                io = get_class_xsd(StringIO(), cls,
-                        include_primary_keys=self.include_primary_keys)
+                io = self.generator.get_class_xsd(StringIO(), cls)
                 return io.getvalue()
         return _render
