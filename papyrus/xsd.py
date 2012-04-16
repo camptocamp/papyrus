@@ -26,33 +26,34 @@ class UnsupportedColumnTypeError(RuntimeError):
         self.type = type
 
 
-SIMPLE_XSD_TYPES = {
-        # GeoAlchemy types
-        geoalchemy.Curve: 'gml:CurvePropertyType',
-        geoalchemy.GeometryCollection: 'gml:GeometryCollectionPropertyType',
-        geoalchemy.LineString: 'gml:LineStringPropertyType',
-        geoalchemy.MultiLineString: 'gml:MultiLineStringPropertyType',
-        geoalchemy.MultiPoint: 'gml:MultiPointPropertyType',
-        geoalchemy.MultiPolygon: 'gml:MultiPolygonPropertyType',
-        geoalchemy.Point: 'gml:PointPropertyType',
-        geoalchemy.Polygon: 'gml:PolygonPropertyType',
-        # SQLAlchemy types
-        sqlalchemy.BigInteger: 'xsd:integer',
-        sqlalchemy.Boolean: 'xsd:boolean',
-        sqlalchemy.Date: 'xsd:date',
-        sqlalchemy.DateTime: 'xsd:dateTime',
-        sqlalchemy.Float: 'xsd:double',
-        sqlalchemy.Integer: 'xsd:integer',
-        sqlalchemy.Interval: 'xsd:duration',
-        sqlalchemy.LargeBinary: 'xsd:base64Binary',
-        sqlalchemy.PickleType: 'xsd:base64Binary',
-        sqlalchemy.SmallInteger: 'xsd:integer',
-        sqlalchemy.Time: 'xsd:time',
-        }
 
 
 class XSDGenerator(object):
     """ XSD Generator """
+
+    SIMPLE_XSD_TYPES = {
+            # GeoAlchemy types
+            geoalchemy.Curve: 'gml:CurvePropertyType',
+            geoalchemy.GeometryCollection: 'gml:GeometryCollectionPropertyType',
+            geoalchemy.LineString: 'gml:LineStringPropertyType',
+            geoalchemy.MultiLineString: 'gml:MultiLineStringPropertyType',
+            geoalchemy.MultiPoint: 'gml:MultiPointPropertyType',
+            geoalchemy.MultiPolygon: 'gml:MultiPolygonPropertyType',
+            geoalchemy.Point: 'gml:PointPropertyType',
+            geoalchemy.Polygon: 'gml:PolygonPropertyType',
+            # SQLAlchemy types
+            sqlalchemy.BigInteger: 'xsd:integer',
+            sqlalchemy.Boolean: 'xsd:boolean',
+            sqlalchemy.Date: 'xsd:date',
+            sqlalchemy.DateTime: 'xsd:dateTime',
+            sqlalchemy.Float: 'xsd:double',
+            sqlalchemy.Integer: 'xsd:integer',
+            sqlalchemy.Interval: 'xsd:duration',
+            sqlalchemy.LargeBinary: 'xsd:base64Binary',
+            sqlalchemy.PickleType: 'xsd:base64Binary',
+            sqlalchemy.SmallInteger: 'xsd:integer',
+            sqlalchemy.Time: 'xsd:time',
+            }
 
     def __init__(self,
                  include_primary_keys=False,
@@ -67,7 +68,7 @@ class XSDGenerator(object):
         if column.nullable:
             attrs['minOccurs'] = str(0)
             attrs['nillable'] = 'true'
-        for cls, xsd_type in SIMPLE_XSD_TYPES.iteritems():
+        for cls, xsd_type in self.SIMPLE_XSD_TYPES.iteritems():
             if isinstance(column.type, cls):
                 attrs['type'] = xsd_type
                 with tag(tb, 'xsd:element', attrs) as tb:
