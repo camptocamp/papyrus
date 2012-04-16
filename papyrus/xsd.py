@@ -2,13 +2,11 @@ from contextlib import contextmanager
 try:
     from xml.etree.cElementTree import ElementTree, TreeBuilder
 except ImportError:  # pragma: no cover
-    from xml.etree.ElementTree import ElementTree, TreeBuilder
+    from xml.etree.ElementTree import ElementTree, TreeBuilder  # NOQA
 
 import sqlalchemy
 from sqlalchemy.orm.util import class_mapper
-from sqlalchemy.orm.properties import ColumnProperty, RelationshipProperty
-from sqlalchemy.exc import InvalidRequestError
-from sqlalchemy.ext.associationproxy import AssociationProxy
+from sqlalchemy.orm.properties import ColumnProperty
 
 import geoalchemy
 
@@ -26,34 +24,32 @@ class UnsupportedColumnTypeError(RuntimeError):
         self.type = type
 
 
-
-
 class XSDGenerator(object):
     """ XSD Generator """
 
     SIMPLE_XSD_TYPES = {
-            # GeoAlchemy types
-            geoalchemy.Curve: 'gml:CurvePropertyType',
-            geoalchemy.GeometryCollection: 'gml:GeometryCollectionPropertyType',
-            geoalchemy.LineString: 'gml:LineStringPropertyType',
-            geoalchemy.MultiLineString: 'gml:MultiLineStringPropertyType',
-            geoalchemy.MultiPoint: 'gml:MultiPointPropertyType',
-            geoalchemy.MultiPolygon: 'gml:MultiPolygonPropertyType',
-            geoalchemy.Point: 'gml:PointPropertyType',
-            geoalchemy.Polygon: 'gml:PolygonPropertyType',
-            # SQLAlchemy types
-            sqlalchemy.BigInteger: 'xsd:integer',
-            sqlalchemy.Boolean: 'xsd:boolean',
-            sqlalchemy.Date: 'xsd:date',
-            sqlalchemy.DateTime: 'xsd:dateTime',
-            sqlalchemy.Float: 'xsd:double',
-            sqlalchemy.Integer: 'xsd:integer',
-            sqlalchemy.Interval: 'xsd:duration',
-            sqlalchemy.LargeBinary: 'xsd:base64Binary',
-            sqlalchemy.PickleType: 'xsd:base64Binary',
-            sqlalchemy.SmallInteger: 'xsd:integer',
-            sqlalchemy.Time: 'xsd:time',
-            }
+        # GeoAlchemy types
+        geoalchemy.Curve: 'gml:CurvePropertyType',
+        geoalchemy.GeometryCollection: 'gml:GeometryCollectionPropertyType',
+        geoalchemy.LineString: 'gml:LineStringPropertyType',
+        geoalchemy.MultiLineString: 'gml:MultiLineStringPropertyType',
+        geoalchemy.MultiPoint: 'gml:MultiPointPropertyType',
+        geoalchemy.MultiPolygon: 'gml:MultiPolygonPropertyType',
+        geoalchemy.Point: 'gml:PointPropertyType',
+        geoalchemy.Polygon: 'gml:PolygonPropertyType',
+        # SQLAlchemy types
+        sqlalchemy.BigInteger: 'xsd:integer',
+        sqlalchemy.Boolean: 'xsd:boolean',
+        sqlalchemy.Date: 'xsd:date',
+        sqlalchemy.DateTime: 'xsd:dateTime',
+        sqlalchemy.Float: 'xsd:double',
+        sqlalchemy.Integer: 'xsd:integer',
+        sqlalchemy.Interval: 'xsd:duration',
+        sqlalchemy.LargeBinary: 'xsd:base64Binary',
+        sqlalchemy.PickleType: 'xsd:base64Binary',
+        sqlalchemy.SmallInteger: 'xsd:integer',
+        sqlalchemy.Time: 'xsd:time',
+        }
 
     def __init__(self,
                  include_primary_keys=False,
