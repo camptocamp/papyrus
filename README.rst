@@ -286,10 +286,39 @@ Notes:
   can be useful. It can also be a source of inspiration for those who don't use
   it.
 
-* One can change the behavior of ``GeoInterface`` by overloading its
-  ``__init__``, ``__update__``, and ``__read__`` functions. The latter is
-  called by the ``__geo_interface__`` property, and is therefore the one to
-  overload to change the behavior of ``__geo_interface__``.
+One can change the behavior of ``GeoInterface`` by overloading its
+``__init__``, ``__update__``, and ``__read__`` functions. The latter is called
+by the ``__geo_interface__`` property, and is therefore the one to overload to
+change the behavior of ``__geo_interface__``.
+
+By default ``__read__`` reads from `column properties
+<http://docs.sqlalchemy.org/en/latest/orm/internals.html#sqlalchemy.orm.properties.ColumnProperty>`_
+only. Likewise, ``__update__`` writes to column properties only. Other property
+types are ignored. To make ``__read__`` and ``__update__`` consider other
+properties the ``__add_properties__`` class-level property can be used. This
+property should reference a collection of property names. For example::
+
+    from papyrus.geo_interface import GeoInterface
+
+    class Type(Base):
+        __tablename__ = 'type'
+        id = Column(Integer, primary_key=True)
+        name = Column(Unicode, nullable=False)
+
+    class Spot(GeoInterface, Base):
+        __tablename__ = 'spots'
+        id = Column(Integer, primary_key=True)
+        name = Column(Unicode, nullable=False)
+        geom = GeometryColumn('the_geom', Point(srid=4326))
+        type_id = Column(Integer, ForeignKey('type.id'))
+        type_ = relationship(Type)
+
+        type = association_proxy('type_', 'name')
+        __add_properties__ = ('type',)
+
+With the above code features returned by the ``__geo_interface__`` will include
+``type`` properties. And ``__update__`` will set  ``type`` in ``Spot`` object
+being updated.
 
 Without GeoInterface
 ^^^^^^^^^^^^^^^^^^^^

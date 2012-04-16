@@ -1,26 +1,15 @@
-import decimal
-import datetime
 try:
     from cStringIO import StringIO
 except ImportError: # pragma: no cover
     from StringIO import StringIO
 
 import geojson
-from geojson.codec import PyGFPEncoder as GeoJSONEncoder
+
+from papyrus.geojsonencoder import dumps
 
 from xsd import get_class_xsd
 
 
-class Encoder(GeoJSONEncoder):
-    # SQLAlchemy's Reflecting Tables mechanism uses decimal.Decimal
-    # for numeric columns and datetime.date for dates. simplejson
-    # does'nt deal with these types. This class provides a simple
-    # encoder to deal with objects of these types.
-
-    def default(self, obj):
-        if isinstance(obj, (datetime.date, datetime.datetime)):
-            return obj.isoformat()
-        return GeoJSONEncoder.default(self, obj)
 
 class GeoJSON(object):
     """ GeoJSON renderer.
@@ -77,7 +66,7 @@ class GeoJSON(object):
         def _render(value, system):
             if isinstance(value, (list, tuple)):
                 value = self.collection_type(value)
-            ret = geojson.dumps(value, cls=Encoder, use_decimal=True)
+            ret = dumps(value)
             request = system.get('request')
             if request is not None:
                 response = request.response
