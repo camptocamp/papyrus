@@ -1,8 +1,8 @@
 Papyrus
 =======
 
-Geospatial Extensions for the `Pyramid <http://docs.pylonshq.com/pyramid>`_ web
-framework.
+Geospatial Extensions for the `Pyramid
+<http://docs.pylonsproject.org/en/latest/docs/pyramid.html>`_ web framework.
 
 Install
 -------
