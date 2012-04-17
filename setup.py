@@ -32,7 +32,7 @@ setup(name='papyrus',
       version=version,
       description="Geospatial Extensions for Pyramid",
       classifiers=[
-        'Framework :: Pylons',
+        'Framework :: Pyramid',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: BSD License',
         'Programming Language :: Python',
