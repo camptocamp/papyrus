@@ -45,6 +45,8 @@ Documentation
    :maxdepth: 1
 
    creating_mapfish_views
+   geojson_renderer
+   xsd_renderer
 
 Contributing
 ------------
