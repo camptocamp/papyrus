@@ -238,7 +238,7 @@ class Mock(object):
         else:
             return Mock()
 
-MOCK_MODULES = ['shapely']
+MOCK_MODULES = ['shapely', 'shapely.geometry']
 for mod_name in MOCK_MODULES:
     sys.modules[mod_name] = Mock()
 
