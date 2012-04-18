@@ -6,8 +6,16 @@
 Papyrus Documentation
 =====================
 
-Papyrus provides geospatial Extensions for the `Pyramid
+Papyrus provides geospatial extensions for the `Pyramid
 <http://docs.pylonsproject.org/en/latest/docs/pyramid.html>`_ web framework.
+
+Papyrus includes an implementation of the `MapFish Protocol
+<http://trac.mapfish.org/trac/mapfish/wiki/MapFishProtocol>`. The MapFish
+Protocol defines a HTTP interface for creating, reading, updating, and deleting
+(CRUD) geographic objects (a.k.a. features).
+
+Papyrus includes lower-level objects, like the GeoJSON renderer, that may come
+in handy for your apps even if you don't need or want MapFish views.
 
 Installing
 ----------
@@ -30,13 +38,21 @@ in the Pyramid application ``setup.py``. Example::
         'papyrus'
         ]
 
+Documentation
+-------------
+
+.. toctree::
+   :maxdepth: 1
+
+   creating_mapfish_views
+
 Contributing
 ------------
 
 Papyrus is on GitHub: http://github.com/elemoine/papyrus. Fork away. Pull
 requests are welcome!
 
-Run Papyrus Tests
+Running the tests
 -----------------
 
 Papyrus includes unit tests. Most of the time patches should include new tests.
@@ -55,9 +71,6 @@ To run the tests::
     $ python setup.py nosetests
 
 100% of the Papyrus code is covered by tests, let's preserve that.
-
-.. toctree::
-   :maxdepth: 1
 
 Indices and tables
 ==================
