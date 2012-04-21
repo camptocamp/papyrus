@@ -14,6 +14,7 @@ Changes
 * New class-level property ``__add_properties__`` for classes implementing
   GeoInterface. This is to be able to have ``GeoInterface`` consider properties
   that are not column properties. #20 @elemoine
+* Documentation is now on Read the Docs, at http://papyrus.rtfd.org. @elemoine
 
 0.8.1
 ~~~~~
