@@ -3,8 +3,8 @@ Release
 
 This file provides the steps for releasing a new version of Papyrus.
 
-Check that version number is correct in ``setup.py``. If not set it to the
-correct value, then commit and push that.
+Verify that the version number is correct in ``setup.py`` and ``docs/conf.py``.
+If not then change it, then commit and push.
 
 Verify that the tests pass, with 100% coverage::
 
@@ -29,9 +29,15 @@ Verify that the tests pass, with 100% coverage::
 
     OK
 
-Create Git tag::
+Create Git tag and push it::
 
     $ git tag -a x.y -m 'version x.y'
+    $ git push origin x.y
+
+Go to http://readthedocs.org/dashboard/papyrus/versions/, and:
+
+* Check the checkbox for the new tag,
+* Update the "default version" to the new version.
 
 Upload the package to PyPI::
 
