@@ -1,6 +1,13 @@
 Changes
 -------
 
+0.10
+~~~~
+
+* `GeoInterface.__update__`` changed not to set model object attributes
+  without corresponding feature properties.
+  https://github.com/elemoine/papyrus/pull/21
+
 0.9
 ~~~
 
