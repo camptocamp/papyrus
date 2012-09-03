@@ -99,7 +99,8 @@ class GeoInterface(object):
                             WKBSpatialElement(buffer(shape.wkb), srid=srid))
                     self._shape = shape
             elif not col.primary_key:
-                setattr(self, p.key, feature.properties.get(p.key, None))
+                if p.key in feature.properties:
+                    setattr(self, p.key, feature.properties[p.key])
 
         if self.__add_properties__:
                 for k in self.__add_properties__:
