@@ -165,7 +165,7 @@ def create_filter(request, mapped_class, geom_attr, **kwargs):
     attr_filter = create_attr_filter(request, mapped_class)
     geom_filter = create_geom_filter(request, mapped_class, geom_attr, **kwargs)
     if geom_filter is None and attr_filter is None:
-        return None
+        return True
     return and_(geom_filter, attr_filter)
 
 def asbool(val):
