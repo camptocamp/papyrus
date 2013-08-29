@@ -273,9 +273,12 @@ class Protocol(object):
 
     def count(self, request, filter=None):
         """ Return the number of records matching the given filter. """
+        query = self.Session().query(self.mapped_class)
         if filter is None:
             filter = create_filter(request, self.mapped_class, self.geom_attr)
-        return self.Session().query(self.mapped_class).filter(filter).count()
+        if filter is not None:
+            query.filter(filter)
+        return query.count()
 
     def read(self, request, filter=None, id=None):
         """ Build a query based on the filter or the idenfier, send the query
