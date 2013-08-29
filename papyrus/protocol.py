@@ -165,7 +165,7 @@ def create_filter(request, mapped_class, geom_attr, **kwargs):
     attr_filter = create_attr_filter(request, mapped_class)
     geom_filter = create_geom_filter(request, mapped_class, geom_attr, **kwargs)
     if geom_filter is None and attr_filter is None:
-        return True
+        return None
     return and_(geom_filter, attr_filter)
 
 def asbool(val):
@@ -260,9 +260,11 @@ class Protocol(object):
             limit = int(request.params['limit'])
         if 'offset' in request.params:
             offset = int(request.params['offset'])
+        query = self.Session().query(self.mapped_class)
         if filter is None:
             filter = create_filter(request, self.mapped_class, self.geom_attr)
-        query = self.Session().query(self.mapped_class).filter(filter)
+            if filter is not None:
+                query.filter(filter)
         order_by = self._get_order_by(request)
         if order_by is not None:
             query = query.order_by(order_by)
