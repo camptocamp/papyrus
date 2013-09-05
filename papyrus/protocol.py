@@ -264,7 +264,7 @@ class Protocol(object):
         if filter is None:
             filter = create_filter(request, self.mapped_class, self.geom_attr)
             if filter is not None:
-                query.filter(filter)
+                query = query.filter(filter)
         order_by = self._get_order_by(request)
         if order_by is not None:
             query = query.order_by(order_by)
@@ -277,7 +277,7 @@ class Protocol(object):
         if filter is None:
             filter = create_filter(request, self.mapped_class, self.geom_attr)
         if filter is not None:
-            query.filter(filter)
+            query = query.filter(filter)
         return query.count()
 
     def read(self, request, filter=None, id=None):
