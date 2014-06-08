@@ -12,7 +12,7 @@ install_requires = [
     'pyramid>=1.1a3',
     'geojson>=1.0',
     'Shapely>=1.2',
-    'GeoAlchemy>=0.5'
+    'GeoAlchemy2>=0.2.4'
     ]
 
 setup_requires = [
