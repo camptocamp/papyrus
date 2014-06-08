@@ -234,10 +234,10 @@ class GeoInterfaceTests(unittest.TestCase):
         self._test_geo_interface_no_feature(mapped_class)
 
     def _test_geo_interface_no_feature(self, mapped_class):
-        from geojson import dumps
+        from papyrus.geojsonencoder import dumps
         obj = mapped_class()
-        # FIXME why an exception is raised here?
-        self.assertRaises(TypeError, dumps, obj)
+        json = dumps(obj)
+        self.assertEqual(json, '{"geometry": null, "type": "Feature", "id": null, "properties": {"text": null, "children": [], "child": null}}')  # NOQA
 
     def test_geo_interface_declarative_shape_unset(self):
         mapped_class = self._get_mapped_class_declarative()
