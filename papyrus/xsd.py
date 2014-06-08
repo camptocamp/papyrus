@@ -8,7 +8,7 @@ import sqlalchemy
 from sqlalchemy.orm.util import class_mapper
 from sqlalchemy.orm.properties import ColumnProperty
 
-import geoalchemy
+from geoalchemy2.types import Geometry
 
 
 @contextmanager
@@ -28,15 +28,6 @@ class XSDGenerator(object):
     """ XSD Generator """
 
     SIMPLE_XSD_TYPES = {
-        # GeoAlchemy types
-        geoalchemy.Curve: 'gml:CurvePropertyType',
-        geoalchemy.GeometryCollection: 'gml:GeometryCollectionPropertyType',
-        geoalchemy.LineString: 'gml:LineStringPropertyType',
-        geoalchemy.MultiLineString: 'gml:MultiLineStringPropertyType',
-        geoalchemy.MultiPoint: 'gml:MultiPointPropertyType',
-        geoalchemy.MultiPolygon: 'gml:MultiPolygonPropertyType',
-        geoalchemy.Point: 'gml:PointPropertyType',
-        geoalchemy.Polygon: 'gml:PolygonPropertyType',
         # SQLAlchemy types
         sqlalchemy.BigInteger: 'xsd:integer',
         sqlalchemy.Boolean: 'xsd:boolean',
@@ -49,6 +40,18 @@ class XSDGenerator(object):
         sqlalchemy.PickleType: 'xsd:base64Binary',
         sqlalchemy.SmallInteger: 'xsd:integer',
         sqlalchemy.Time: 'xsd:time',
+        }
+
+    SIMPLE_GEOMETRY_XSD_TYPES = {
+        # GeoAlchemy types
+        'CURVE': 'gml:CurvePropertyType',
+        'GEOMETRYCOLLECTION': 'gml:GeometryCollectionPropertyType',
+        'LINESTRING': 'gml:LineStringPropertyType',
+        'MULTILINESTRING': 'gml:MultiLineStringPropertyType',
+        'MULTIPOINT': 'gml:MultiPointPropertyType',
+        'MULTIPOLYGON': 'gml:MultiPolygonPropertyType',
+        'POINT': 'gml:PointPropertyType',
+        'POLYGON': 'gml:PolygonPropertyType',
         }
 
     def __init__(self,
@@ -69,6 +72,12 @@ class XSDGenerator(object):
                 attrs['type'] = xsd_type
                 with tag(tb, 'xsd:element', attrs) as tb:
                     return tb
+        if isinstance(column.type, Geometry):
+            geometry_type = column.type.geometry_type
+            xsd_type = self.SIMPLE_GEOMETRY_XSD_TYPES[geometry_type]
+            attrs['type'] = xsd_type
+            with tag(tb, 'xsd:element', attrs) as tb:
+                return tb
         if isinstance(column.type, sqlalchemy.Enum):
             with tag(tb, 'xsd:element', attrs) as tb:
                 with tag(tb, 'xsd:simpleType') as tb:
@@ -101,9 +110,9 @@ class XSDGenerator(object):
                                     pass
                             return tb
         if isinstance(column.type, sqlalchemy.String) \
-            or isinstance(column.type, sqlalchemy.Text) \
-            or isinstance(column.type, sqlalchemy.Unicode) \
-            or isinstance(column.type, sqlalchemy.UnicodeText):
+                or isinstance(column.type, sqlalchemy.Text) \
+                or isinstance(column.type, sqlalchemy.Unicode) \
+                or isinstance(column.type, sqlalchemy.UnicodeText):
             if column.type.length is None:
                 attrs['type'] = 'xsd:string'
                 with tag(tb, 'xsd:element', attrs) as tb:
