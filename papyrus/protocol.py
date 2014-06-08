@@ -1,23 +1,20 @@
 
-# Copyright (c) 2008-2011 Camptocamp.
-# All rights reserved.
+# Copyright (c) 2008-2011 Camptocamp.  All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted provided that the following conditions
-# are met:
-# 1. Redistributions of source code must retain the above copyright
-#    notice, this list of conditions and the following disclaimer.
-# 2. Redistributions in binary form must reproduce the above copyright
-#    notice, this list of conditions and the following disclaimer in the
-#    documentation and/or other materials provided with the distribution.
-# 3. Neither the name of Camptocamp nor the names of its contributors may
-#    be used to endorse or promote products derived from this software
-#    without specific prior written permission.
+# modification, are permitted provided that the following conditions are met:
+# 1. Redistributions of source code must retain the above copyright notice,
+# this list of conditions and the following disclaimer.  2. Redistributions in
+# binary form must reproduce the above copyright notice, this list of
+# conditions and the following disclaimer in the documentation and/or other
+# materials provided with the distribution.  3. Neither the name of Camptocamp
+# nor the names of its contributors may be used to endorse or promote products
+# derived from this software without specific prior written permission.
 #
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-# ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-# WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-# DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+# ARE DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
 # DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
 # (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
 # LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -26,18 +23,18 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-from pyramid.httpexceptions import HTTPBadRequest, HTTPMethodNotAllowed, HTTPNotFound
+from pyramid.httpexceptions import (HTTPBadRequest, HTTPMethodNotAllowed,
+                                    HTTPNotFound)
 from pyramid.response import Response
 
 from shapely.geometry import asShape
 from shapely.geometry.point import Point
 from shapely.geometry.polygon import Polygon
 
-from sqlalchemy.sql import asc, desc, and_
+from sqlalchemy.sql import asc, desc, and_, func
 from sqlalchemy.orm.util import class_mapper
 
-from geoalchemy import WKBSpatialElement
-from geoalchemy.functions import functions
+from geoalchemy2.shape import from_shape
 
 from geojson import Feature, FeatureCollection, loads, GeoJSON
 
@@ -47,6 +44,7 @@ def _get_col_epsg(mapped_class, geom_attr):
 
     Arguments:
 
+
     geom_attr
         the key of the geometry property as defined in the SQLAlchemy
         mapper. If you use ``declarative_base`` this is the name of
@@ -55,8 +53,8 @@ def _get_col_epsg(mapped_class, geom_attr):
     col = class_mapper(mapped_class).get_property(geom_attr).columns[0]
     return col.type.srid
 
-def create_geom_filter(request, mapped_class, geom_attr,
-                       within_distance_additional_params={}):
+
+def create_geom_filter(request, mapped_class, geom_attr):
     """Create MapFish geometry filter based on the request params. Either
     a box or within or geometry filter, depending on the request params.
     Additional named arguments are passed to the spatial filter.
@@ -73,37 +71,35 @@ def create_geom_filter(request, mapped_class, geom_attr,
         the key of the geometry property as defined in the SQLAlchemy
         mapper. If you use ``declarative_base`` this is the name of
         the geometry attribute as defined in the mapped class.
-
-    within_distance_additional_params
-        additional_params to pass to the ``within_distance`` function.
     """
     tolerance = float(request.params.get('tolerance', 0.0))
     epsg = None
     if 'epsg' in request.params:
         epsg = int(request.params['epsg'])
     box = request.params.get('bbox')
-    geometry = None
+    shape = None
     if box is not None:
         box = map(float, box.split(','))
-        geometry = Polygon(((box[0], box[1]), (box[0], box[3]),
-                            (box[2], box[3]), (box[2], box[1]),
-                            (box[0], box[1])))
+        shape = Polygon(((box[0], box[1]), (box[0], box[3]),
+                         (box[2], box[3]), (box[2], box[1]),
+                         (box[0], box[1])))
     elif 'lon' and 'lat' in request.params:
-        geometry = Point(float(request.params['lon']),
-                         float(request.params['lat']))
+        shape = Point(float(request.params['lon']),
+                      float(request.params['lat']))
     elif 'geometry' in request.params:
-        geometry = loads(request.params['geometry'], object_hook=GeoJSON.to_instance)
-        geometry = asShape(geometry)
-    if geometry is None:
+        shape = loads(request.params['geometry'],
+                      object_hook=GeoJSON.to_instance)
+        shape = asShape(shape)
+    if shape is None:
         return None
     column_epsg = _get_col_epsg(mapped_class, geom_attr)
     geom_attr = getattr(mapped_class, geom_attr)
     epsg = column_epsg if epsg is None else epsg
     if epsg != column_epsg:
-        geom_attr = functions.transform(geom_attr, epsg)
-    wkb_geometry = WKBSpatialElement(buffer(geometry.wkb), epsg)
-    return functions._within_distance(geom_attr, wkb_geometry, tolerance,
-                                      within_distance_additional_params)
+        geom_attr = func.ST_Transform(geom_attr, epsg)
+    geometry = from_shape(shape, srid=epsg)
+    return func.ST_DWITHIN(geom_attr, geometry, tolerance)
+
 
 def create_attr_filter(request, mapped_class):
     """Create an ``and_`` SQLAlchemy filter (a ClauseList object) based
@@ -119,13 +115,13 @@ def create_attr_filter(request, mapped_class):
     """
 
     mapping = {
-        'eq'   : '__eq__',
-        'ne'   : '__ne__',
-        'lt'   : '__lt__',
-        'lte'  : '__le__',
-        'gt'   : '__gt__',
-        'gte'  : '__ge__',
-        'like' : 'like',
+        'eq': '__eq__',
+        'ne': '__ne__',
+        'lt': '__lt__',
+        'lte': '__le__',
+        'gt': '__gt__',
+        'gte': '__ge__',
+        'like': 'like',
         'ilike': 'ilike'
     }
     filters = []
