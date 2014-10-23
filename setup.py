@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 import os
 
-version = '0.10'
+version = '2.0dev1'
 
 here = os.path.abspath(os.path.dirname(__file__))
 README = open(os.path.join(here, 'README.rst')).read()
@@ -12,7 +12,7 @@ install_requires = [
     'pyramid>=1.1a3',
     'geojson>=1.0',
     'Shapely>=1.2',
-    'GeoAlchemy>=0.5'
+    'GeoAlchemy2>=0.2.4'
     ]
 
 setup_requires = [

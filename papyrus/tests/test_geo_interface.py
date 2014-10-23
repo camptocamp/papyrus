@@ -7,7 +7,7 @@ class GeoInterfaceTests(unittest.TestCase):
         from sqlalchemy import MetaData, Column, types, orm, schema
         from sqlalchemy.ext.declarative import declarative_base
         from sqlalchemy.ext.associationproxy import association_proxy
-        from geoalchemy import GeometryColumn, Geometry
+        from geoalchemy2.types import Geometry
         from papyrus.geo_interface import GeoInterface
         Base = declarative_base(metadata=MetaData())
 
@@ -32,7 +32,8 @@ class GeoInterfaceTests(unittest.TestCase):
             __tablename__ = 'parent'
             id = Column(types.Integer, primary_key=True)
             text = Column(types.Unicode)
-            geom = GeometryColumn(Geometry(dimension=2, srid=3000))
+            geom = Column(Geometry(geometry_type='GEOMETRY', dimension=2,
+                                   srid=3000))
             children_ = orm.relationship(Child1, backref="parent")
             child_id = Column(types.Integer, schema.ForeignKey('child2.id'))
             child_ = orm.relationship(Child2)
@@ -47,7 +48,7 @@ class GeoInterfaceTests(unittest.TestCase):
         from sqlalchemy import MetaData, Column, types, orm, schema
         from sqlalchemy.ext.declarative import declarative_base
         from sqlalchemy.ext.associationproxy import association_proxy
-        from geoalchemy import GeometryColumn, Geometry
+        from geoalchemy2.types import Geometry
         from papyrus.geo_interface import GeoInterface
         Base = declarative_base(metadata=MetaData(), cls=GeoInterface,
                                 constructor=None)
@@ -73,7 +74,8 @@ class GeoInterfaceTests(unittest.TestCase):
             __tablename__ = 'parent'
             id = Column(types.Integer, primary_key=True)
             text = Column(types.Unicode)
-            geom = GeometryColumn(Geometry(dimension=2, srid=3000))
+            geom = Column(Geometry(geometry_type='GEOMETRY', dimension=2,
+                                   srid=3000))
             children_ = orm.relationship(Child1, backref="parent")
             child_id = Column(types.Integer, schema.ForeignKey('child2.id'))
             child_ = orm.relationship(Child2)
@@ -88,9 +90,7 @@ class GeoInterfaceTests(unittest.TestCase):
         from sqlalchemy import Table, MetaData, Column, types, orm, schema
         from sqlalchemy.ext.associationproxy import association_proxy
         from papyrus.geo_interface import GeoInterface
-        from geoalchemy import (GeometryExtensionColumn, GeometryColumn,
-                                Geometry)
-        from geoalchemy.postgis import PGComparator
+        from geoalchemy2.types import Geometry
 
         md = MetaData()
 
@@ -108,7 +108,8 @@ class GeoInterfaceTests(unittest.TestCase):
         parent_table = Table('parent', md,
             Column('id', types.Integer, primary_key=True),
             Column('text', types.Unicode),
-            GeometryExtensionColumn('geom', Geometry(dimension=2, srid=3000)),
+            Column('geom', Geometry(geometry_type='GEOMETRY',
+                                    dimension=2, srid=3000)),
             Column('child_id', types.Integer, schema.ForeignKey('child2.id'))
             )
 
@@ -130,8 +131,7 @@ class GeoInterfaceTests(unittest.TestCase):
             __add_properties__ = ('child', 'children')
 
         orm.mapper(Parent, parent_table,
-                   properties={'geom': GeometryColumn(parent_table.c.geom,
-                                                      comparator=PGComparator),
+                   properties={
                                'children_': orm.relationship(Child1),
                                'child_': orm.relationship(Child2)
                               }
@@ -152,8 +152,8 @@ class GeoInterfaceTests(unittest.TestCase):
 
     def _test_update(self, mapped_class):
         from geojson import Feature, Point
-        from geoalchemy import WKBSpatialElement
-        from shapely import wkb
+        from geoalchemy2.elements import WKBElement
+        from geoalchemy2.shape import to_shape
         feature = Feature(id=1, properties={'text': 'foo', 'child': 'foo',
                                             'children': ['foo', 'foo']},
                           geometry=Point(coordinates=[53, -4]))
@@ -166,8 +166,8 @@ class GeoInterfaceTests(unittest.TestCase):
         self.assertEqual(obj.text, 'bar')
         self.assertEqual(obj.child, 'bar')
         self.assertEqual(obj.children, ['bar', 'bar'])
-        self.assertTrue(isinstance(obj.geom, WKBSpatialElement))
-        point = wkb.loads(str(obj.geom.desc))
+        self.assertTrue(isinstance(obj.geom, WKBElement))
+        point = to_shape(obj.geom)
         self.assertEqual(point.x, 55)
         self.assertEqual(point.y, -5)
         self.assertEqual(obj.geom.srid, 3000)
@@ -186,8 +186,8 @@ class GeoInterfaceTests(unittest.TestCase):
 
     def _test_init(self, mapped_class):
         from geojson import Feature, Point
-        from geoalchemy import WKBSpatialElement
-        from shapely import wkb
+        from geoalchemy2.elements import WKBElement
+        from geoalchemy2.shape import to_shape
         feature = Feature(id=1, properties={'text': 'foo', 'child': 'foo',
                                             'children': ['foo', 'foo']},
                           geometry=Point(coordinates=[53, -4]))
@@ -196,8 +196,8 @@ class GeoInterfaceTests(unittest.TestCase):
         self.assertEqual(obj.text, 'foo')
         self.assertEqual(obj.child, 'foo')
         self.assertEqual(obj.children, ['foo', 'foo'])
-        self.assertTrue(isinstance(obj.geom, WKBSpatialElement))
-        point = wkb.loads(str(obj.geom.desc))
+        self.assertTrue(isinstance(obj.geom, WKBElement))
+        point = to_shape(obj.geom)
         self.assertEqual(point.x, 53)
         self.assertEqual(point.y, -4)
         self.assertEqual(obj.geom.srid, 3000)
@@ -223,7 +223,7 @@ class GeoInterfaceTests(unittest.TestCase):
                           geometry=Point(coordinates=[53, -4]))
         obj = mapped_class(feature)
         json = dumps(obj)
-        self.assertEqual(json, '{"geometry": {"type": "Point", "coordinates": [53.0, -4.0]}, "type": "Feature", "properties": {"text": "foo", "children": ["foo", "bar"], "child": "bar"}, "id": 1}')  # NOQA
+        self.assertEqual(json, '{"geometry": {"type": "Point", "coordinates": [53.0, -4.0]}, "type": "Feature", "id": 1, "properties": {"text": "foo", "children": ["foo", "bar"], "child": "bar"}}')  # NOQA
 
     def test_geo_interface_declarative_no_feature(self):
         mapped_class = self._get_mapped_class_declarative()
@@ -234,9 +234,10 @@ class GeoInterfaceTests(unittest.TestCase):
         self._test_geo_interface_no_feature(mapped_class)
 
     def _test_geo_interface_no_feature(self, mapped_class):
-        from geojson import dumps
+        from papyrus.geojsonencoder import dumps
         obj = mapped_class()
-        self.assertRaises(ValueError, dumps, obj)
+        json = dumps(obj)
+        self.assertEqual(json, '{"geometry": null, "type": "Feature", "id": null, "properties": {"text": null, "children": [], "child": null}}')  # NOQA
 
     def test_geo_interface_declarative_shape_unset(self):
         mapped_class = self._get_mapped_class_declarative()
@@ -255,8 +256,7 @@ class GeoInterfaceTests(unittest.TestCase):
                           geometry=Point(coordinates=[53, -4]))
         obj = mapped_class(feature)
         # we want to simulate the case where the geometry is read from
-        # the database, so we delete _shape and set geom.geom_wkb
+        # the database, so we delete _shape
         del(obj._shape)
-        obj.geom.geom_wkb = obj.geom.desc
         json = dumps(obj)
-        self.assertEqual(json, '{"geometry": {"type": "Point", "coordinates": [53.0, -4.0]}, "type": "Feature", "properties": {"text": "foo", "children": ["foo", "foo"], "child": "foo"}, "id": 1}')  # NOQA
+        self.assertEqual(json, '{"geometry": {"type": "Point", "coordinates": [53.0, -4.0]}, "type": "Feature", "id": 1, "properties": {"text": "foo", "children": ["foo", "foo"], "child": "foo"}}')  # NOQA

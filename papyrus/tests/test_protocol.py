@@ -53,14 +53,14 @@ class create_geom_filter_Tests(unittest.TestCase):
     def _get_mapped_class(self):
         from sqlalchemy import MetaData, Column, types
         from sqlalchemy.ext.declarative import declarative_base
-        from geoalchemy import GeometryColumn, Geometry, WKBSpatialElement
-        from shapely.geometry import asShape
+        from geoalchemy2.types import Geometry
         Base = declarative_base(metadata=MetaData())
         class MappedClass(Base):
             __tablename__ = "table"
             id = Column(types.Integer, primary_key=True)
             text = Column(types.Unicode)
-            geom = GeometryColumn(Geometry(dimension=2, srid=4326))
+            geom = Column(Geometry(geometry_type='GEOMETRY',
+                                   dimension=2, srid=4326))
         return MappedClass
 
     def _get_engine(self):
@@ -78,11 +78,10 @@ class create_geom_filter_Tests(unittest.TestCase):
         compiled_filter = filter.compile(self._get_engine())
         params = compiled_filter.params
         filter_str = _compiled_to_string(compiled_filter)
-        self.assertEqual(filter_str, '(ST_Expand(GeomFromWKB(%(GeomFromWKB_1)s, %(GeomFromWKB_2)s), %(ST_Expand_1)s) && "table".geom) AND (ST_Expand("table".geom, %(ST_Expand_2)s) && GeomFromWKB(%(GeomFromWKB_3)s, %(GeomFromWKB_4)s)) AND ST_Distance("table".geom, GeomFromWKB(%(GeomFromWKB_5)s, %(GeomFromWKB_6)s)) <= %(ST_Distance_1)s')
-        self.assertTrue(wkb.loads(str(params["GeomFromWKB_1"])).equals(wkt.loads('POLYGON ((-180 -90, -180 90, 180 90, 180 -90, -180 -90))')))
-        self.assertEqual(params["GeomFromWKB_2"], 4326)
-        self.assertEqual(params["ST_Expand_1"], 1)
-        self.assertEqual(params["ST_Distance_1"], 1)
+        self.assertEqual(filter_str, 'ST_DWITHIN("table".geom, ST_GeomFromWKB(%(ST_GeomFromWKB_1)s, %(ST_GeomFromWKB_2)s), %(ST_DWITHIN_1)s)')
+        self.assertTrue(wkb.loads(str(params["ST_GeomFromWKB_1"])).equals(wkt.loads('POLYGON ((-180 -90, -180 90, 180 90, 180 -90, -180 -90))')))
+        self.assertEqual(params["ST_GeomFromWKB_2"], 4326)
+        self.assertEqual(params["ST_DWITHIN_1"], 1)
 
     def test_box_filter_with_epsg(self):
         from papyrus.protocol import create_geom_filter
@@ -95,12 +94,11 @@ class create_geom_filter_Tests(unittest.TestCase):
         compiled_filter = filter.compile(self._get_engine())
         params = compiled_filter.params
         filter_str = _compiled_to_string(compiled_filter)
-        self.assertEqual(filter_str, '(ST_Expand(GeomFromWKB(%(GeomFromWKB_1)s, %(GeomFromWKB_2)s), %(ST_Expand_1)s) && ST_Transform("table".geom, %(param_1)s)) AND (ST_Expand(ST_Transform("table".geom, %(param_2)s), %(ST_Expand_2)s) && GeomFromWKB(%(GeomFromWKB_3)s, %(GeomFromWKB_4)s)) AND ST_Distance(ST_Transform("table".geom, %(param_3)s), GeomFromWKB(%(GeomFromWKB_5)s, %(GeomFromWKB_6)s)) <= %(ST_Distance_1)s')
-        self.assertTrue(wkb.loads(str(params["GeomFromWKB_1"])).equals(wkt.loads('POLYGON ((-180 -90, -180 90, 180 90, 180 -90, -180 -90))')))
-        self.assertEqual(params["GeomFromWKB_2"], 900913)
-        self.assertEqual(params["ST_Expand_1"], 1)
+        self.assertEqual(filter_str, 'ST_DWITHIN(ST_Transform("table".geom, %(param_1)s), ST_GeomFromWKB(%(ST_GeomFromWKB_1)s, %(ST_GeomFromWKB_2)s), %(ST_DWITHIN_1)s)')
+        self.assertTrue(wkb.loads(str(params["ST_GeomFromWKB_1"])).equals(wkt.loads('POLYGON ((-180 -90, -180 90, 180 90, 180 -90, -180 -90))')))
+        self.assertEqual(params["ST_GeomFromWKB_2"], 900913)
         self.assertEqual(params["param_1"], 900913)
-        self.assertEqual(params["ST_Distance_1"], 1)
+        self.assertEqual(params["ST_DWITHIN_1"], 1)
 
     def test_within_filter(self):
         from papyrus.protocol import create_geom_filter
@@ -113,11 +111,10 @@ class create_geom_filter_Tests(unittest.TestCase):
         compiled_filter = filter.compile(self._get_engine())
         params = compiled_filter.params
         filter_str = _compiled_to_string(compiled_filter)
-        self.assertEqual(filter_str, '(ST_Expand(GeomFromWKB(%(GeomFromWKB_1)s, %(GeomFromWKB_2)s), %(ST_Expand_1)s) && "table".geom) AND (ST_Expand("table".geom, %(ST_Expand_2)s) && GeomFromWKB(%(GeomFromWKB_3)s, %(GeomFromWKB_4)s)) AND ST_Distance("table".geom, GeomFromWKB(%(GeomFromWKB_5)s, %(GeomFromWKB_6)s)) <= %(ST_Distance_1)s')
-        self.assertTrue(wkb.loads(str(params["GeomFromWKB_1"])).equals(wkt.loads('POINT (40 5)')))
-        self.assertEqual(params["GeomFromWKB_2"], 4326)
-        self.assertEqual(params["ST_Expand_1"], 1)
-        self.assertEqual(params["ST_Distance_1"], 1)
+        self.assertEqual(filter_str, 'ST_DWITHIN("table".geom, ST_GeomFromWKB(%(ST_GeomFromWKB_1)s, %(ST_GeomFromWKB_2)s), %(ST_DWITHIN_1)s)')
+        self.assertTrue(wkb.loads(str(params["ST_GeomFromWKB_1"])).equals(wkt.loads('POINT (40 5)')))
+        self.assertEqual(params["ST_GeomFromWKB_2"], 4326)
+        self.assertEqual(params["ST_DWITHIN_1"], 1)
 
     def test_within_filter_with_epsg(self):
         from papyrus.protocol import create_geom_filter
@@ -130,12 +127,11 @@ class create_geom_filter_Tests(unittest.TestCase):
         compiled_filter = filter.compile(self._get_engine())
         params = compiled_filter.params
         filter_str = _compiled_to_string(compiled_filter)
-        self.assertEqual(filter_str, '(ST_Expand(GeomFromWKB(%(GeomFromWKB_1)s, %(GeomFromWKB_2)s), %(ST_Expand_1)s) && ST_Transform("table".geom, %(param_1)s)) AND (ST_Expand(ST_Transform("table".geom, %(param_2)s), %(ST_Expand_2)s) && GeomFromWKB(%(GeomFromWKB_3)s, %(GeomFromWKB_4)s)) AND ST_Distance(ST_Transform("table".geom, %(param_3)s), GeomFromWKB(%(GeomFromWKB_5)s, %(GeomFromWKB_6)s)) <= %(ST_Distance_1)s')
-        self.assertTrue(wkb.loads(str(params["GeomFromWKB_1"])).equals(wkt.loads('POINT (40 5)')))
-        self.assertEqual(params["GeomFromWKB_2"], 900913)
-        self.assertEqual(params["ST_Expand_1"], 1)
+        self.assertEqual(filter_str, 'ST_DWITHIN(ST_Transform("table".geom, %(param_1)s), ST_GeomFromWKB(%(ST_GeomFromWKB_1)s, %(ST_GeomFromWKB_2)s), %(ST_DWITHIN_1)s)')
+        self.assertTrue(wkb.loads(str(params["ST_GeomFromWKB_1"])).equals(wkt.loads('POINT (40 5)')))
+        self.assertEqual(params["ST_GeomFromWKB_2"], 900913)
         self.assertEqual(params["param_1"], 900913)
-        self.assertEqual(params["ST_Distance_1"], 1)
+        self.assertEqual(params["ST_DWITHIN_1"], 1)
 
     def test_polygon_filter(self):
         from papyrus.protocol import create_geom_filter
@@ -151,11 +147,10 @@ class create_geom_filter_Tests(unittest.TestCase):
         compiled_filter = filter.compile(self._get_engine())
         params = compiled_filter.params
         filter_str = _compiled_to_string(compiled_filter)
-        self.assertEqual(filter_str, '(ST_Expand(GeomFromWKB(%(GeomFromWKB_1)s, %(GeomFromWKB_2)s), %(ST_Expand_1)s) && "table".geom) AND (ST_Expand("table".geom, %(ST_Expand_2)s) && GeomFromWKB(%(GeomFromWKB_3)s, %(GeomFromWKB_4)s)) AND ST_Distance("table".geom, GeomFromWKB(%(GeomFromWKB_5)s, %(GeomFromWKB_6)s)) <= %(ST_Distance_1)s')
-        self.assertTrue(wkb.loads(str(params["GeomFromWKB_1"])).equals(poly))
-        self.assertEqual(params["GeomFromWKB_2"], 4326)
-        self.assertEqual(params["ST_Expand_1"], 1)
-        self.assertEqual(params["ST_Distance_1"], 1)
+        self.assertEqual(filter_str, 'ST_DWITHIN("table".geom, ST_GeomFromWKB(%(ST_GeomFromWKB_1)s, %(ST_GeomFromWKB_2)s), %(ST_DWITHIN_1)s)')
+        self.assertTrue(wkb.loads(str(params["ST_GeomFromWKB_1"])).equals(poly))
+        self.assertEqual(params["ST_GeomFromWKB_2"], 4326)
+        self.assertEqual(params["ST_DWITHIN_1"], 1)
 
     def test_polygon_filter_with_epsg(self):
         from papyrus.protocol import create_geom_filter
@@ -171,12 +166,11 @@ class create_geom_filter_Tests(unittest.TestCase):
         compiled_filter = filter.compile(self._get_engine())
         params = compiled_filter.params
         filter_str = _compiled_to_string(compiled_filter)
-        self.assertEqual(filter_str, '(ST_Expand(GeomFromWKB(%(GeomFromWKB_1)s, %(GeomFromWKB_2)s), %(ST_Expand_1)s) && ST_Transform("table".geom, %(param_1)s)) AND (ST_Expand(ST_Transform("table".geom, %(param_2)s), %(ST_Expand_2)s) && GeomFromWKB(%(GeomFromWKB_3)s, %(GeomFromWKB_4)s)) AND ST_Distance(ST_Transform("table".geom, %(param_3)s), GeomFromWKB(%(GeomFromWKB_5)s, %(GeomFromWKB_6)s)) <= %(ST_Distance_1)s')
-        self.assertTrue(wkb.loads(str(params["GeomFromWKB_1"])).equals(poly))
-        self.assertEqual(params["GeomFromWKB_2"], 900913)
-        self.assertEqual(params["ST_Expand_1"], 1)
+        self.assertEqual(filter_str, 'ST_DWITHIN(ST_Transform("table".geom, %(param_1)s), ST_GeomFromWKB(%(ST_GeomFromWKB_1)s, %(ST_GeomFromWKB_2)s), %(ST_DWITHIN_1)s)')
+        self.assertTrue(wkb.loads(str(params["ST_GeomFromWKB_1"])).equals(poly))
+        self.assertEqual(params["ST_GeomFromWKB_2"], 900913)
         self.assertEqual(params["param_1"], 900913)
-        self.assertEqual(params["ST_Distance_1"], 1)
+        self.assertEqual(params["ST_DWITHIN_1"], 1)
 
     def test_geom_filter_no_params(self):
         from papyrus.protocol import create_geom_filter
@@ -190,13 +184,14 @@ class create_attr_filter_Tests(unittest.TestCase):
     def _get_mapped_class(self):
         from sqlalchemy import MetaData, Column, types
         from sqlalchemy.ext.declarative import declarative_base
-        from geoalchemy import GeometryColumn, Geometry, WKBSpatialElement
+        from geoalchemy2.types import Geometry
         Base = declarative_base(metadata=MetaData())
         class MappedClass(Base):
             __tablename__ = "table"
             id = Column(types.Integer, primary_key=True)
             text = Column(types.Unicode)
-            geom = GeometryColumn(Geometry(dimension=2, srid=4326))
+            geom = Column(Geometry(geometry_type='GEOMETRY',
+                                   dimension=2, srid=4326))
         return MappedClass
 
     def test_create_attr_filter_eq(self):
@@ -354,7 +349,8 @@ class Test_protocol(unittest.TestCase):
     def _get_mapped_class(self):
         from sqlalchemy import MetaData, Column, types
         from sqlalchemy.ext.declarative import declarative_base
-        from geoalchemy import GeometryColumn, Geometry, WKBSpatialElement
+        from geoalchemy2.types import Geometry
+        from geoalchemy2.shape import from_shape
         from geojson import Feature
         from geojson.geometry import Default
         from shapely.geometry import asShape
@@ -364,7 +360,8 @@ class Test_protocol(unittest.TestCase):
             __tablename__ = "table"
             id = Column(types.Integer, primary_key=True)
             text = Column(types.Unicode)
-            geom = GeometryColumn(Geometry(dimension=2, srid=4326))
+            geom = Column(Geometry(geometry_type='GEOMETRY',
+                                   dimension=2, srid=4326))
             def __init__(self, feature):
                 self.id = feature.id
                 self.__update__(feature)
@@ -373,7 +370,7 @@ class Test_protocol(unittest.TestCase):
                 if geometry is not None and \
                    not isinstance(geometry, Default):
                     shape = asShape(feature.geometry)
-                    self.geom = WKBSpatialElement(buffer(shape.wkb), srid=4326)
+                    self.geom = from_shape(shape, srid=4326)
                     self.geom.shape = shape
                 self.text = feature.properties.get('text', None)
             @property
@@ -740,7 +737,7 @@ class Test_protocol(unittest.TestCase):
         from geojson import Feature
         from pyramid.testing import DummyRequest
         from pyramid.response import Response
-        from geoalchemy import WKBSpatialElement
+        from geoalchemy2.elements import WKBElement
 
         MappedClass = self._get_mapped_class()
 
@@ -766,7 +763,7 @@ class Test_protocol(unittest.TestCase):
         obj = proto.update(request, "a")
 
         self.assertTrue(isinstance(obj, MappedClass))
-        self.assertTrue(isinstance(obj.geom, WKBSpatialElement))
+        self.assertTrue(isinstance(obj.geom, WKBElement))
         self.assertEqual(obj.text, "foo")
 
         # test before_update

@@ -1,6 +1,11 @@
 Changes
 -------
 
+2.0
+~~~
+
+* Use GeoAlchemy 2 instead of GeoAlchemy. @elemoine
+
 0.10
 ~~~~
 
