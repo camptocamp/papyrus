@@ -138,9 +138,10 @@ def create_attr_filter(request, mapped_class):
             filters.append(f)
     return and_(*filters) if len(filters) > 0 else None
 
+
 def create_filter(request, mapped_class, geom_attr, **kwargs):
     """ Create MapFish default filter based on the request params.
-    
+
     Arguments:
 
     request
@@ -168,12 +169,14 @@ def create_filter(request, mapped_class, geom_attr, **kwargs):
         return geom_filter
     return and_(geom_filter, attr_filter)
 
+
 def asbool(val):
     # Convert the passed value to a boolean.
     if isinstance(val, basestring):
         return val.lower() not in ['false', '0']
     else:
         return bool(val)
+
 
 class Protocol(object):
     """ Protocol class.
@@ -236,7 +239,7 @@ class Protocol(object):
                     new_props[name] = props[name]
             feature.properties = new_props
         if asbool(request.params.get('no_geom', False)):
-            feature.geometry=None
+            feature.geometry = None
         return feature
 
     def _get_order_by(self, request):
@@ -294,7 +297,7 @@ class Protocol(object):
         else:
             objs = self._query(request, filter)
             ret = FeatureCollection(
-                    [self._filter_attrs(o.__geo_interface__, request) for o in objs if o is not None])
+                [self._filter_attrs(o.__geo_interface__, request) for o in objs if o is not None])
         return ret
 
     def create(self, request):
