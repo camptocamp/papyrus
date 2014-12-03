@@ -138,9 +138,10 @@ def create_attr_filter(request, mapped_class):
             filters.append(f)
     return and_(*filters) if len(filters) > 0 else None
 
+
 def create_filter(request, mapped_class, geom_attr, **kwargs):
     """ Create MapFish default filter based on the request params.
-    
+
     Arguments:
 
     request
@@ -162,7 +163,12 @@ def create_filter(request, mapped_class, geom_attr, **kwargs):
     geom_filter = create_geom_filter(request, mapped_class, geom_attr, **kwargs)
     if geom_filter is None and attr_filter is None:
         return None
+    if geom_filter is None:
+        return attr_filter
+    if attr_filter is None:
+        return geom_filter
     return and_(geom_filter, attr_filter)
+
 
 def asbool(val):
     # Convert the passed value to a boolean.
@@ -170,6 +176,7 @@ def asbool(val):
         return val.lower() not in ['false', '0']
     else:
         return bool(val)
+
 
 class Protocol(object):
     """ Protocol class.
@@ -232,7 +239,7 @@ class Protocol(object):
                     new_props[name] = props[name]
             feature.properties = new_props
         if asbool(request.params.get('no_geom', False)):
-            feature.geometry=None
+            feature.geometry = None
         return feature
 
     def _get_order_by(self, request):
@@ -258,7 +265,9 @@ class Protocol(object):
             offset = int(request.params['offset'])
         if filter is None:
             filter = create_filter(request, self.mapped_class, self.geom_attr)
-        query = self.Session().query(self.mapped_class).filter(filter)
+        query = self.Session().query(self.mapped_class)
+        if filter is not None:
+            query = query.filter(filter)
         order_by = self._get_order_by(request)
         if order_by is not None:
             query = query.order_by(order_by)
@@ -269,7 +278,10 @@ class Protocol(object):
         """ Return the number of records matching the given filter. """
         if filter is None:
             filter = create_filter(request, self.mapped_class, self.geom_attr)
-        return self.Session().query(self.mapped_class).filter(filter).count()
+        query = self.Session().query(self.mapped_class)
+        if filter is not None:
+            query = query.filter(filter)
+        return query.count()
 
     def read(self, request, filter=None, id=None):
         """ Build a query based on the filter or the idenfier, send the query
@@ -285,7 +297,7 @@ class Protocol(object):
         else:
             objs = self._query(request, filter)
             ret = FeatureCollection(
-                    [self._filter_attrs(o.__geo_interface__, request) for o in objs if o is not None])
+                [self._filter_attrs(o.__geo_interface__, request) for o in objs if o is not None])
         return ret
 
     def create(self, request):
