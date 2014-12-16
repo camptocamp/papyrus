@@ -1,0 +1,7 @@
+nose
+coverage
+WebTest
+psycopg2
+pyramid_handlers
+mock
+simplejson
