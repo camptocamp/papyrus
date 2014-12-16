@@ -6,9 +6,9 @@ This file provides the steps for releasing a new version of Papyrus.
 Verify that the version number is correct in ``setup.py`` and ``docs/conf.py``.
 If not then change it, then commit and push.
 
-Verify that the tests pass, with 100% coverage::
+Verify that the tests pass, with 100% (or close) coverage::
 
-    $ python setup.py nosetests
+    $ nosetests
     ......................................................
     Name                               Stmts   Miss  Cover   Missing
     ----------------------------------------------------------------

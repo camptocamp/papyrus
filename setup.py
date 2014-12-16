@@ -15,19 +15,6 @@ install_requires = [
     'GeoAlchemy2>=0.2.4'
     ]
 
-setup_requires = [
-    'nose'
-    ]
-
-tests_require = install_requires + [
-    'coverage',
-    'WebTest',
-    'psycopg2',
-    'simplejson',
-    'pyramid_handlers',
-    'mock'
-    ]
-
 setup(name='papyrus',
       version=version,
       description="Geospatial Extensions for Pyramid",
@@ -47,9 +34,6 @@ setup(name='papyrus',
       include_package_data=True,
       zip_safe=False,
       install_requires=install_requires,
-      setup_requires=setup_requires,
-      tests_require=tests_require,
-      test_suite="papyrus.tests",
       entry_points="""
       # -*- Entry points: -*-
       """,

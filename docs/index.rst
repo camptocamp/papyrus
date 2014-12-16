@@ -61,18 +61,20 @@ Papyrus includes unit tests. Most of the time patches should include new tests.
 
 To run the Papyrus tests, in addition to Papyrus and its dependencies the
 following packages need to be installed: ``nose``, ``mock``, ``psycopg2``,
-``simplejson``, ``pyramid_handlers``, and ``coverage``.  There's no need to
-manually install these packages, as they will be installed when the ``setup.py
-nosetests`` command is run.  However, for these packages to install correctly,
-you have to have header files for ``PostgreSQL``, ``Python``, and ``GEOS``. On
-Debian-based systems install the following system packages: ``libpq-dev``,
-``python-dev``, ``libgeos-c1``.
+``simplejson``, ``pyramid_handlers``, ``coverage``, and ``WebTest``.
+
+For these packages to install correctly, you have to have header files for
+``PostgreSQL``, ``Python``, and ``GEOS``. On Debian-based systems install the
+following system packages: ``libpq-dev``, ``python-dev``, ``libgeos-c1``.
+
+Use ``pip`` and the ``dev_requirements.txt`` file to install these packages in
+the virtual environment::
+
+    $ pip install -r dev_requirements.txt
 
 To run the tests::
 
-    $ python setup.py nosetests
-
-100% of the Papyrus code is covered by tests, let's preserve that.
+    $ nosetests
 
 Indices and tables
 ==================
