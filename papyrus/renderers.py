@@ -1,10 +1,4 @@
-try:
-    from cStringIO import StringIO
-except ImportError: # pragma: no cover
-    try: # pragma: no cover
-        from StringIO import StringIO
-    except ImportError: # pragma no cover
-        from io import BytesIO
+from six import BytesIO
 
 import geojson
 
