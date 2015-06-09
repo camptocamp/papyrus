@@ -1,4 +1,6 @@
 import unittest
+import json
+import re
 
 from pyramid import testing
 
@@ -23,7 +25,8 @@ class Test_GeoJSON(unittest.TestCase):
             }
         request = testing.DummyRequest()
         result = renderer(f, {'request': request})
-        self.assertEqual(result, '{"geometry": {"type": "Point", "coordinates": [53, -4]}, "type": "Feature", "id": 1, "properties": {"title": "Dict 1"}}')
+        result_parsed = json.loads(result)
+        self.assertEqual(result_parsed, {"geometry": {"type": "Point", "coordinates": [53, -4]}, "type": "Feature", "id": 1, "properties": {"title": "Dict 1"}})
         self.assertEqual(request.response.content_type, 'application/json')
 
     def test_geojson_content_type(self):
@@ -37,7 +40,8 @@ class Test_GeoJSON(unittest.TestCase):
         request = testing.DummyRequest()
         request.response.content_type = 'text/javascript'
         result = renderer(f, {'request': request})
-        self.assertEqual(result, '{"geometry": {"type": "Point", "coordinates": [53, -4]}, "type": "Feature", "id": 1, "properties": {"title": "Dict 1"}}')
+        result_parsed = json.loads(result)
+        self.assertEqual(result_parsed, {"geometry": {"type": "Point", "coordinates": [53, -4]}, "type": "Feature", "id": 1, "properties": {"title": "Dict 1"}})
         self.assertEqual(request.response.content_type, 'text/javascript')
 
     def test_Decimal(self):
@@ -51,7 +55,8 @@ class Test_GeoJSON(unittest.TestCase):
             }
         request = testing.DummyRequest()
         result = renderer(f, {'request': request})
-        self.assertEqual(result, '{"geometry": {"type": "Point", "coordinates": [53, -4]}, "type": "Feature", "id": 1, "properties": {"decimal": 0.003}}')
+        result_parsed = json.loads(result)
+        self.assertEqual(result_parsed, {"geometry": {"type": "Point", "coordinates": [53, -4]}, "type": "Feature", "id": 1, "properties": {"decimal": 0.003}})
         self.assertEqual(request.response.content_type, 'application/json')
 
     def test_date(self):
@@ -61,11 +66,12 @@ class Test_GeoJSON(unittest.TestCase):
             'type': 'Feature',
             'id': 1,
             'geometry': {'type': 'Point', 'coordinates': [53, -4]},
-            'properties': {'date': datetime.date(2011, 05, 21)}
+            'properties': {'date': datetime.date(2011, 5, 21)}
             }
         request = testing.DummyRequest()
         result = renderer(f, {'request': request})
-        self.assertEqual(result, '{"geometry": {"type": "Point", "coordinates": [53, -4]}, "type": "Feature", "id": 1, "properties": {"date": "2011-05-21"}}')
+        result_parsed = json.loads(result)
+        self.assertEqual(result_parsed, {"geometry": {"type": "Point", "coordinates": [53, -4]}, "type": "Feature", "id": 1, "properties": {"date": "2011-05-21"}})
         self.assertEqual(request.response.content_type, 'application/json')
 
     def test_datetime(self):
@@ -75,11 +81,12 @@ class Test_GeoJSON(unittest.TestCase):
             'type': 'Feature',
             'id': 1,
             'geometry': {'type': 'Point', 'coordinates': [53, -4]},
-            'properties': {'datetime': datetime.datetime(2011, 05, 21, 20, 55, 12)}
+            'properties': {'datetime': datetime.datetime(2011, 5, 21, 20, 55, 12)}
             }
         request = testing.DummyRequest()
         result = renderer(f, {'request': request})
-        self.assertEqual(result, '{"geometry": {"type": "Point", "coordinates": [53, -4]}, "type": "Feature", "id": 1, "properties": {"datetime": "2011-05-21T20:55:12"}}')
+        result_parsed = json.loads(result)
+        self.assertEqual(result_parsed, {"geometry": {"type": "Point", "coordinates": [53, -4]}, "type": "Feature", "id": 1, "properties": {"datetime": "2011-05-21T20:55:12"}})
         self.assertEqual(request.response.content_type, 'application/json')
 
 
@@ -94,7 +101,10 @@ class Test_GeoJSON(unittest.TestCase):
         request = testing.DummyRequest()
         request.params['callback'] = 'jsonp_cb'
         result = renderer(f, {'request': request})
-        self.assertEqual(result, 'jsonp_cb({"geometry": {"type": "Point", "coordinates": [53, -4]}, "type": "Feature", "id": 1, "properties": {"title": "Dict 1"}});')
+        self.assertIsNotNone(re.match(r'jsonp_cb\({.*}\);', result))
+        result_json = result[9:-2]
+        json_parsed = json.loads(result_json)
+        self.assertEqual(json_parsed, {"geometry": {"type": "Point", "coordinates": [53, -4]}, "type": "Feature", "id": 1, "properties": {"title": "Dict 1"}})
         self.assertEqual(request.response.content_type, 'text/javascript')
 
     def test_jsonp_param_name(self):
@@ -108,12 +118,16 @@ class Test_GeoJSON(unittest.TestCase):
         request = testing.DummyRequest()
         request.params['callback'] = 'jsonp_cb'
         result = renderer(f, {'request': request})
-        self.assertEqual(result, '{"geometry": {"type": "Point", "coordinates": [53, -4]}, "type": "Feature", "id": 1, "properties": {"title": "Dict 1"}}')
+        result_parsed = json.loads(result)
+        self.assertEqual(result_parsed, {"geometry": {"type": "Point", "coordinates": [53, -4]}, "type": "Feature", "id": 1, "properties": {"title": "Dict 1"}})
         self.assertEqual(request.response.content_type, 'application/json')
         request = testing.DummyRequest()
         request.params['cb'] = 'jsonp_cb'
         result = renderer(f, {'request': request})
-        self.assertEqual(result, 'jsonp_cb({"geometry": {"type": "Point", "coordinates": [53, -4]}, "type": "Feature", "id": 1, "properties": {"title": "Dict 1"}});')
+        self.assertIsNotNone(re.match(r'jsonp_cb\({.*}\);', result))
+        result_json = result[9:-2]
+        json_parsed = json.loads(result_json)
+        self.assertEqual(json_parsed, {"geometry": {"type": "Point", "coordinates": [53, -4]}, "type": "Feature", "id": 1, "properties": {"title": "Dict 1"}})
         self.assertEqual(request.response.content_type, 'text/javascript')
 
     def test_type_for_array_default(self):
@@ -126,7 +140,8 @@ class Test_GeoJSON(unittest.TestCase):
             }
         request = testing.DummyRequest()
         result = renderer([f], {'request': request})
-        self.assertEqual(result, '{"type": "FeatureCollection", "features": [{"geometry": {"type": "Point", "coordinates": [53, -4]}, "type": "Feature", "id": 1, "properties": {"title": "Dict 1"}}]}')
+        result_parsed = json.loads(result)
+        self.assertEqual(result_parsed, {"type": "FeatureCollection", "features": [{"geometry": {"type": "Point", "coordinates": [53, -4]}, "type": "Feature", "id": 1, "properties": {"title": "Dict 1"}}]})
         self.assertEqual(request.response.content_type, 'application/json')
 
     def test_collection_type(self):
@@ -136,10 +151,12 @@ class Test_GeoJSON(unittest.TestCase):
             }
         request = testing.DummyRequest()
         result = renderer(f, {'request': request})
-        self.assertEqual(result, '{"type": "Point", "coordinates": [53, -4]}')
+        result_parsed = json.loads(result)
+        self.assertEqual(result_parsed, {"type": "Point", "coordinates": [53, -4]})
         self.assertEqual(request.response.content_type, 'application/json')
         result = renderer([f], {'request': request})
-        self.assertEqual(result, '{"type": "GeometryCollection", "geometries": [{"type": "Point", "coordinates": [53, -4]}]}')
+        result_parsed = json.loads(result)
+        self.assertEqual(result_parsed, {"type": "GeometryCollection", "geometries": [{"type": "Point", "coordinates": [53, -4]}]})
         self.assertEqual(request.response.content_type, 'application/json')
 
 

@@ -1,10 +1,8 @@
-try:
-    from cStringIO import StringIO
-except ImportError: # pragma: no cover
-    from StringIO import StringIO
+from six import BytesIO
 
 import geojson
 
+from six import string_types
 from papyrus.geojsonencoder import dumps
 from papyrus.xsd import XSDGenerator
 
@@ -39,7 +37,7 @@ class GeoJSON(object):
     - If there is a parameter in the request's HTTP query string that matches
       the ``jsonp_param_name`` of the registered JSONP renderer (by default,
       ``callback``), the renderer will return a JSONP response.
-    
+
     - If there is no callback parameter in the request's query string, the
       renderer will return a 'plain' JSON response.
 
@@ -56,7 +54,7 @@ class GeoJSON(object):
     def __init__(self, jsonp_param_name='callback',
                  collection_type=geojson.factory.FeatureCollection):
         self.jsonp_param_name = jsonp_param_name
-        if isinstance(collection_type, basestring):
+        if isinstance(collection_type, string_types):
             collection_type = getattr(geojson.factory, collection_type)
         self.collection_type = collection_type
 
@@ -175,6 +173,6 @@ class XSD(object):
             if request is not None:
                 response = request.response
                 response.content_type = 'application/xml'
-                io = self.generator.get_class_xsd(StringIO(), cls)
+                io = self.generator.get_class_xsd(BytesIO(), cls)
                 return io.getvalue()
         return _render

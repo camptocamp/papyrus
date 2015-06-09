@@ -1,4 +1,9 @@
 import unittest
+import json
+import sys
+
+
+PY = sys.version_info.major
 
 
 class GeoInterfaceTests(unittest.TestCase):
@@ -222,8 +227,9 @@ class GeoInterfaceTests(unittest.TestCase):
                                             'children': ['foo', 'bar']},
                           geometry=Point(coordinates=[53, -4]))
         obj = mapped_class(feature)
-        json = dumps(obj)
-        self.assertEqual(json, '{"geometry": {"type": "Point", "coordinates": [53.0, -4.0]}, "type": "Feature", "id": 1, "properties": {"text": "foo", "children": ["foo", "bar"], "child": "bar"}}')  # NOQA
+        obj_json = dumps(obj)
+        json_parsed = json.loads(obj_json)
+        self.assertEqual(json_parsed, {"geometry": {"type": "Point", "coordinates": [53.0, -4.0]}, "type": "Feature", "id": 1, "properties": {"text": "foo", "children": ["foo", "bar"], "child": "bar"}})
 
     def test_geo_interface_declarative_no_feature(self):
         mapped_class = self._get_mapped_class_declarative()
@@ -236,8 +242,11 @@ class GeoInterfaceTests(unittest.TestCase):
     def _test_geo_interface_no_feature(self, mapped_class):
         from papyrus.geojsonencoder import dumps
         obj = mapped_class()
-        json = dumps(obj)
-        self.assertEqual(json, '{"geometry": null, "type": "Feature", "id": null, "properties": {"text": null, "children": [], "child": null}}')  # NOQA
+        obj_json = dumps(obj)
+        json_parsed = json.loads(obj_json)
+        if PY == 2:
+            json_parsed['id'] = None
+        self.assertEqual(json_parsed, {u"geometry": None, u"type": u"Feature", u"id": None, u"properties": {u"text": None, u"children": [], u"child": None}})  # NOQA
 
     def test_geo_interface_declarative_shape_unset(self):
         mapped_class = self._get_mapped_class_declarative()
@@ -258,5 +267,6 @@ class GeoInterfaceTests(unittest.TestCase):
         # we want to simulate the case where the geometry is read from
         # the database, so we delete _shape
         del(obj._shape)
-        json = dumps(obj)
-        self.assertEqual(json, '{"geometry": {"type": "Point", "coordinates": [53.0, -4.0]}, "type": "Feature", "id": 1, "properties": {"text": "foo", "children": ["foo", "foo"], "child": "foo"}}')  # NOQA
+        obj_json = dumps(obj)
+        json_parsed = json.loads(obj_json)
+        self.assertEqual(json_parsed, {"geometry": {"type": "Point", "coordinates": [53.0, -4.0]}, "type": "Feature", "id": 1, "properties": {"text": "foo", "children": ["foo", "foo"], "child": "foo"}})

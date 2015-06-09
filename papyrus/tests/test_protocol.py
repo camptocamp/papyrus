@@ -33,19 +33,20 @@ from __future__ import with_statement
 import unittest
 
 from pyramid import testing
+from six import text_type
 
 
 def query_to_str(query, engine):
     """Helper function which compiles a query using a database engine
     """
-    return unicode(query.statement.compile(engine)).encode('ascii', 'backslashreplace')
+    return text_type(query.statement.compile(engine)).encode('ascii', 'backslashreplace')
 
 
 def _compiled_to_string(compiled_filter):
     """Helper function which converts a compiled SQL expression
     into a string.
     """
-    return unicode(compiled_filter).encode('ascii', 'backslashreplace')
+    return text_type(compiled_filter).encode('ascii', 'backslashreplace')
 
 
 class create_geom_filter_Tests(unittest.TestCase):
@@ -78,8 +79,8 @@ class create_geom_filter_Tests(unittest.TestCase):
         compiled_filter = filter.compile(self._get_engine())
         params = compiled_filter.params
         filter_str = _compiled_to_string(compiled_filter)
-        self.assertEqual(filter_str, 'ST_DWITHIN("table".geom, ST_GeomFromWKB(%(ST_GeomFromWKB_1)s, %(ST_GeomFromWKB_2)s), %(ST_DWITHIN_1)s)')
-        self.assertTrue(wkb.loads(str(params["ST_GeomFromWKB_1"])).equals(wkt.loads('POLYGON ((-180 -90, -180 90, 180 90, 180 -90, -180 -90))')))
+        self.assertEqual(filter_str, b'ST_DWITHIN("table".geom, ST_GeomFromWKB(%(ST_GeomFromWKB_1)s, %(ST_GeomFromWKB_2)s), %(ST_DWITHIN_1)s)')
+        self.assertTrue(wkb.loads(bytes(params["ST_GeomFromWKB_1"])).equals(wkt.loads('POLYGON ((-180 -90, -180 90, 180 90, 180 -90, -180 -90))')))
         self.assertEqual(params["ST_GeomFromWKB_2"], 4326)
         self.assertEqual(params["ST_DWITHIN_1"], 1)
 
@@ -94,8 +95,8 @@ class create_geom_filter_Tests(unittest.TestCase):
         compiled_filter = filter.compile(self._get_engine())
         params = compiled_filter.params
         filter_str = _compiled_to_string(compiled_filter)
-        self.assertEqual(filter_str, 'ST_DWITHIN(ST_Transform("table".geom, %(param_1)s), ST_GeomFromWKB(%(ST_GeomFromWKB_1)s, %(ST_GeomFromWKB_2)s), %(ST_DWITHIN_1)s)')
-        self.assertTrue(wkb.loads(str(params["ST_GeomFromWKB_1"])).equals(wkt.loads('POLYGON ((-180 -90, -180 90, 180 90, 180 -90, -180 -90))')))
+        self.assertEqual(filter_str, b'ST_DWITHIN(ST_Transform("table".geom, %(param_1)s), ST_GeomFromWKB(%(ST_GeomFromWKB_1)s, %(ST_GeomFromWKB_2)s), %(ST_DWITHIN_1)s)')
+        self.assertTrue(wkb.loads(bytes(params["ST_GeomFromWKB_1"])).equals(wkt.loads('POLYGON ((-180 -90, -180 90, 180 90, 180 -90, -180 -90))')))
         self.assertEqual(params["ST_GeomFromWKB_2"], 900913)
         self.assertEqual(params["param_1"], 900913)
         self.assertEqual(params["ST_DWITHIN_1"], 1)
@@ -111,8 +112,8 @@ class create_geom_filter_Tests(unittest.TestCase):
         compiled_filter = filter.compile(self._get_engine())
         params = compiled_filter.params
         filter_str = _compiled_to_string(compiled_filter)
-        self.assertEqual(filter_str, 'ST_DWITHIN("table".geom, ST_GeomFromWKB(%(ST_GeomFromWKB_1)s, %(ST_GeomFromWKB_2)s), %(ST_DWITHIN_1)s)')
-        self.assertTrue(wkb.loads(str(params["ST_GeomFromWKB_1"])).equals(wkt.loads('POINT (40 5)')))
+        self.assertEqual(filter_str, b'ST_DWITHIN("table".geom, ST_GeomFromWKB(%(ST_GeomFromWKB_1)s, %(ST_GeomFromWKB_2)s), %(ST_DWITHIN_1)s)')
+        self.assertTrue(wkb.loads(bytes(params["ST_GeomFromWKB_1"])).equals(wkt.loads('POINT (40 5)')))
         self.assertEqual(params["ST_GeomFromWKB_2"], 4326)
         self.assertEqual(params["ST_DWITHIN_1"], 1)
 
@@ -127,8 +128,8 @@ class create_geom_filter_Tests(unittest.TestCase):
         compiled_filter = filter.compile(self._get_engine())
         params = compiled_filter.params
         filter_str = _compiled_to_string(compiled_filter)
-        self.assertEqual(filter_str, 'ST_DWITHIN(ST_Transform("table".geom, %(param_1)s), ST_GeomFromWKB(%(ST_GeomFromWKB_1)s, %(ST_GeomFromWKB_2)s), %(ST_DWITHIN_1)s)')
-        self.assertTrue(wkb.loads(str(params["ST_GeomFromWKB_1"])).equals(wkt.loads('POINT (40 5)')))
+        self.assertEqual(filter_str, b'ST_DWITHIN(ST_Transform("table".geom, %(param_1)s), ST_GeomFromWKB(%(ST_GeomFromWKB_1)s, %(ST_GeomFromWKB_2)s), %(ST_DWITHIN_1)s)')
+        self.assertTrue(wkb.loads(bytes(params["ST_GeomFromWKB_1"])).equals(wkt.loads('POINT (40 5)')))
         self.assertEqual(params["ST_GeomFromWKB_2"], 900913)
         self.assertEqual(params["param_1"], 900913)
         self.assertEqual(params["ST_DWITHIN_1"], 1)
@@ -147,8 +148,8 @@ class create_geom_filter_Tests(unittest.TestCase):
         compiled_filter = filter.compile(self._get_engine())
         params = compiled_filter.params
         filter_str = _compiled_to_string(compiled_filter)
-        self.assertEqual(filter_str, 'ST_DWITHIN("table".geom, ST_GeomFromWKB(%(ST_GeomFromWKB_1)s, %(ST_GeomFromWKB_2)s), %(ST_DWITHIN_1)s)')
-        self.assertTrue(wkb.loads(str(params["ST_GeomFromWKB_1"])).equals(poly))
+        self.assertEqual(filter_str, b'ST_DWITHIN("table".geom, ST_GeomFromWKB(%(ST_GeomFromWKB_1)s, %(ST_GeomFromWKB_2)s), %(ST_DWITHIN_1)s)')
+        self.assertTrue(wkb.loads(bytes(params["ST_GeomFromWKB_1"])).equals(poly))
         self.assertEqual(params["ST_GeomFromWKB_2"], 4326)
         self.assertEqual(params["ST_DWITHIN_1"], 1)
 
@@ -166,8 +167,8 @@ class create_geom_filter_Tests(unittest.TestCase):
         compiled_filter = filter.compile(self._get_engine())
         params = compiled_filter.params
         filter_str = _compiled_to_string(compiled_filter)
-        self.assertEqual(filter_str, 'ST_DWITHIN(ST_Transform("table".geom, %(param_1)s), ST_GeomFromWKB(%(ST_GeomFromWKB_1)s, %(ST_GeomFromWKB_2)s), %(ST_DWITHIN_1)s)')
-        self.assertTrue(wkb.loads(str(params["ST_GeomFromWKB_1"])).equals(poly))
+        self.assertEqual(filter_str, b'ST_DWITHIN(ST_Transform("table".geom, %(param_1)s), ST_GeomFromWKB(%(ST_GeomFromWKB_1)s, %(ST_GeomFromWKB_2)s), %(ST_DWITHIN_1)s)')
+        self.assertTrue(wkb.loads(bytes(params["ST_GeomFromWKB_1"])).equals(poly))
         self.assertEqual(params["ST_GeomFromWKB_2"], 900913)
         self.assertEqual(params["param_1"], 900913)
         self.assertEqual(params["ST_DWITHIN_1"], 1)
@@ -428,51 +429,51 @@ class Test_protocol(unittest.TestCase):
         request = testing.DummyRequest()
         with patch('sqlalchemy.orm.query.Query.all', lambda q : q):
             query = proto._query(request)
-        self.assertTrue("SELECT" in query_to_str(query, engine))
+        self.assertTrue(b"SELECT" in query_to_str(query, engine))
 
         request = testing.DummyRequest(params={"queryable": "id", "id__eq": "1"})
         with patch('sqlalchemy.orm.query.Query.all', lambda q : q):
             query = proto._query(request)
-        self.assertTrue("WHERE" in query_to_str(query, engine))
+        self.assertTrue(b"WHERE" in query_to_str(query, engine))
 
         request = testing.DummyRequest(params={"queryable": "id", "id__eq": "1"})
         with patch('sqlalchemy.orm.query.Query.all', lambda q : q):
             filter = create_attr_filter(request, MappedClass)
             query = proto._query(testing.DummyRequest(), filter=filter)
-        self.assertTrue("WHERE" in query_to_str(query, engine))
+        self.assertTrue(b"WHERE" in query_to_str(query, engine))
 
         request = testing.DummyRequest(params={"limit": "2"})
         with patch('sqlalchemy.orm.query.Query.all', lambda q : q):
             query = proto._query(request)
-        self.assertTrue("LIMIT" in query_to_str(query, engine))
+        self.assertTrue(b"LIMIT" in query_to_str(query, engine))
 
         request = testing.DummyRequest(params={"maxfeatures": "2"})
         with patch('sqlalchemy.orm.query.Query.all', lambda q : q):
             query = proto._query(request)
-        self.assertTrue("LIMIT" in query_to_str(query, engine))
+        self.assertTrue(b"LIMIT" in query_to_str(query, engine))
 
         request = testing.DummyRequest(params={"limit": "2", "offset": "10"})
         with patch('sqlalchemy.orm.query.Query.all', lambda q : q):
             query = proto._query(request)
-        self.assertTrue("OFFSET" in query_to_str(query, engine))
+        self.assertTrue(b"OFFSET" in query_to_str(query, engine))
 
         request = testing.DummyRequest(params={"order_by": "text"})
         with patch('sqlalchemy.orm.query.Query.all', lambda q : q):
             query = proto._query(request)
-        self.assertTrue("ORDER BY" in query_to_str(query, engine))
-        self.assertTrue("ASC" in query_to_str(query, engine))
+        self.assertTrue(b"ORDER BY" in query_to_str(query, engine))
+        self.assertTrue(b"ASC" in query_to_str(query, engine))
 
         request = testing.DummyRequest(params={"sort": "text"})
         with patch('sqlalchemy.orm.query.Query.all', lambda q : q):
             query = proto._query(request)
-        self.assertTrue("ORDER BY" in query_to_str(query, engine))
-        self.assertTrue("ASC" in query_to_str(query, engine))
+        self.assertTrue(b"ORDER BY" in query_to_str(query, engine))
+        self.assertTrue(b"ASC" in query_to_str(query, engine))
 
         request = testing.DummyRequest(params={"order_by": "text", "dir": "DESC"})
         with patch('sqlalchemy.orm.query.Query.all', lambda q : q):
             query = proto._query(request)
-        self.assertTrue("ORDER BY" in query_to_str(query, engine))
-        self.assertTrue("DESC" in query_to_str(query, engine))
+        self.assertTrue(b"ORDER BY" in query_to_str(query, engine))
+        self.assertTrue(b"DESC" in query_to_str(query, engine))
 
     def test_count(self):
         from papyrus.protocol import Protocol
@@ -489,7 +490,7 @@ class Test_protocol(unittest.TestCase):
         request = testing.DummyRequest()
         with patch('sqlalchemy.orm.query.Query.count', lambda q : q):
             query = proto.count(request)
-        self.assertTrue("SELECT" in query_to_str(query, engine))
+        self.assertTrue(b"SELECT" in query_to_str(query, engine))
 
     def test_read_id(self):
         from papyrus.protocol import Protocol

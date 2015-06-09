@@ -67,7 +67,7 @@ class XSDGenerator(object):
         if column.nullable:
             attrs['minOccurs'] = str(0)
             attrs['nillable'] = 'true'
-        for cls, xsd_type in self.SIMPLE_XSD_TYPES.iteritems():
+        for cls, xsd_type in self.SIMPLE_XSD_TYPES.items():
             if isinstance(column.type, cls):
                 attrs['type'] = xsd_type
                 with tag(tb, 'xsd:element', attrs) as tb:

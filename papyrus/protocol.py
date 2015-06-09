@@ -37,6 +37,7 @@ from sqlalchemy.orm.util import class_mapper
 from geoalchemy2.shape import from_shape
 
 from geojson import Feature, FeatureCollection, loads, GeoJSON
+from six import string_types
 
 
 def _get_col_epsg(mapped_class, geom_attr):
@@ -79,7 +80,7 @@ def create_geom_filter(request, mapped_class, geom_attr):
     box = request.params.get('bbox')
     shape = None
     if box is not None:
-        box = map(float, box.split(','))
+        box = [float(x) for x in box.split(',')]
         shape = Polygon(((box[0], box[1]), (box[0], box[3]),
                          (box[2], box[3]), (box[2], box[1]),
                          (box[0], box[1])))
@@ -172,7 +173,7 @@ def create_filter(request, mapped_class, geom_attr, **kwargs):
 
 def asbool(val):
     # Convert the passed value to a boolean.
-    if isinstance(val, basestring):
+    if isinstance(val, string_types):
         return val.lower() not in ['false', '0']
     else:
         return bool(val)

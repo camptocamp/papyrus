@@ -8,9 +8,9 @@ class Test_includeme(unittest.TestCase):
         c = Configurator(autocommit=True)
         c.include(pyramid_handlers.includeme)
         c.include(papyrus.includeme)
-        self.failUnless(c.add_handler.im_func.__docobj__ is
+        self.failUnless(c.add_handler.__func__.__docobj__ is
                         pyramid_handlers.add_handler)
-        self.failUnless(c.add_papyrus_handler.im_func.__docobj__ is
+        self.failUnless(c.add_papyrus_handler.__func__.__docobj__ is
                         papyrus.add_papyrus_handler)
 
 class Test_add_papyrus_handler(unittest.TestCase):
