@@ -364,7 +364,7 @@ class Test_protocol(unittest.TestCase):
             geom = Column(Geometry(geometry_type='GEOMETRY',
                                    dimension=2, srid=4326))
             def __init__(self, feature):
-                self.id = feature.id
+                self.id = feature.id if hasattr(feature, 'id') else None
                 self.__update__(feature)
             def __update__(self, feature):
                 geometry = feature.geometry
