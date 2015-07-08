@@ -19,10 +19,9 @@ Setting up the db model
 
 First of all we need an SQLAlchemy/GeoAlchemy mapping for that table. To comply
 with Papyrus' MapFish Protocol implementation the mapped class must implement
-the `Python Geo Interface
-<http://trac.gispython.org/lab/wiki/PythonGeoInterface>`_ (typically through
-the ``__geo_interface__`` property), and must define ``__init__`` and
-``__update__`` methods.
+the `Python Geo Interface <https://gist.github.com/sgillies/2217756>`_
+(typically through the ``__geo_interface__`` property), and must define
+``__init__`` and ``__update__`` methods.
 
 Implementing the Python Geo Interface is required for Papyrus to be able to
 serialize ``Spot`` objects into GeoJSON. The ``__init__`` and ``__update__``
