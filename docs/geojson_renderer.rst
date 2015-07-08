@@ -41,7 +41,7 @@ view config. Here is a simple example::
 
 Views configured with the ``geojson`` renderer must return objects that
 implement the `Python Geo Interface
-<http://trac.gispython.org/lab/wiki/PythonGeoInterface>`_.
+<https://gist.github.com/sgillies/2217756>`_.
 
 Here's another example where the returned object is an SQLAlchemy (or
 GeoAlchemy) mapped object::
