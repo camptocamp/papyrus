@@ -26,6 +26,11 @@ Papyrus can be installed with ``easy_install`` or ``pip``::
 
 (Installing Papyrus in an isolated ``virtualenv`` is recommended.)
 
+You may want to install ``simplejson`` as well. This dependency is not required
+but it provides more functionnalities than the ``json`` module from the
+standard library like the possibility to parse float numbers as Decimal.
+``papyrus`` can use such options if ``simplejson`` is present.
+
 Most of the time you'll want to make Papyrus a dependency of your Pyramid
 application. For that add ``papyrus`` to the ``install_requires`` list defined
 in the Pyramid application ``setup.py``. Example::
