@@ -1,3 +1,4 @@
 include README.rst
 include CHANGES.rst
 include TODO.rst
+include LICENSE.txt
