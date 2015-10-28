@@ -1,4 +1,6 @@
+import six
 from contextlib import contextmanager
+
 try:
     from xml.etree.cElementTree import ElementTree, TreeBuilder
 except ImportError:  # pragma: no cover
@@ -67,7 +69,7 @@ class XSDGenerator(object):
         if column.nullable:
             attrs['minOccurs'] = str(0)
             attrs['nillable'] = 'true'
-        for cls, xsd_type in self.SIMPLE_XSD_TYPES.items():
+        for cls, xsd_type in six.iteritems(self.SIMPLE_XSD_TYPES):
             if isinstance(column.type, cls):
                 attrs['type'] = xsd_type
                 with tag(tb, 'xsd:element', attrs) as tb:

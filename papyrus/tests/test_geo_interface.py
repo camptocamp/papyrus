@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import unittest
 import json
 import sys
@@ -99,18 +101,21 @@ class GeoInterfaceTests(unittest.TestCase):
 
         md = MetaData()
 
-        child1_table = Table('child1', md,
+        child1_table = Table(
+            'child1', md,
             Column('id', types.Integer, primary_key=True),
             Column('name', types.Unicode),
             Column('parent_id', types.Integer, schema.ForeignKey('parent.id'))
             )
 
-        child2_table = Table('child2', md,
+        child2_table = Table(
+            'child2', md,
             Column('id', types.Integer, primary_key=True),
             Column('name', types.Unicode)
             )
 
-        parent_table = Table('parent', md,
+        parent_table = Table(
+            'parent', md,
             Column('id', types.Integer, primary_key=True),
             Column('text', types.Unicode),
             Column('geom', Geometry(geometry_type='GEOMETRY',
@@ -137,10 +142,9 @@ class GeoInterfaceTests(unittest.TestCase):
 
         orm.mapper(Parent, parent_table,
                    properties={
-                               'children_': orm.relationship(Child1),
-                               'child_': orm.relationship(Child2)
-                              }
-                   )
+                       'children_': orm.relationship(Child1),
+                       'child_': orm.relationship(Child2)
+                   })
         return Parent
 
     def test_update_declarative(self):
@@ -229,7 +233,7 @@ class GeoInterfaceTests(unittest.TestCase):
         obj = mapped_class(feature)
         obj_json = dumps(obj)
         json_parsed = json.loads(obj_json)
-        self.assertEqual(json_parsed, {"geometry": {"type": "Point", "coordinates": [53.0, -4.0]}, "type": "Feature", "id": 1, "properties": {"text": "foo", "children": ["foo", "bar"], "child": "bar"}})
+        self.assertEqual(json_parsed, {"geometry": {"type": "Point", "coordinates": [53.0, -4.0]}, "type": "Feature", "id": 1, "properties": {"text": "foo", "children": ["foo", "bar"], "child": "bar"}})  # NOQA
 
     def test_geo_interface_declarative_no_feature(self):
         mapped_class = self._get_mapped_class_declarative()
@@ -244,7 +248,7 @@ class GeoInterfaceTests(unittest.TestCase):
         obj = mapped_class()
         obj_json = dumps(obj)
         json_parsed = json.loads(obj_json)
-        self.assertEqual(json_parsed, {u"geometry": None, u"type": u"Feature", u"properties": {u"text": None, u"children": [], u"child": None}})  # NOQA
+        self.assertEqual(json_parsed, {"geometry": None, "type": "Feature", "properties": {"text": None, "children": [], "child": None}})  # NOQA
 
     def test_geo_interface_declarative_shape_unset(self):
         mapped_class = self._get_mapped_class_declarative()
@@ -267,4 +271,4 @@ class GeoInterfaceTests(unittest.TestCase):
         del(obj._shape)
         obj_json = dumps(obj)
         json_parsed = json.loads(obj_json)
-        self.assertEqual(json_parsed, {"geometry": {"type": "Point", "coordinates": [53.0, -4.0]}, "type": "Feature", "id": 1, "properties": {"text": "foo", "children": ["foo", "foo"], "child": "foo"}})
+        self.assertEqual(json_parsed, {"geometry": {"type": "Point", "coordinates": [53.0, -4.0]}, "type": "Feature", "id": 1, "properties": {"text": "foo", "children": ["foo", "foo"], "child": "foo"}})  # NOQA

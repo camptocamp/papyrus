@@ -23,6 +23,8 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
+import six
+
 from pyramid.httpexceptions import (HTTPBadRequest, HTTPMethodNotAllowed,
                                     HTTPNotFound)
 from pyramid.response import Response
@@ -37,7 +39,6 @@ from sqlalchemy.orm.util import class_mapper
 from geoalchemy2.shape import from_shape
 
 from geojson import Feature, FeatureCollection, loads, GeoJSON
-from six import string_types
 
 
 def _get_col_epsg(mapped_class, geom_attr):
@@ -132,7 +133,7 @@ def create_attr_filter(request, mapped_class):
             if len(request.params[k]) <= 0 or '__' not in k:
                 continue
             col, op = k.split("__")
-            if col not in queryable or op not in mapping.keys():
+            if col not in queryable or op not in six.iterkeys(mapping):
                 continue
             column = getattr(mapped_class, col)
             f = getattr(column, mapping[op])(request.params[k])
@@ -161,7 +162,8 @@ def create_filter(request, mapped_class, geom_attr, **kwargs):
         additional arguments passed to ``create_geom_filter()``.
     """
     attr_filter = create_attr_filter(request, mapped_class)
-    geom_filter = create_geom_filter(request, mapped_class, geom_attr, **kwargs)
+    geom_filter = create_geom_filter(request, mapped_class, geom_attr,
+                                     **kwargs)
     if geom_filter is None and attr_filter is None:
         return None
     if geom_filter is None:
@@ -173,7 +175,7 @@ def create_filter(request, mapped_class, geom_attr, **kwargs):
 
 def asbool(val):
     # Convert the passed value to a boolean.
-    if isinstance(val, string_types):
+    if isinstance(val, six.string_types):
         return val.lower() not in ['false', '0']
     else:
         return bool(val)
@@ -219,7 +221,8 @@ class Protocol(object):
             and the database object about to be deleted.
     """
 
-    def __init__(self, Session, mapped_class, geom_attr, readonly=False, **kwargs):
+    def __init__(self, Session, mapped_class, geom_attr, readonly=False,
+                 **kwargs):
         self.Session = Session
         self.mapped_class = mapped_class
         self.geom_attr = geom_attr
@@ -298,7 +301,8 @@ class Protocol(object):
         else:
             objs = self._query(request, filter)
             ret = FeatureCollection(
-                [self._filter_attrs(o.__geo_interface__, request) for o in objs if o is not None])
+                [self._filter_attrs(o.__geo_interface__, request)
+                 for o in objs if o is not None])
         return ret
 
     def create(self, request):
