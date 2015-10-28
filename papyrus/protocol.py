@@ -162,7 +162,8 @@ def create_filter(request, mapped_class, geom_attr, **kwargs):
         additional arguments passed to ``create_geom_filter()``.
     """
     attr_filter = create_attr_filter(request, mapped_class)
-    geom_filter = create_geom_filter(request, mapped_class, geom_attr, **kwargs)
+    geom_filter = create_geom_filter(request, mapped_class, geom_attr,
+                                     **kwargs)
     if geom_filter is None and attr_filter is None:
         return None
     if geom_filter is None:
@@ -220,7 +221,8 @@ class Protocol(object):
             and the database object about to be deleted.
     """
 
-    def __init__(self, Session, mapped_class, geom_attr, readonly=False, **kwargs):
+    def __init__(self, Session, mapped_class, geom_attr, readonly=False,
+                 **kwargs):
         self.Session = Session
         self.mapped_class = mapped_class
         self.geom_attr = geom_attr
@@ -299,7 +301,8 @@ class Protocol(object):
         else:
             objs = self._query(request, filter)
             ret = FeatureCollection(
-                [self._filter_attrs(o.__geo_interface__, request) for o in objs if o is not None])
+                [self._filter_attrs(o.__geo_interface__, request)
+                 for o in objs if o is not None])
         return ret
 
     def create(self, request):
