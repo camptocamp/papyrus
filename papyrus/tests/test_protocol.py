@@ -28,7 +28,9 @@
 
 """ This module includes unit tests for protocol.py """
 
-from __future__ import with_statement
+
+from __future__ import unicode_literals
+
 
 import unittest
 
@@ -326,12 +328,12 @@ class asbool_Tests(unittest.TestCase):
         self.assertEqual(asbool("true"), True)
         self.assertEqual(asbool("False"), False)
         self.assertEqual(asbool("True"), True)
-        self.assertEqual(asbool(u"0"), False)
-        self.assertEqual(asbool(u"1"), True)
-        self.assertEqual(asbool(u"false"), False)
-        self.assertEqual(asbool(u"true"), True)
-        self.assertEqual(asbool(u"False"), False)
-        self.assertEqual(asbool(u"True"), True)
+        self.assertEqual(asbool("0"), False)
+        self.assertEqual(asbool("1"), True)
+        self.assertEqual(asbool("false"), False)
+        self.assertEqual(asbool("true"), True)
+        self.assertEqual(asbool("False"), False)
+        self.assertEqual(asbool("True"), True)
 
 
 class Test_protocol(unittest.TestCase):

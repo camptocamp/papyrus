@@ -23,6 +23,8 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
+import six
+
 from pyramid.httpexceptions import (HTTPBadRequest, HTTPMethodNotAllowed,
                                     HTTPNotFound)
 from pyramid.response import Response
@@ -37,7 +39,6 @@ from sqlalchemy.orm.util import class_mapper
 from geoalchemy2.shape import from_shape
 
 from geojson import Feature, FeatureCollection, loads, GeoJSON
-from six import string_types
 
 
 def _get_col_epsg(mapped_class, geom_attr):
@@ -132,7 +133,7 @@ def create_attr_filter(request, mapped_class):
             if len(request.params[k]) <= 0 or '__' not in k:
                 continue
             col, op = k.split("__")
-            if col not in queryable or op not in mapping.keys():
+            if col not in queryable or op not in six.iterkeys(mapping):
                 continue
             column = getattr(mapped_class, col)
             f = getattr(column, mapping[op])(request.params[k])
@@ -173,7 +174,7 @@ def create_filter(request, mapped_class, geom_attr, **kwargs):
 
 def asbool(val):
     # Convert the passed value to a boolean.
-    if isinstance(val, string_types):
+    if isinstance(val, six.string_types):
         return val.lower() not in ['false', '0']
     else:
         return bool(val)

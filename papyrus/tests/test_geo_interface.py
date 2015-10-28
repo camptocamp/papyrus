@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import unittest
 import json
 import sys
@@ -244,7 +246,7 @@ class GeoInterfaceTests(unittest.TestCase):
         obj = mapped_class()
         obj_json = dumps(obj)
         json_parsed = json.loads(obj_json)
-        self.assertEqual(json_parsed, {u"geometry": None, u"type": u"Feature", u"properties": {u"text": None, u"children": [], u"child": None}})  # NOQA
+        self.assertEqual(json_parsed, {"geometry": None, "type": "Feature", "properties": {"text": None, "children": [], "child": None}})  # NOQA
 
     def test_geo_interface_declarative_shape_unset(self):
         mapped_class = self._get_mapped_class_declarative()
