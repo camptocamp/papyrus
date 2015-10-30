@@ -16,7 +16,8 @@ matrix:
       - TOX_ENV=py35
 
 install:
-  - pip install tox
+  - pip install flake8 tox
 
 script:
+  - flake8 papyrus
   - tox -e $TOX_ENV --sitepackages -- -v --cover-package papyrus
