@@ -101,7 +101,7 @@ class Test_GeoJSON(unittest.TestCase):
         request = testing.DummyRequest()
         request.params['callback'] = 'jsonp_cb'
         result = renderer(f, {'request': request})
-        self.assertIsNotNone(re.match(r'jsonp_cb\({.*}\);', result))
+        self.assertTrue(re.match(r'jsonp_cb\({.*}\);', result) is not None)
         result_json = result[9:-2]
         json_parsed = json.loads(result_json)
         self.assertEqual(json_parsed, {"geometry": {"type": "Point", "coordinates": [53, -4]}, "type": "Feature", "id": 1, "properties": {"title": "Dict 1"}})
@@ -124,7 +124,7 @@ class Test_GeoJSON(unittest.TestCase):
         request = testing.DummyRequest()
         request.params['cb'] = 'jsonp_cb'
         result = renderer(f, {'request': request})
-        self.assertIsNotNone(re.match(r'jsonp_cb\({.*}\);', result))
+        self.assertTrue(re.match(r'jsonp_cb\({.*}\);', result) is not None)
         result_json = result[9:-2]
         json_parsed = json.loads(result_json)
         self.assertEqual(json_parsed, {"geometry": {"type": "Point", "coordinates": [53, -4]}, "type": "Feature", "id": 1, "properties": {"title": "Dict 1"}})
