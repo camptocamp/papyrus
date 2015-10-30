@@ -7,7 +7,8 @@ def add_papyrus_handler(self, route_name_prefix, base_url, handler):
 
         import papyrus
         config.include(papyrus)
-        config.add_papyrus_handler('spots', '/spots', 'mypackage.handlers.SpotHandler')
+        config.add_papyrus_handler(
+            'spots', '/spots', 'mypackage.handlers.SpotHandler')
 
     Arguments:
 
@@ -39,6 +40,7 @@ def add_papyrus_handler(self, route_name_prefix, base_url, handler):
     self.add_handler(route_name, base_url + '/{id}', handler,
                      action='delete', request_method='DELETE')
 
+
 def add_papyrus_routes(self, route_name_prefix, base_url):
     """ A helper method that adds routes to view callables that, together,
     implement the MapFish HTTP interface.
@@ -65,11 +67,12 @@ def add_papyrus_routes(self, route_name_prefix, base_url):
     route_name = route_name_prefix + '_count'
     self.add_route(route_name, base_url + '/count', request_method='GET')
     route_name = route_name_prefix + '_create'
-    self.add_route(route_name, base_url,request_method='POST')
+    self.add_route(route_name, base_url, request_method='POST')
     route_name = route_name_prefix + '_update'
     self.add_route(route_name, base_url + '/{id}', request_method='PUT')
     route_name = route_name_prefix + '_delete'
     self.add_route(route_name, base_url + '/{id}', request_method='DELETE')
+
 
 def includeme(config):
     """ The function to pass to ``config.include``. Requires the
