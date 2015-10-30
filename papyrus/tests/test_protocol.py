@@ -289,6 +289,9 @@ class create_attr_filter_Tests(unittest.TestCase):
                     })
         MappedClass = self._get_mapped_class()
         filter = create_attr_filter(request, MappedClass)
+        print(filter)
+        print(sql.and_(MappedClass.text.ilike("foo"),
+                       MappedClass.id == "1"))
         self.assertTrue((sql.and_(MappedClass.text.ilike("foo"),
                                   MappedClass.id == "1")).compare(filter))
 
