@@ -1,10 +1,24 @@
+sudo: false
 language: python
 
 python:
   - 2.7
 
+env:
+  - TOX_ENV=py26
+  - TOX_ENV=py27
+  - TOX_ENV=py33
+  - TOX_ENV=py34
+
+matrix:
+  include:
+    - python: 3.5
+      env:
+      - TOX_ENV=py35
+
 install:
-  - pip install -r dev_requirements.txt
+  - pip install flake8 tox
 
 script:
-  - nosetests
+  - flake8 papyrus
+  - tox -e $TOX_ENV --sitepackages -- -v --cover-package papyrus

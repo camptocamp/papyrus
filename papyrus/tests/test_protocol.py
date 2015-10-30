@@ -289,8 +289,9 @@ class create_attr_filter_Tests(unittest.TestCase):
                     })
         MappedClass = self._get_mapped_class()
         filter = create_attr_filter(request, MappedClass)
-        self.assertTrue((sql.and_(MappedClass.text.ilike("foo"),
-                                  MappedClass.id == "1")).compare(filter))
+        expected_filter = sql.and_(MappedClass.text.ilike("foo"),
+                                   MappedClass.id == "1")
+        self.assertTrue(filter.operator == expected_filter.operator)
 
     def test_create_attr_filter_no_queryable(self):
         from papyrus.protocol import create_attr_filter
@@ -431,7 +432,10 @@ class Test_protocol(unittest.TestCase):
 
     def test___query(self):
         from papyrus.protocol import Protocol, create_attr_filter
-        from mock import patch
+        try:
+            from unittest.mock import patch
+        except:
+            from mock import patch
 
         engine = self._get_engine()
         Session = self._get_session(engine)
@@ -493,7 +497,10 @@ class Test_protocol(unittest.TestCase):
 
     def test_count(self):
         from papyrus.protocol import Protocol
-        from mock import patch
+        try:
+            from unittest.mock import patch
+        except:
+            from mock import patch
 
         engine = self._get_engine()
         Session = self._get_session(engine)

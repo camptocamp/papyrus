@@ -2,10 +2,6 @@ from __future__ import unicode_literals
 
 import unittest
 import json
-import sys
-
-
-PY = sys.version_info.major
 
 
 class GeoInterfaceTests(unittest.TestCase):

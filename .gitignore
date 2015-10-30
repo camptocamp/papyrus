@@ -4,3 +4,4 @@
 papyrus.egg-info/
 dist
 .coverage
+.tox
