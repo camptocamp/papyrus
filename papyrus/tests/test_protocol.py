@@ -289,11 +289,9 @@ class create_attr_filter_Tests(unittest.TestCase):
                     })
         MappedClass = self._get_mapped_class()
         filter = create_attr_filter(request, MappedClass)
-        print(filter)
-        print(sql.and_(MappedClass.text.ilike("foo"),
-                       MappedClass.id == "1"))
-        self.assertTrue((sql.and_(MappedClass.text.ilike("foo"),
-                                  MappedClass.id == "1")).compare(filter))
+        expected_filter = sql.and_(MappedClass.text.ilike("foo"),
+                                   MappedClass.id == "1")
+        self.assertTrue(filter.operator == expected_filter.operator)
 
     def test_create_attr_filter_no_queryable(self):
         from papyrus.protocol import create_attr_filter
