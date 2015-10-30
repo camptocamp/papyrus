@@ -1,5 +1,6 @@
 import unittest
 
+
 class Test_includeme(unittest.TestCase):
     def test_it(self):
         from pyramid.config import Configurator
@@ -12,6 +13,7 @@ class Test_includeme(unittest.TestCase):
                         pyramid_handlers.add_handler)
         self.failUnless(c.add_papyrus_handler.__func__.__docobj__ is
                         papyrus.add_papyrus_handler)
+
 
 class Test_add_papyrus_handler(unittest.TestCase):
     def _makeOne(self, autocommit=True):
@@ -27,6 +29,7 @@ class Test_add_papyrus_handler(unittest.TestCase):
         from pyramid.interfaces import IRoutesMapper
         config = self._makeOne()
         views = []
+
         def dummy_add_view(**kw):
             views.append(kw)
         config.add_view = dummy_add_view
@@ -55,41 +58,40 @@ class Test_add_papyrus_handler(unittest.TestCase):
         self.assertEqual(len(routes[5].predicates), 1)
 
 from pyramid_handlers import action
-class DummyHandler(object): # pragma: no cover
+
+
+class DummyHandler(object):  # pragma: no cover
     def __init__(self, request):
         self.request = request
 
     @action(renderer='geojson')
     def read_many(self):
-        return proto.read(self.request)
+        pass
 
     @action(renderer='geojson')
     def read_one(self):
-        id = self.request.matchdict.get('id', None)
-        return proto.read(self.request, id=id)
+        pass
 
     @action(renderer='string')
     def count(self):
-        return proto.count(self.request)
+        pass
 
     @action(renderer='geojson')
     def create(self):
-        return proto.create(self.request)
+        pass
 
     @action(renderer='geojson')
     def update(self):
-        id = self.request.matchdict['id']
-        return proto.update(self.request, id)
+        pass
 
     @action()
     def delete(self):
-        id = self.request.matchdict['id']
-        return proto.delete(self.request, id)
+        pass
+
 
 class Test_add_papyrus_routes(unittest.TestCase):
     def _makeOne(self, autocommit=True):
         from pyramid.config import Configurator
-        import pyramid_handlers
         from papyrus import add_papyrus_routes
         config = Configurator(autocommit=autocommit)
         config.add_directive('add_papyrus_routes', add_papyrus_routes)
