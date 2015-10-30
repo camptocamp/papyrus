@@ -133,7 +133,7 @@ def create_attr_filter(request, mapped_class):
             if len(request.params[k]) <= 0 or '__' not in k:
                 continue
             col, op = k.split("__")
-            if col not in queryable or op not in six.iterkeys(mapping):
+            if col not in queryable or op not in mapping:
                 continue
             column = getattr(mapped_class, col)
             f = getattr(column, mapping[op])(request.params[k])
