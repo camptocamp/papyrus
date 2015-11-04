@@ -39,4 +39,4 @@ to x.y.
 
 Upload the package to PyPI::
 
-    $ python setup.py sdist upload
+    $ python setup.py sdist bdist_wheel upload
