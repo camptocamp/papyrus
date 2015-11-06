@@ -34,9 +34,10 @@ Create Git tag and push it::
     $ git tag -a x.y -m 'version x.y'
     $ git push origin x.y
 
-Go to http://readthedocs.org/dashboard/papyrus/edit/ and set "Default branch"
-to x.y.
+Go to https://readthedocs.org/dashboard/papyrus/advanced/ and set "Default
+version" to x.y. Now go to https://readthedocs.org/dashboard/papyrus/versions/
+and change that version to "Active".
 
-Upload the package to PyPI::
+Upload the packages to PyPI::
 
     $ python setup.py sdist bdist_wheel upload
