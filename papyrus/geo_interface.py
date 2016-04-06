@@ -75,7 +75,8 @@ class GeoInterface(object):
                     continue
                 if p.columns[0].primary_key:
                     primary_key = p.key
-            setattr(self, primary_key, feature.id)
+            if hasattr(feature, 'id') and feature.id is not None:
+                setattr(self, primary_key, feature.id)
             self.__update__(feature)
 
     def __update__(self, feature):
