@@ -1,5 +1,7 @@
 import unittest
 
+from pyramid_handlers import action
+
 
 class Test_includeme(unittest.TestCase):
     def test_it(self):
@@ -56,8 +58,6 @@ class Test_add_papyrus_handler(unittest.TestCase):
         self.assertEqual(routes[5].name, 'prefix_delete')
         self.assertEqual(routes[5].path, '/base_url/{id}')
         self.assertEqual(len(routes[5].predicates), 1)
-
-from pyramid_handlers import action
 
 
 class DummyHandler(object):  # pragma: no cover
