@@ -1,6 +1,12 @@
 Changes
 -------
 
+2.1
+~~~
+
+* Support recent versions of geojson package. @sbrunner
+  https://github.com/elemoine/papyrus/pull/53
+
 2.0
 ~~~
 
