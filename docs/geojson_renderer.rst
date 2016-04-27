@@ -55,10 +55,6 @@ implement the Python Geo Interface.
 
 Notes:
 
-* The GeoJSON renderer requires simplejson 2.1 or higher. Indeed, to be able to
-  deal with ``decimal.Decimal`` values, which are common when using SQLAlchemy,
-  we set ``use_decimal`` to ``True`` when calling the ``dumps`` function, and
-  only simplejson 2.1 and higher support that argument.
 * The GeoJSON renderer supports `JSONP <http://en.wikipedia.org/wiki/JSONP>`_.
   The renderer indeed checks if there's a ``callback`` parameter in the query
   string, and if there's one it wraps the response in a JavaScript call and
