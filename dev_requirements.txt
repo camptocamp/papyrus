@@ -4,5 +4,4 @@ coverage
 WebTest
 psycopg2
 pyramid_handlers
-simplejson
 flake8
