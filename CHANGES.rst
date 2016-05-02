@@ -1,6 +1,12 @@
 Changes
 -------
 
+2.2
+~~~
+
+* Remove dependency to simplejson for Decimal handling @gberaudo
+  https://github.com/elemoine/papyrus/pull/57
+
 2.1
 ~~~
 
