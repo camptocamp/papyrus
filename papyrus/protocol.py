@@ -351,7 +351,7 @@ class Protocol(object):
             self.before_update(request, feature, obj)
         obj.__update__(feature)
         session.flush()
-        request.response.status_int = 201
+        request.response.status_int = 200
         return obj
 
     def delete(self, request, id):

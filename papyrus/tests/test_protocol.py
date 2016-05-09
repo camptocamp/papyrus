@@ -793,7 +793,7 @@ class Test_protocol(unittest.TestCase):
         self.assertTrue(isinstance(request._log["obj"], MappedClass))
 
         # test response status
-        self.assertEqual(request.response.status_int, 201)
+        self.assertEqual(request.response.status_int, 200)
 
     def test_delete_forbidden(self):
         from papyrus.protocol import Protocol
