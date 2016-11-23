@@ -10,7 +10,7 @@ Papyrus provides geospatial extensions for the `Pyramid
 <http://docs.pylonsproject.org/en/latest/docs/pyramid.html>`_ web framework.
 
 Papyrus includes an implementation of the `MapFish Protocol
-<http://trac.mapfish.org/trac/mapfish/wiki/MapFishProtocol>`_. The MapFish
+<https://github.com/mapfish/mapfish/wiki/MapFishProtocol>`_. The MapFish
 Protocol defines a HTTP interface for creating, reading, updating, and deleting
 (CRUD) geographic objects (a.k.a. features).
 
