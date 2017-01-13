@@ -85,7 +85,7 @@ def create_geom_filter(request, mapped_class, geom_attr):
         shape = Polygon(((box[0], box[1]), (box[0], box[3]),
                          (box[2], box[3]), (box[2], box[1]),
                          (box[0], box[1])))
-    elif 'lon' and 'lat' in request.params:
+    elif 'lon' in request.params and 'lat' in request.params:
         shape = Point(float(request.params['lon']),
                       float(request.params['lat']))
     elif 'geometry' in request.params:
