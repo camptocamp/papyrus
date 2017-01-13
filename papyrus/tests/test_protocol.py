@@ -99,10 +99,10 @@ class create_geom_filter_Tests(unittest.TestCase):
         compiled_filter = filter.compile(self._get_engine())
         params = compiled_filter.params
         filter_str = _compiled_to_string(compiled_filter)
-        self.assertEqual(filter_str, b'ST_DWITHIN(ST_Transform("table".geom, %(param_1)s), ST_GeomFromWKB(%(ST_GeomFromWKB_1)s, %(ST_GeomFromWKB_2)s), %(ST_DWITHIN_1)s)')  # NOQA
+        self.assertEqual(filter_str, b'ST_DWITHIN(ST_Transform("table".geom, %(ST_Transform_1)s), ST_GeomFromWKB(%(ST_GeomFromWKB_1)s, %(ST_GeomFromWKB_2)s), %(ST_DWITHIN_1)s)')  # NOQA
         self.assertTrue(wkb.loads(bytes(params["ST_GeomFromWKB_1"])).equals(wkt.loads('POLYGON ((-180 -90, -180 90, 180 90, 180 -90, -180 -90))')))  # NOQA
         self.assertEqual(params["ST_GeomFromWKB_2"], 900913)
-        self.assertEqual(params["param_1"], 900913)
+        self.assertEqual(params["ST_Transform_1"], 900913)
         self.assertEqual(params["ST_DWITHIN_1"], 1)
 
     def test_within_filter(self):
@@ -133,10 +133,10 @@ class create_geom_filter_Tests(unittest.TestCase):
         compiled_filter = filter.compile(self._get_engine())
         params = compiled_filter.params
         filter_str = _compiled_to_string(compiled_filter)
-        self.assertEqual(filter_str, b'ST_DWITHIN(ST_Transform("table".geom, %(param_1)s), ST_GeomFromWKB(%(ST_GeomFromWKB_1)s, %(ST_GeomFromWKB_2)s), %(ST_DWITHIN_1)s)')  # NOQA
+        self.assertEqual(filter_str, b'ST_DWITHIN(ST_Transform("table".geom, %(ST_Transform_1)s), ST_GeomFromWKB(%(ST_GeomFromWKB_1)s, %(ST_GeomFromWKB_2)s), %(ST_DWITHIN_1)s)')  # NOQA
         self.assertTrue(wkb.loads(bytes(params["ST_GeomFromWKB_1"])).equals(wkt.loads('POINT (40 5)')))  # NOQA
         self.assertEqual(params["ST_GeomFromWKB_2"], 900913)
-        self.assertEqual(params["param_1"], 900913)
+        self.assertEqual(params["ST_Transform_1"], 900913)
         self.assertEqual(params["ST_DWITHIN_1"], 1)
 
     def test_polygon_filter(self):
@@ -172,10 +172,10 @@ class create_geom_filter_Tests(unittest.TestCase):
         compiled_filter = filter.compile(self._get_engine())
         params = compiled_filter.params
         filter_str = _compiled_to_string(compiled_filter)
-        self.assertEqual(filter_str, b'ST_DWITHIN(ST_Transform("table".geom, %(param_1)s), ST_GeomFromWKB(%(ST_GeomFromWKB_1)s, %(ST_GeomFromWKB_2)s), %(ST_DWITHIN_1)s)')  # NOQA
+        self.assertEqual(filter_str, b'ST_DWITHIN(ST_Transform("table".geom, %(ST_Transform_1)s), ST_GeomFromWKB(%(ST_GeomFromWKB_1)s, %(ST_GeomFromWKB_2)s), %(ST_DWITHIN_1)s)')  # NOQA
         self.assertTrue(wkb.loads(bytes(params["ST_GeomFromWKB_1"])).equals(poly))  # NOQA
         self.assertEqual(params["ST_GeomFromWKB_2"], 900913)
-        self.assertEqual(params["param_1"], 900913)
+        self.assertEqual(params["ST_Transform_1"], 900913)
         self.assertEqual(params["ST_DWITHIN_1"], 1)
 
     def test_geom_filter_no_params(self):
