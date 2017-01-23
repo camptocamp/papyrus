@@ -29,7 +29,7 @@ class Test_GeoJSON(unittest.TestCase):
         result = renderer(f, {'request': request})
         result_parsed = json.loads(result)
         self.assertEqual(result_parsed, {"geometry": {"type": "Point", "coordinates": [53, -4]}, "type": "Feature", "id": 1, "properties": {"title": "Dict 1"}})  # NOQA
-        self.assertEqual(request.response.content_type, 'application/json')
+        self.assertEqual(request.response.content_type, 'application/geo+json')
 
     def test_geojson_content_type(self):
         renderer = self._callFUT()
@@ -59,7 +59,7 @@ class Test_GeoJSON(unittest.TestCase):
         result = renderer(f, {'request': request})
         result_parsed = json.loads(result)
         self.assertEqual(result_parsed, {"geometry": {"type": "Point", "coordinates": [53, -4]}, "type": "Feature", "id": 1, "properties": {"decimal": 0.003}})  # NOQA
-        self.assertEqual(request.response.content_type, 'application/json')
+        self.assertEqual(request.response.content_type, 'application/geo+json')
 
     def test_date(self):
         renderer = self._callFUT()
@@ -74,7 +74,7 @@ class Test_GeoJSON(unittest.TestCase):
         result = renderer(f, {'request': request})
         result_parsed = json.loads(result)
         self.assertEqual(result_parsed, {"geometry": {"type": "Point", "coordinates": [53, -4]}, "type": "Feature", "id": 1, "properties": {"date": "2011-05-21"}})  # NOQA
-        self.assertEqual(request.response.content_type, 'application/json')
+        self.assertEqual(request.response.content_type, 'application/geo+json')
 
     def test_datetime(self):
         renderer = self._callFUT()
@@ -90,7 +90,7 @@ class Test_GeoJSON(unittest.TestCase):
         result = renderer(f, {'request': request})
         result_parsed = json.loads(result)
         self.assertEqual(result_parsed, {"geometry": {"type": "Point", "coordinates": [53, -4]}, "type": "Feature", "id": 1, "properties": {"datetime": "2011-05-21T20:55:12"}})  # NOQA
-        self.assertEqual(request.response.content_type, 'application/json')
+        self.assertEqual(request.response.content_type, 'application/geo+json')
 
     def test_jsonp(self):
         renderer = self._callFUT()
@@ -122,7 +122,7 @@ class Test_GeoJSON(unittest.TestCase):
         result = renderer(f, {'request': request})
         result_parsed = json.loads(result)
         self.assertEqual(result_parsed, {"geometry": {"type": "Point", "coordinates": [53, -4]}, "type": "Feature", "id": 1, "properties": {"title": "Dict 1"}})  # NOQA
-        self.assertEqual(request.response.content_type, 'application/json')
+        self.assertEqual(request.response.content_type, 'application/geo+json')
         request = testing.DummyRequest()
         request.params['cb'] = 'jsonp_cb'
         result = renderer(f, {'request': request})
@@ -144,7 +144,7 @@ class Test_GeoJSON(unittest.TestCase):
         result = renderer([f], {'request': request})
         result_parsed = json.loads(result)
         self.assertEqual(result_parsed, {"type": "FeatureCollection", "features": [{"geometry": {"type": "Point", "coordinates": [53, -4]}, "type": "Feature", "id": 1, "properties": {"title": "Dict 1"}}]})  # NOQA
-        self.assertEqual(request.response.content_type, 'application/json')
+        self.assertEqual(request.response.content_type, 'application/geo+json')
 
     def test_collection_type(self):
         renderer = self._callFUT(collection_type='GeometryCollection')
@@ -156,11 +156,11 @@ class Test_GeoJSON(unittest.TestCase):
         result_parsed = json.loads(result)
         self.assertEqual(result_parsed,
                          {"type": "Point", "coordinates": [53, -4]})
-        self.assertEqual(request.response.content_type, 'application/json')
+        self.assertEqual(request.response.content_type, 'application/geo+json')
         result = renderer([f], {'request': request})
         result_parsed = json.loads(result)
         self.assertEqual(result_parsed, {"type": "GeometryCollection", "geometries": [{"type": "Point", "coordinates": [53, -4]}]})  # NOQA
-        self.assertEqual(request.response.content_type, 'application/json')
+        self.assertEqual(request.response.content_type, 'application/geo+json')
 
 
 class Test_XSD(unittest.TestCase):

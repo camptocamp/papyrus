@@ -73,7 +73,7 @@ class GeoJSON(object):
                 if ct == response.default_content_type:
                     callback = request.params.get(self.jsonp_param_name)
                     if callback is None:
-                        response.content_type = 'application/json'
+                        response.content_type = 'application/geo+json'
                     else:
                         response.content_type = 'text/javascript'
                         ret = ('%(callback)s(%(json)s);' %
