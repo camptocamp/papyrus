@@ -4,7 +4,7 @@ Creating MapFish Views
 ----------------------
 
 Papyrus provides an implementation of the `MapFish Protocol
-<http://trac.mapfish.org/trac/mapfish/wiki/MapFishProtocol>`_. This
+<https://github.com/mapfish/mapfish/wiki/MapFishProtocol>`_. This
 implementation relies on `GeoAlchemy <http://www.geoalchemy.org>`_.
 
 This section provides an example describing how to build a MapFish web service
