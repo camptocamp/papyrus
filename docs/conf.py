@@ -226,7 +226,11 @@ from unittest.mock import MagicMock
 class Mock(MagicMock):
     @classmethod
     def __getattr__(cls, name):
+        if name == '_mock_methods':
+            return name._mock_methods
+        else:
             return Mock()
 
-MOCK_MODULES = ['shapely', 'shapely.geometry', 'shapely.geometry.point', 'shapely.geometry.polygon']
+MOCK_MODULES = ['shapely', 'shapely.geometry', 'shapely.geometry.point',
+                'shapely.geometry.polygon', 'shapely.wkb', 'shapely.wkt']
 sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
