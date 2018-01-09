@@ -1,6 +1,18 @@
 Changes
 -------
 
+2.3
+~~~
+
+* Add time support in geojson renderer @sbrunner
+  https://github.com/elemoine/papyrus/pull/69
+* Change content type to 'application/geo+json' @fredj
+  https://github.com/elemoine/papyrus/pull/63
+* Fix membership test in create_geom_filter @fredj
+  https://github.com/elemoine/papyrus/pull/61
+* Change 'update' HTTP response from 201 to 200 @fredj
+  https://github.com/elemoine/papyrus/pull/59
+
 2.2
 ~~~
 
