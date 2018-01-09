@@ -76,6 +76,21 @@ class Test_GeoJSON(unittest.TestCase):
         self.assertEqual(result_parsed, {"geometry": {"type": "Point", "coordinates": [53, -4]}, "type": "Feature", "id": 1, "properties": {"date": "2011-05-21"}})  # NOQA
         self.assertEqual(request.response.content_type, 'application/geo+json')
 
+    def test_time(self):
+        renderer = self._callFUT()
+        import datetime
+        f = {
+            'type': 'Feature',
+            'id': 1,
+            'geometry': {'type': 'Point', 'coordinates': [53, -4]},
+            'properties': {'time': datetime.time(11, 5, 21)}
+        }
+        request = testing.DummyRequest()
+        result = renderer(f, {'request': request})
+        result_parsed = json.loads(result)
+        self.assertEqual(result_parsed, {"geometry": {"type": "Point", "coordinates": [53, -4]}, "type": "Feature", "id": 1, "properties": {"time": "11:05:21"}})  # NOQA
+        self.assertEqual(request.response.content_type, 'application/geo+json')
+
     def test_datetime(self):
         renderer = self._callFUT()
         import datetime

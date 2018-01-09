@@ -434,7 +434,7 @@ class Test_protocol(unittest.TestCase):
         from papyrus.protocol import Protocol, create_attr_filter
         try:
             from unittest.mock import patch
-        except:
+        except Exception:
             from mock import patch
 
         engine = self._get_engine()
@@ -499,7 +499,7 @@ class Test_protocol(unittest.TestCase):
         from papyrus.protocol import Protocol
         try:
             from unittest.mock import patch
-        except:
+        except Exception:
             from mock import patch
 
         engine = self._get_engine()
