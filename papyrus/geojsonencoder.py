@@ -15,7 +15,7 @@ class GeoJSONEncoder(PyGFPEncoder):
     # encoder to deal with objects of these types.
 
     def default(self, obj):
-        if isinstance(obj, (datetime.date, datetime.datetime)):
+        if isinstance(obj, (datetime.date, datetime.datetime, datetime.time)):
             return obj.isoformat()
         if isinstance(obj, _AssociationList):
             return list(obj)
