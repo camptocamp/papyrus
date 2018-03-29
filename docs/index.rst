@@ -63,7 +63,7 @@ Running the tests
 Papyrus includes unit tests. Most of the time patches should include new tests.
 
 To run the Papyrus tests, in addition to Papyrus and its dependencies the
-following packages need to be installed: ``nose``, ``mock``, ``psycopg2``,
+following packages need to be installed: ``nose``, ``mock``, ``psycopg2-binary``,
 ``pyramid_handlers``, ``coverage``, and ``WebTest``.
 
 For these packages to install correctly, you have to have header files for
