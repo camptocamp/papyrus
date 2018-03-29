@@ -355,7 +355,7 @@ class Protocol(object):
         return obj
 
     def delete(self, request, id):
-        """ Remove the targetted feature from the database """
+        """ Remove the targeted feature from the database """
         if self.readonly:
             return HTTPMethodNotAllowed(headers={'Allow': 'GET, HEAD'})
         session = self.Session()
