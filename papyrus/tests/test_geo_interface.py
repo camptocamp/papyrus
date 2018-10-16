@@ -34,7 +34,7 @@ class GeoInterfaceTests(unittest.TestCase):
         class Parent(GeoInterface, Base):
             __tablename__ = 'parent'
             id = Column(types.Integer, primary_key=True)
-            name = Column(types.Unicode)
+            name = Column(types.Unicode, info={'readonly': True})
             text = Column(types.Unicode)
             geom = Column(Geometry(geometry_type='GEOMETRY', dimension=2,
                                    srid=3000))
@@ -45,7 +45,6 @@ class GeoInterfaceTests(unittest.TestCase):
             children = association_proxy('children_', 'name')
             child = association_proxy('child_', 'name')
             __add_properties__ = ('child', 'children')
-            __readonly_properties__ = ('name')
 
         return Parent
 
@@ -78,7 +77,7 @@ class GeoInterfaceTests(unittest.TestCase):
         class Parent(Base):
             __tablename__ = 'parent'
             id = Column(types.Integer, primary_key=True)
-            name = Column(types.Unicode)
+            name = Column(types.Unicode, info={'readonly': True})
             text = Column(types.Unicode)
             geom = Column(Geometry(geometry_type='GEOMETRY', dimension=2,
                                    srid=3000))
@@ -89,7 +88,6 @@ class GeoInterfaceTests(unittest.TestCase):
             children = association_proxy('children_', 'name')
             child = association_proxy('child_', 'name')
             __add_properties__ = ('child', 'children')
-            __readonly_properties__ = ('name')
 
         return Parent
 
@@ -117,7 +115,7 @@ class GeoInterfaceTests(unittest.TestCase):
         parent_table = Table(
             'parent', md,
             Column('id', types.Integer, primary_key=True),
-            Column('name', types.Unicode),
+            Column('name', types.Unicode, info={'readonly': True}),
             Column('text', types.Unicode),
             Column('geom', Geometry(geometry_type='GEOMETRY',
                                     dimension=2, srid=3000)),
@@ -140,7 +138,6 @@ class GeoInterfaceTests(unittest.TestCase):
             children = association_proxy('children_', 'name')
             child = association_proxy('child_', 'name')
             __add_properties__ = ('child', 'children')
-            __readonly_properties__ = ('name')
 
         orm.mapper(Parent, parent_table,
                    properties={

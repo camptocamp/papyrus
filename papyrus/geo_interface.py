@@ -40,6 +40,15 @@ class GeoInterface(object):
             __tablename__ = 'spots'
             id = Column(Integer, primary_key=True)
             geom = Geometry('the_geom', Geometry('POINT', 4326))
+
+    Properties can be flagged read only through column info properties.
+    Such column will not be updated without error.
+    Example::
+        class Spot(GeoInterface, Base):
+            __tablename__ = 'spots'
+            id = Column(Integer, primary_key=True)
+            geom = Column('the_geom', Geometry('POINT', 4326))
+            name = Column(String(80), info={'readonly': True})
     """
 
     __add_properties__ = None
@@ -59,21 +68,6 @@ class GeoInterface(object):
             type = association_proxy('type_', 'type')
             __add_properties__ = ('type',)
 
-    """
-
-    __readonly_properties__ = None
-    """
-    Use this property to protect properties against writing. By default all
-    propeties are writable. Default is ``None``.
-
-    Example::
-
-        class Spot(Base):
-            __tablename__ = 'spots'
-            id = Column(Integer, primary_key=True)
-            geom = Column('the_geom', Geometry('POINT', 4326))
-            name = Column(String(80))
-            __readonly__properties__ = ('name')
     """
 
     def __init__(self, feature=None):
@@ -106,6 +100,8 @@ class GeoInterface(object):
             if not isinstance(p, ColumnProperty):
                 continue
             col = p.columns[0]
+            if col.info.get('readonly'):
+                continue
             if isinstance(col.type, Geometry):
                 geom = feature.geometry
                 if geom and not isinstance(geom, geojson.geometry.Default):
@@ -115,15 +111,11 @@ class GeoInterface(object):
                     self._shape = shape
             elif not col.primary_key:
                 if p.key in feature.properties:
-                    if (self.__readonly_properties__ and
-                            p.key in self.__readonly_properties__):
-                        continue
                     setattr(self, p.key, feature.properties[p.key])
 
         if self.__add_properties__:
                 for k in self.__add_properties__:
-                    if (self.__readonly_properties__ and
-                            p.key in self.__readonly_properties__):
+                    if col.info.get('readonly'):
                         continue
                     setattr(self, k, feature.properties.get(k))
 

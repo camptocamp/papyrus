@@ -384,6 +384,18 @@ class Test_XSD(unittest.TestCase):
         self.assertRaises(UnsupportedColumnTypeError,
                           self._get_elements, (('column', column),))
 
+    def test_readonly(self):
+        from sqlalchemy import Column, types
+        column = Column('_column', types.String(10), info={'readonly': True})
+        elements = self._get_elements((('column', column),))
+        self.assertEqual(len(elements), 1)
+        appinfos = elements[0].findall(
+            self._make_xpath('. annotation appinfo'))
+        self.assertEqual(len(appinfos), 1)
+        readonlys = appinfos[0].findall('readonly')
+        self.assertEqual(len(readonlys), 1)
+        self.assertEqual(readonlys[0].attrib, {'value': 'true'})
+
     def test_sequence_callback(self):
         from sqlalchemy import Column, ForeignKey, types
         from sqlalchemy.orm import relationship

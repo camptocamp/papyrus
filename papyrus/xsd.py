@@ -64,6 +64,13 @@ class XSDGenerator(object):
         self.include_foreign_keys = include_foreign_keys
         self.sequence_callback = sequence_callback
 
+    def add_column_app_info(self, tb, column):
+        if column.info.get('readonly'):
+            with tag(tb, 'xsd:annotation'):
+                with tag(tb, 'xsd:appinfo'):
+                    with tag(tb, 'readonly', {'value': 'true'}):
+                        return tb
+
     def add_column_xsd(self, tb, column, attrs):
         """ Add the XSD for a column to tb (a TreeBuilder) """
         if column.nullable:
@@ -73,12 +80,14 @@ class XSDGenerator(object):
             if isinstance(column.type, cls):
                 attrs['type'] = xsd_type
                 with tag(tb, 'xsd:element', attrs) as tb:
+                    self.add_column_app_info(tb, column)
                     return tb
         if isinstance(column.type, Geometry):
             geometry_type = column.type.geometry_type
             xsd_type = self.SIMPLE_GEOMETRY_XSD_TYPES[geometry_type]
             attrs['type'] = xsd_type
             with tag(tb, 'xsd:element', attrs) as tb:
+                self.add_column_app_info(tb, column)
                 return tb
         if isinstance(column.type, sqlalchemy.Enum):
             with tag(tb, 'xsd:element', attrs) as tb:
@@ -88,11 +97,13 @@ class XSDGenerator(object):
                         for enum in column.type.enums:
                             with tag(tb, 'xsd:enumeration', {'value': enum}):
                                 pass
-                        return tb
+                self.add_column_app_info(tb, column)
+                return tb
         if isinstance(column.type, sqlalchemy.Numeric):
             if column.type.scale is None and column.type.precision is None:
                 attrs['type'] = 'xsd:decimal'
                 with tag(tb, 'xsd:element', attrs) as tb:
+                    self.add_column_app_info(tb, column)
                     return tb
             else:
                 with tag(tb, 'xsd:element', attrs) as tb:
@@ -110,7 +121,8 @@ class XSDGenerator(object):
                                          {'value': str(precision)}) \
                                         as tb:
                                     pass
-                            return tb
+                    self.add_column_app_info(tb, column)
+                    return tb
         if isinstance(column.type, sqlalchemy.String) \
                 or isinstance(column.type, sqlalchemy.Text) \
                 or isinstance(column.type, sqlalchemy.Unicode) \
@@ -118,6 +130,7 @@ class XSDGenerator(object):
             if column.type.length is None:
                 attrs['type'] = 'xsd:string'
                 with tag(tb, 'xsd:element', attrs) as tb:
+                    self.add_column_app_info(tb, column)
                     return tb
             else:
                 with tag(tb, 'xsd:element', attrs) as tb:
@@ -126,7 +139,9 @@ class XSDGenerator(object):
                                  {'base': 'xsd:string'}) as tb:
                             with tag(tb, 'xsd:maxLength',
                                      {'value': str(column.type.length)}):
-                                return tb
+                                pass
+                    self.add_column_app_info(tb, column)
+                    return tb
         raise UnsupportedColumnTypeError(column.type)
 
     def add_column_property_xsd(self, tb, column_property):
