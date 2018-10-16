@@ -34,6 +34,7 @@ class GeoInterfaceTests(unittest.TestCase):
         class Parent(GeoInterface, Base):
             __tablename__ = 'parent'
             id = Column(types.Integer, primary_key=True)
+            name = Column(types.Unicode)
             text = Column(types.Unicode)
             geom = Column(Geometry(geometry_type='GEOMETRY', dimension=2,
                                    srid=3000))
@@ -44,6 +45,7 @@ class GeoInterfaceTests(unittest.TestCase):
             children = association_proxy('children_', 'name')
             child = association_proxy('child_', 'name')
             __add_properties__ = ('child', 'children')
+            __readonly_properties__ = ('name')
 
         return Parent
 
@@ -76,6 +78,7 @@ class GeoInterfaceTests(unittest.TestCase):
         class Parent(Base):
             __tablename__ = 'parent'
             id = Column(types.Integer, primary_key=True)
+            name = Column(types.Unicode)
             text = Column(types.Unicode)
             geom = Column(Geometry(geometry_type='GEOMETRY', dimension=2,
                                    srid=3000))
@@ -86,6 +89,7 @@ class GeoInterfaceTests(unittest.TestCase):
             children = association_proxy('children_', 'name')
             child = association_proxy('child_', 'name')
             __add_properties__ = ('child', 'children')
+            __readonly_properties__ = ('name')
 
         return Parent
 
@@ -113,6 +117,7 @@ class GeoInterfaceTests(unittest.TestCase):
         parent_table = Table(
             'parent', md,
             Column('id', types.Integer, primary_key=True),
+            Column('name', types.Unicode),
             Column('text', types.Unicode),
             Column('geom', Geometry(geometry_type='GEOMETRY',
                                     dimension=2, srid=3000)),
@@ -135,6 +140,7 @@ class GeoInterfaceTests(unittest.TestCase):
             children = association_proxy('children_', 'name')
             child = association_proxy('child_', 'name')
             __add_properties__ = ('child', 'children')
+            __readonly_properties__ = ('name')
 
         orm.mapper(Parent, parent_table,
                    properties={
@@ -163,11 +169,14 @@ class GeoInterfaceTests(unittest.TestCase):
                                             'children': ['foo', 'foo']},
                           geometry=Point(coordinates=[53, -4]))
         obj = mapped_class(feature)
-        feature = Feature(id=2, properties={'text': 'bar', 'child': 'bar',
+        obj.name = 'foo'
+        feature = Feature(id=2, properties={'name': 'bar',
+                                            'text': 'bar', 'child': 'bar',
                                             'children': ['bar', 'bar']},
                           geometry=Point(coordinates=[55, -5]))
         obj.__update__(feature)
         self.assertEqual(obj.id, 1)
+        self.assertEqual(obj.name, 'foo')
         self.assertEqual(obj.text, 'bar')
         self.assertEqual(obj.child, 'bar')
         self.assertEqual(obj.children, ['bar', 'bar'])
@@ -193,11 +202,13 @@ class GeoInterfaceTests(unittest.TestCase):
         from geojson import Feature, Point
         from geoalchemy2.elements import WKBElement
         from geoalchemy2.shape import to_shape
-        feature = Feature(id=1, properties={'text': 'foo', 'child': 'foo',
+        feature = Feature(id=1, properties={'name': 'foo',
+                                            'text': 'foo', 'child': 'foo',
                                             'children': ['foo', 'foo']},
                           geometry=Point(coordinates=[53, -4]))
         obj = mapped_class(feature)
         self.assertEqual(obj.id, 1)
+        self.assertEqual(obj.name, None)
         self.assertEqual(obj.text, 'foo')
         self.assertEqual(obj.child, 'foo')
         self.assertEqual(obj.children, ['foo', 'foo'])
@@ -223,13 +234,14 @@ class GeoInterfaceTests(unittest.TestCase):
         from geojson import Feature, Point
         from papyrus.geojsonencoder import dumps
         mapped_class = self._get_mapped_class_declarative()
-        feature = Feature(id=1, properties={'text': 'foo', 'child': 'bar',
+        feature = Feature(id=1, properties={'name': 'foo',
+                                            'text': 'foo', 'child': 'bar',
                                             'children': ['foo', 'bar']},
                           geometry=Point(coordinates=[53, -4]))
         obj = mapped_class(feature)
         obj_json = dumps(obj)
         json_parsed = json.loads(obj_json)
-        self.assertEqual(json_parsed, {"geometry": {"type": "Point", "coordinates": [53.0, -4.0]}, "type": "Feature", "id": 1, "properties": {"text": "foo", "children": ["foo", "bar"], "child": "bar"}})  # NOQA
+        self.assertEqual(json_parsed, {"geometry": {"type": "Point", "coordinates": [53.0, -4.0]}, "type": "Feature", "id": 1, "properties": {"name": None, "text": "foo", "children": ["foo", "bar"], "child": "bar"}})  # NOQA
 
     def test_geo_interface_declarative_no_feature(self):
         mapped_class = self._get_mapped_class_declarative()
@@ -244,7 +256,7 @@ class GeoInterfaceTests(unittest.TestCase):
         obj = mapped_class()
         obj_json = dumps(obj)
         json_parsed = json.loads(obj_json)
-        self.assertEqual(json_parsed, {"geometry": None, "type": "Feature", "properties": {"text": None, "children": [], "child": None}})  # NOQA
+        self.assertEqual(json_parsed, {"geometry": None, "type": "Feature", "properties": {"name": None, "text": None, "children": [], "child": None}})  # NOQA
 
     def test_geo_interface_declarative_shape_unset(self):
         mapped_class = self._get_mapped_class_declarative()
@@ -258,7 +270,8 @@ class GeoInterfaceTests(unittest.TestCase):
         from geojson import Feature, Point
         from papyrus.geojsonencoder import dumps
         mapped_class = self._get_mapped_class_declarative()
-        feature = Feature(id=1, properties={'text': 'foo', 'child': 'foo',
+        feature = Feature(id=1, properties={'name': 'foo',
+                                            'text': 'foo', 'child': 'foo',
                                             'children': ['foo', 'foo']},
                           geometry=Point(coordinates=[53, -4]))
         obj = mapped_class(feature)
@@ -267,4 +280,4 @@ class GeoInterfaceTests(unittest.TestCase):
         del(obj._shape)
         obj_json = dumps(obj)
         json_parsed = json.loads(obj_json)
-        self.assertEqual(json_parsed, {"geometry": {"type": "Point", "coordinates": [53.0, -4.0]}, "type": "Feature", "id": 1, "properties": {"text": "foo", "children": ["foo", "foo"], "child": "foo"}})  # NOQA
+        self.assertEqual(json_parsed, {"geometry": {"type": "Point", "coordinates": [53.0, -4.0]}, "type": "Feature", "id": 1, "properties": {"name": None, "text": "foo", "children": ["foo", "foo"], "child": "foo"}})  # NOQA

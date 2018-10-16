@@ -61,6 +61,21 @@ class GeoInterface(object):
 
     """
 
+    __readonly_properties__ = None
+    """
+    Use this property to protect properties against writing. By default all
+    propeties are writable. Default is ``None``.
+
+    Example::
+
+        class Spot(Base):
+            __tablename__ = 'spots'
+            id = Column(Integer, primary_key=True)
+            geom = Column('the_geom', Geometry('POINT', 4326))
+            name = Column(String(80))
+            __readonly__properties__ = ('name')
+    """
+
     def __init__(self, feature=None):
         """
         Called by the protocol on object creation.
@@ -100,10 +115,16 @@ class GeoInterface(object):
                     self._shape = shape
             elif not col.primary_key:
                 if p.key in feature.properties:
+                    if (self.__readonly_properties__ and
+                            p.key in self.__readonly_properties__):
+                        continue
                     setattr(self, p.key, feature.properties[p.key])
 
         if self.__add_properties__:
                 for k in self.__add_properties__:
+                    if (self.__readonly_properties__ and
+                            p.key in self.__readonly_properties__):
+                        continue
                     setattr(self, k, feature.properties.get(k))
 
     def __read__(self):
