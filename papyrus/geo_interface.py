@@ -9,6 +9,10 @@ import geojson
 from shapely.geometry import asShape
 
 
+class OperationNotAllowedError(Exception):
+    pass
+
+
 class GeoInterface(object):
     """
 
@@ -42,7 +46,7 @@ class GeoInterface(object):
             geom = Geometry('the_geom', Geometry('POINT', 4326))
 
     Properties can be flagged read only through column info properties.
-    Such column will not be updated without error.
+    Attempts to update such column will raise an OperationNotAllowedError.
     Example::
         class Spot(GeoInterface, Base):
             __tablename__ = 'spots'
@@ -100,23 +104,27 @@ class GeoInterface(object):
             if not isinstance(p, ColumnProperty):
                 continue
             col = p.columns[0]
-            if col.info.get('readonly'):
-                continue
             if isinstance(col.type, Geometry):
                 geom = feature.geometry
                 if geom and not isinstance(geom, geojson.geometry.Default):
+                    if col.info.get('readonly'):
+                        raise OperationNotAllowedError(
+                            'Column "{}" is readonly.'.
+                            format(col.name))
                     srid = col.type.srid
                     shape = asShape(geom)
                     setattr(self, p.key, from_shape(shape, srid=srid))
                     self._shape = shape
             elif not col.primary_key:
                 if p.key in feature.properties:
+                    if col.info.get('readonly'):
+                        raise OperationNotAllowedError(
+                            'Column "{}" is readonly.'.
+                            format(col.name))
                     setattr(self, p.key, feature.properties[p.key])
 
         if self.__add_properties__:
                 for k in self.__add_properties__:
-                    if col.info.get('readonly'):
-                        continue
                     setattr(self, k, feature.properties.get(k))
 
     def __read__(self):

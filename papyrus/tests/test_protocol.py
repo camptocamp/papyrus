@@ -370,6 +370,7 @@ class Test_protocol(unittest.TestCase):
         class MappedClass(Base):
             __tablename__ = "table"
             id = Column(types.Integer, primary_key=True)
+            name = Column(types.Unicode, info={'readonly': True})
             text = Column(types.Unicode)
             geom = Column(Geometry(geometry_type='GEOMETRY',
                                    dimension=2, srid=4326))
@@ -601,6 +602,22 @@ class Test_protocol(unittest.TestCase):
         response = proto.create(request)
         self.assertEqual(response.status_int, 400)
 
+    def test_create_readonly_column(self):
+        from papyrus.protocol import Protocol
+        from pyramid.testing import DummyRequest
+
+        engine = self._get_engine()
+        Session = self._get_session(engine)
+        MappedClass = self._get_mapped_class()
+
+        proto = Protocol(Session, MappedClass, "geom")
+        # we need an actual Request object here, for body to do its job
+        request = DummyRequest({})
+        request.method = 'POST'
+        request.body = '{"type": "Feature", "properties": {"name": "foo"}}'  # NOQA
+        response = proto.create(request)
+        self.assertEqual(response.status_int, 400)
+
     def test_create(self):
         from papyrus.protocol import Protocol
         from pyramid.testing import DummyRequest
@@ -750,6 +767,22 @@ class Test_protocol(unittest.TestCase):
         request.method = 'PUT'
         request.body = '{"type": "Point", "coordinates": [45, 5]}'
         response = proto.update(request, 'a')
+        self.assertEqual(response.status_int, 400)
+
+    def test_update_readonly_column(self):
+        from papyrus.protocol import Protocol
+        from pyramid.testing import DummyRequest
+
+        engine = self._get_engine()
+        Session = self._get_session(engine)
+        MappedClass = self._get_mapped_class()
+
+        proto = Protocol(Session, MappedClass, "geom")
+        # we need an actual Request object here, for body to do its job
+        request = DummyRequest({})
+        request.method = 'POST'
+        request.body = '{"type": "Feature", "properties": {"name": "foo"}}'  # NOQA
+        response = proto.create(request)
         self.assertEqual(response.status_int, 400)
 
     def test_update(self):

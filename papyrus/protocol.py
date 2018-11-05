@@ -39,6 +39,7 @@ from sqlalchemy.orm.util import class_mapper
 from geoalchemy2.shape import from_shape
 
 from geojson import Feature, FeatureCollection, loads, GeoJSON
+from papyrus.geo_interface import OperationNotAllowedError
 
 
 def _get_col_epsg(mapped_class, geom_attr):
@@ -323,10 +324,16 @@ class Protocol(object):
             if self.before_create is not None:
                 self.before_create(request, feature, obj)
             if obj is None:
-                obj = self.mapped_class(feature)
+                try:
+                    obj = self.mapped_class(feature)
+                except OperationNotAllowedError as e:
+                    return HTTPBadRequest(str(e))
                 create = True
             else:
-                obj.__update__(feature)
+                try:
+                    obj.__update__(feature)
+                except OperationNotAllowedError as e:
+                    return HTTPBadRequest(str(e))
             if create:
                 session.add(obj)
             objects.append(obj)
@@ -349,7 +356,10 @@ class Protocol(object):
             return HTTPBadRequest()
         if self.before_update is not None:
             self.before_update(request, feature, obj)
-        obj.__update__(feature)
+        try:
+            obj.__update__(feature)
+        except OperationNotAllowedError as e:
+            return HTTPBadRequest(str(e))
         session.flush()
         request.response.status_int = 200
         return obj

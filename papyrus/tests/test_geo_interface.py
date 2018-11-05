@@ -166,14 +166,11 @@ class GeoInterfaceTests(unittest.TestCase):
                                             'children': ['foo', 'foo']},
                           geometry=Point(coordinates=[53, -4]))
         obj = mapped_class(feature)
-        obj.name = 'foo'
-        feature = Feature(id=2, properties={'name': 'bar',
-                                            'text': 'bar', 'child': 'bar',
+        feature = Feature(id=2, properties={'text': 'bar', 'child': 'bar',
                                             'children': ['bar', 'bar']},
                           geometry=Point(coordinates=[55, -5]))
         obj.__update__(feature)
         self.assertEqual(obj.id, 1)
-        self.assertEqual(obj.name, 'foo')
         self.assertEqual(obj.text, 'bar')
         self.assertEqual(obj.child, 'bar')
         self.assertEqual(obj.children, ['bar', 'bar'])
@@ -182,6 +179,33 @@ class GeoInterfaceTests(unittest.TestCase):
         self.assertEqual(point.x, 55)
         self.assertEqual(point.y, -5)
         self.assertEqual(obj.geom.srid, 3000)
+
+    def test_update_readonly_column(self):
+        mapped_class = self._get_mapped_class_declarative()
+        self._test_update_readonly_column(mapped_class)
+
+    def test_update_readonly_column_as_base(self):
+        mapped_class = self._get_mapped_class_declarative_as_base()
+        self._test_update_readonly_column(mapped_class)
+
+    def test_update_readonly_column_non_declarative(self):
+        mapped_class = self._get_mapped_class_non_declarative()
+        self._test_update_readonly_column(mapped_class)
+
+    def _test_update_readonly_column(self, mapped_class):
+        from geojson import Feature, Point
+        from papyrus.geo_interface import OperationNotAllowedError
+        feature = Feature(id=1, properties={'text': 'foo', 'child': 'foo',
+                                            'children': ['foo', 'foo']},
+                          geometry=Point(coordinates=[53, -4]))
+        obj = mapped_class(feature)
+        obj.name = 'foo'
+        feature = Feature(id=2, properties={'name': 'bar'})
+        with self.assertRaises(OperationNotAllowedError) as cm:
+            obj.__update__(feature)
+        self.assertEqual(str(cm.exception),
+                         'Column "name" is readonly.')
+        self.assertEqual(obj.name, 'foo')
 
     def test_init_declarative(self):
         mapped_class = self._get_mapped_class_declarative()
@@ -199,8 +223,7 @@ class GeoInterfaceTests(unittest.TestCase):
         from geojson import Feature, Point
         from geoalchemy2.elements import WKBElement
         from geoalchemy2.shape import to_shape
-        feature = Feature(id=1, properties={'name': 'foo',
-                                            'text': 'foo', 'child': 'foo',
+        feature = Feature(id=1, properties={'text': 'foo', 'child': 'foo',
                                             'children': ['foo', 'foo']},
                           geometry=Point(coordinates=[53, -4]))
         obj = mapped_class(feature)
@@ -214,6 +237,30 @@ class GeoInterfaceTests(unittest.TestCase):
         self.assertEqual(point.x, 53)
         self.assertEqual(point.y, -4)
         self.assertEqual(obj.geom.srid, 3000)
+
+    def test_init_readonly_column_declarative(self):
+        mapped_class = self._get_mapped_class_declarative()
+        self._test_init_readonly_column(mapped_class)
+
+    def test_init_readonly_column_declarative_as_base(self):
+        mapped_class = self._get_mapped_class_declarative_as_base()
+        self._test_init_readonly_column(mapped_class)
+
+    def test_init_readonly_column_non_declarative(self):
+        mapped_class = self._get_mapped_class_non_declarative()
+        self._test_init_readonly_column(mapped_class)
+
+    def _test_init_readonly_column(self, mapped_class):
+        from geojson import Feature, Point
+        from papyrus.geo_interface import OperationNotAllowedError
+        feature = Feature(id=1, properties={'name': 'foo',
+                                            'text': 'foo', 'child': 'foo',
+                                            'children': ['foo', 'foo']},
+                          geometry=Point(coordinates=[53, -4]))
+        with self.assertRaises(OperationNotAllowedError) as cm:
+            mapped_class(feature)
+        self.assertEqual(str(cm.exception),
+                         'Column "name" is readonly.')
 
     def test_geo_interface_declarative(self):
         mapped_class = self._get_mapped_class_declarative()
@@ -231,8 +278,7 @@ class GeoInterfaceTests(unittest.TestCase):
         from geojson import Feature, Point
         from papyrus.geojsonencoder import dumps
         mapped_class = self._get_mapped_class_declarative()
-        feature = Feature(id=1, properties={'name': 'foo',
-                                            'text': 'foo', 'child': 'bar',
+        feature = Feature(id=1, properties={'text': 'foo', 'child': 'bar',
                                             'children': ['foo', 'bar']},
                           geometry=Point(coordinates=[53, -4]))
         obj = mapped_class(feature)
@@ -267,8 +313,7 @@ class GeoInterfaceTests(unittest.TestCase):
         from geojson import Feature, Point
         from papyrus.geojsonencoder import dumps
         mapped_class = self._get_mapped_class_declarative()
-        feature = Feature(id=1, properties={'name': 'foo',
-                                            'text': 'foo', 'child': 'foo',
+        feature = Feature(id=1, properties={'text': 'foo', 'child': 'foo',
                                             'children': ['foo', 'foo']},
                           geometry=Point(coordinates=[53, -4]))
         obj = mapped_class(feature)
