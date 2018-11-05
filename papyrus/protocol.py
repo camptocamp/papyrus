@@ -158,8 +158,7 @@ def create_filter(request, mapped_class, geom_attr, **kwargs):
         mapper. If you use ``declarative_base`` this is the name of
         the geometry attribute as defined in the mapped class.
 
-
-    \**kwargs
+    \\**kwargs
         additional arguments passed to ``create_geom_filter()``.
     """
     attr_filter = create_attr_filter(request, mapped_class)
@@ -202,7 +201,7 @@ class Protocol(object):
           will set 405 (Method Not Allowed) as the response status and
           return right away.
 
-      \**kwargs
+      \\**kwargs
           before_create
             a callback function called before a feature is inserted
             in the database table, the function receives the request,
