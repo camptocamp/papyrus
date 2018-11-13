@@ -94,6 +94,20 @@ Notes:
                               pass
       config.add_renderer('xsd', XSD(sequence_callback=callback))
 
+* It is also possible to extend the column property ``xsd::element`` nodes
+  using ``element_callback``, for example to add an annotation/appinfo element::
+
+     from papyrus.renderers import XSD
+     from papyrus.xsd import tag
+
+     def callback(tb, cls):
+         if column.info.get('readonly'):
+             with tag(tb, 'xsd:annotation'):
+                 with tag(tb, 'xsd:appinfo'):
+                     with tag(tb, 'readonly', {'value': 'true'}):
+                         pass
+     config.add_renderer('xsd', XSD(element_callback=callback))
+
 API Reference
 ~~~~~~~~~~~~~
 

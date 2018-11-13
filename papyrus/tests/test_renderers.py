@@ -425,3 +425,34 @@ class Test_XSD(unittest.TestCase):
         self.assertEqual(len(enumerations), 2)
         self.assertEqual(enumerations[0].attrib, {'value': 'male'})
         self.assertEqual(enumerations[1].attrib, {'value': 'female'})
+
+    def test_element_callback(self):
+        from sqlalchemy.ext.declarative import declarative_base
+        from sqlalchemy import Column, types
+        from geoalchemy2.types import Geometry
+        from papyrus.xsd import tag
+
+        def cb(tb, cls):
+            with tag(tb, 'xsd:annotation'):
+                with tag(tb, 'xsd:appinfo'):
+                    with tag(tb, 'readonly', {'value': 'true'}):
+                        pass
+
+        for column in (
+            Column('_column', types.Integer),
+            Column('_column', types.Enum('red', 'green', 'blue')),
+            Column('_column', Geometry('POINT', 4326)),
+            Column('_column', types.Unicode),
+            Column('_column', types.Numeric),
+        ):
+            self.base = declarative_base()
+
+            elements = self._get_elements((('column', column),),
+                                          element_callback=cb)
+            self.assertEqual(len(elements), 1)
+            appinfos = elements[0].findall(
+                self._make_xpath('. annotation appinfo'))
+            self.assertEqual(len(appinfos), 1)
+            readonlys = appinfos[0].findall('readonly')
+            self.assertEqual(len(readonlys), 1)
+            self.assertEqual(readonlys[0].attrib, {'value': 'true'})
