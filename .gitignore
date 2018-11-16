@@ -3,5 +3,6 @@
 *.swp
 papyrus.egg-info/
 dist
+.build
 .coverage
 .tox

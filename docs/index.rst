@@ -79,6 +79,14 @@ To run the tests::
 
     $ nosetests
 
+Running the tests using Make
+----------------------------
+
+Make can create a python virtual environment to run the tests for you::
+
+    $ make check
+    $ make tests
+
 Indices and tables
 ==================
 

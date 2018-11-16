@@ -158,16 +158,35 @@ class XSD(object):
 
     The callback receives an ``xml.etree.ElementTree.TreeBuilder`` object
     and the mapped class being serialized.
+
+    It is also possible to extend the column property ``xsd::element`` nodes
+    using ``element_callback``, for example to add an annotation/appinfo
+    element:
+
+    .. code-block: python
+
+        from papyrus.renderers import XSD
+        from papyrus.xsd import tag
+
+        def callback(tb, cls):
+            if column.info.get('readonly'):
+                with tag(tb, 'xsd:annotation'):
+                    with tag(tb, 'xsd:appinfo'):
+                        with tag(tb, 'readonly', {'value': 'true'}):
+                            pass
+        config.add_renderer('xsd', XSD(element_callback=callback))
     """
 
     def __init__(self,
                  include_primary_keys=False,
                  include_foreign_keys=False,
-                 sequence_callback=None):
+                 sequence_callback=None,
+                 element_callback=None):
         self.generator = XSDGenerator(
             include_primary_keys=include_primary_keys,
             include_foreign_keys=include_foreign_keys,
-            sequence_callback=sequence_callback
+            sequence_callback=sequence_callback,
+            element_callback=element_callback
             )
 
     def __call__(self, table):
