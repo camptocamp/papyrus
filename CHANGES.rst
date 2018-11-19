@@ -1,6 +1,18 @@
 Changes
 -------
 
+2.4
+~~~
+
+* Add element_callback parameters to XSD and XSDGenerator @arnaud-morvan
+  https://github.com/elemoine/papyrus/pull/75
+* Ease development through Makefile and virtualenv @arnaud-morvan
+  https://github.com/elemoine/papyrus/pull/75
+* Use psycopg2-binary package instead of psycopg2 @fredj
+  https://github.com/elemoine/papyrus/pull/73
+* Fix spelling errors @fredj
+  https://github.com/elemoine/papyrus/pull/72
+
 2.3
 ~~~
 
