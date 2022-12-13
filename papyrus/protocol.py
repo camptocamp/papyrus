@@ -100,7 +100,7 @@ def create_geom_filter(request, mapped_class, geom_attr):
     if epsg != column_epsg:
         geom_attr = func.ST_Transform(geom_attr, epsg)
     geometry = from_shape(shape, srid=epsg)
-    return func.ST_DWITHIN(geom_attr, geometry, tolerance)
+    return func.ST_DWithin(geom_attr, geometry, tolerance)
 
 
 def create_attr_filter(request, mapped_class):
