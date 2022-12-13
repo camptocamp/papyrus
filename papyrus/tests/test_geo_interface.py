@@ -264,7 +264,7 @@ class GeoInterfaceTests(unittest.TestCase):
         obj = mapped_class(feature)
         # we want to simulate the case where the geometry is read from
         # the database, so we delete _shape
-        del(obj._shape)
+        del obj._shape
         obj_json = dumps(obj)
         json_parsed = json.loads(obj_json)
         self.assertEqual(json_parsed, {"geometry": {"type": "Point", "coordinates": [53.0, -4.0]}, "type": "Feature", "id": 1, "properties": {"text": "foo", "children": ["foo", "foo"], "child": "foo"}})  # NOQA

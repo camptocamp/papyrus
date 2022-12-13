@@ -231,8 +231,9 @@ class Protocol(object):
         self.before_delete = kwargs.get('before_delete')
 
     def _filter_attrs(self, feature, request):
-        """ Remove some attributes from the feature and set the geometry to None
-            in the feature based ``attrs`` and the ``no_geom`` parameters. """
+        """ Remove some attributes from the feature and set the geometry to
+            None in the feature based ``attrs`` and the ``no_geom``
+            parameters. """
         if 'attrs' in request.params:
             attrs = request.params['attrs'].split(',')
             props = feature.properties
