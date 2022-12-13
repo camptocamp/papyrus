@@ -363,7 +363,7 @@ class Test_protocol(unittest.TestCase):
         from geoalchemy2.shape import from_shape
         from geojson import Feature
         from geojson.geometry import Default
-        from shapely.geometry import asShape
+        from papyrus._shapely_utils import asShape
 
         Base = declarative_base(metadata=MetaData())
 

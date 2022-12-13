@@ -29,7 +29,7 @@ from pyramid.httpexceptions import (HTTPBadRequest, HTTPMethodNotAllowed,
                                     HTTPNotFound)
 from pyramid.response import Response
 
-from shapely.geometry import asShape
+from papyrus._shapely_utils import asShape
 from shapely.geometry.point import Point
 from shapely.geometry.polygon import Polygon
 
