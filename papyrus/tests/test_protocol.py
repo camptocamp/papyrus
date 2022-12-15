@@ -33,13 +33,12 @@ from __future__ import unicode_literals
 import unittest
 
 from pyramid import testing
-from six import text_type
 
 
 def query_to_str(query, engine):
     """Helper function which compiles a query using a database engine
     """
-    return (text_type(query.statement.compile(engine))
+    return (str(query.statement.compile(engine))
             .encode('ascii', 'backslashreplace'))
 
 
@@ -47,7 +46,7 @@ def _compiled_to_string(compiled_filter):
     """Helper function which converts a compiled SQL expression
     into a string.
     """
-    return text_type(compiled_filter).encode('ascii', 'backslashreplace')
+    return str(compiled_filter).encode('ascii', 'backslashreplace')
 
 
 class create_geom_filter_Tests(unittest.TestCase):

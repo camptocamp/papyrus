@@ -1,8 +1,7 @@
-from six import BytesIO
+from io import BytesIO
 
 import geojson
 
-from six import string_types
 from papyrus.geojsonencoder import dumps
 from papyrus.xsd import XSDGenerator
 
@@ -57,7 +56,7 @@ class GeoJSON(object):
     def __init__(self, jsonp_param_name='callback',
                  collection_type=geojson.factory.FeatureCollection):
         self.jsonp_param_name = jsonp_param_name
-        if isinstance(collection_type, string_types):
+        if isinstance(collection_type, str):
             collection_type = getattr(geojson.factory, collection_type)
         self.collection_type = collection_type
 
