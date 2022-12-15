@@ -1,6 +1,14 @@
 Changes
 -------
 
+2.5
+~~~
+
+* Support shapely 2.x (in addition to shapely 1.x) @gberaudo
+  https://github.com/elemoine/papyrus/pull/78
+* Fix postgis function name ST_DWithin @gberaudo
+  https://github.com/elemoine/papyrus/pull/78
+
 2.4
 ~~~
 

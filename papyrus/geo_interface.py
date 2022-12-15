@@ -6,7 +6,7 @@ from geoalchemy2.shape import from_shape, to_shape
 
 import geojson
 
-from shapely.geometry import asShape
+from papyrus._shapely_utils import asShape
 
 
 class GeoInterface(object):
@@ -103,8 +103,8 @@ class GeoInterface(object):
                     setattr(self, p.key, feature.properties[p.key])
 
         if self.__add_properties__:
-                for k in self.__add_properties__:
-                    setattr(self, k, feature.properties.get(k))
+            for k in self.__add_properties__:
+                setattr(self, k, feature.properties.get(k))
 
     def __read__(self):
         """

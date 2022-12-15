@@ -29,7 +29,7 @@ from pyramid.httpexceptions import (HTTPBadRequest, HTTPMethodNotAllowed,
                                     HTTPNotFound)
 from pyramid.response import Response
 
-from shapely.geometry import asShape
+from papyrus._shapely_utils import asShape
 from shapely.geometry.point import Point
 from shapely.geometry.polygon import Polygon
 
@@ -100,7 +100,7 @@ def create_geom_filter(request, mapped_class, geom_attr):
     if epsg != column_epsg:
         geom_attr = func.ST_Transform(geom_attr, epsg)
     geometry = from_shape(shape, srid=epsg)
-    return func.ST_DWITHIN(geom_attr, geometry, tolerance)
+    return func.ST_DWithin(geom_attr, geometry, tolerance)
 
 
 def create_attr_filter(request, mapped_class):
@@ -231,8 +231,9 @@ class Protocol(object):
         self.before_delete = kwargs.get('before_delete')
 
     def _filter_attrs(self, feature, request):
-        """ Remove some attributes from the feature and set the geometry to None
-            in the feature based ``attrs`` and the ``no_geom`` parameters. """
+        """ Remove some attributes from the feature and set the geometry to
+            None in the feature based ``attrs`` and the ``no_geom``
+            parameters. """
         if 'attrs' in request.params:
             attrs = request.params['attrs'].split(',')
             props = feature.properties

@@ -141,7 +141,7 @@ Without using ``GeoInterface`` our ``Spot`` class could look like this::
             geometry = feature.geometry
             if geometry is not None and \
                not isinstance(geometry, geojson.geometry.Default):
-                shape = asShape(geometry)
+                shape = shape(geometry)
                 self.geom = WKBSpatialElement(buffer(shape.wkb), srid=4326)
                 self._shape = shape
             self.name = feature.properties.get('name', None)

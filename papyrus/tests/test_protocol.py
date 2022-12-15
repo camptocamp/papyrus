@@ -82,10 +82,10 @@ class create_geom_filter_Tests(unittest.TestCase):
         compiled_filter = filter.compile(self._get_engine())
         params = compiled_filter.params
         filter_str = _compiled_to_string(compiled_filter)
-        self.assertEqual(filter_str, b'ST_DWITHIN("table".geom, ST_GeomFromWKB(%(ST_GeomFromWKB_1)s, %(ST_GeomFromWKB_2)s), %(ST_DWITHIN_1)s)')  # NOQA
+        self.assertEqual(filter_str, b'ST_DWithin("table".geom, ST_GeomFromWKB(%(ST_GeomFromWKB_1)s, %(ST_GeomFromWKB_2)s), %(ST_DWithin_1)s)')  # NOQA
         self.assertTrue(wkb.loads(bytes(params["ST_GeomFromWKB_1"])).equals(wkt.loads('POLYGON ((-180 -90, -180 90, 180 90, 180 -90, -180 -90))')))  # NOQA
         self.assertEqual(params["ST_GeomFromWKB_2"], 4326)
-        self.assertEqual(params["ST_DWITHIN_1"], 1)
+        self.assertEqual(params["ST_DWithin_1"], 1)
 
     def test_box_filter_with_epsg(self):
         from papyrus.protocol import create_geom_filter
@@ -99,11 +99,11 @@ class create_geom_filter_Tests(unittest.TestCase):
         compiled_filter = filter.compile(self._get_engine())
         params = compiled_filter.params
         filter_str = _compiled_to_string(compiled_filter)
-        self.assertEqual(filter_str, b'ST_DWITHIN(ST_Transform("table".geom, %(ST_Transform_1)s), ST_GeomFromWKB(%(ST_GeomFromWKB_1)s, %(ST_GeomFromWKB_2)s), %(ST_DWITHIN_1)s)')  # NOQA
+        self.assertEqual(filter_str, b'ST_DWithin(ST_Transform("table".geom, %(ST_Transform_1)s), ST_GeomFromWKB(%(ST_GeomFromWKB_1)s, %(ST_GeomFromWKB_2)s), %(ST_DWithin_1)s)')  # NOQA
         self.assertTrue(wkb.loads(bytes(params["ST_GeomFromWKB_1"])).equals(wkt.loads('POLYGON ((-180 -90, -180 90, 180 90, 180 -90, -180 -90))')))  # NOQA
         self.assertEqual(params["ST_GeomFromWKB_2"], 900913)
         self.assertEqual(params["ST_Transform_1"], 900913)
-        self.assertEqual(params["ST_DWITHIN_1"], 1)
+        self.assertEqual(params["ST_DWithin_1"], 1)
 
     def test_within_filter(self):
         from papyrus.protocol import create_geom_filter
@@ -116,10 +116,10 @@ class create_geom_filter_Tests(unittest.TestCase):
         compiled_filter = filter.compile(self._get_engine())
         params = compiled_filter.params
         filter_str = _compiled_to_string(compiled_filter)
-        self.assertEqual(filter_str, b'ST_DWITHIN("table".geom, ST_GeomFromWKB(%(ST_GeomFromWKB_1)s, %(ST_GeomFromWKB_2)s), %(ST_DWITHIN_1)s)')  # NOQA
+        self.assertEqual(filter_str, b'ST_DWithin("table".geom, ST_GeomFromWKB(%(ST_GeomFromWKB_1)s, %(ST_GeomFromWKB_2)s), %(ST_DWithin_1)s)')  # NOQA
         self.assertTrue(wkb.loads(bytes(params["ST_GeomFromWKB_1"])).equals(wkt.loads('POINT (40 5)')))  # NOQA
         self.assertEqual(params["ST_GeomFromWKB_2"], 4326)
-        self.assertEqual(params["ST_DWITHIN_1"], 1)
+        self.assertEqual(params["ST_DWithin_1"], 1)
 
     def test_within_filter_with_epsg(self):
         from papyrus.protocol import create_geom_filter
@@ -133,11 +133,11 @@ class create_geom_filter_Tests(unittest.TestCase):
         compiled_filter = filter.compile(self._get_engine())
         params = compiled_filter.params
         filter_str = _compiled_to_string(compiled_filter)
-        self.assertEqual(filter_str, b'ST_DWITHIN(ST_Transform("table".geom, %(ST_Transform_1)s), ST_GeomFromWKB(%(ST_GeomFromWKB_1)s, %(ST_GeomFromWKB_2)s), %(ST_DWITHIN_1)s)')  # NOQA
+        self.assertEqual(filter_str, b'ST_DWithin(ST_Transform("table".geom, %(ST_Transform_1)s), ST_GeomFromWKB(%(ST_GeomFromWKB_1)s, %(ST_GeomFromWKB_2)s), %(ST_DWithin_1)s)')  # NOQA
         self.assertTrue(wkb.loads(bytes(params["ST_GeomFromWKB_1"])).equals(wkt.loads('POINT (40 5)')))  # NOQA
         self.assertEqual(params["ST_GeomFromWKB_2"], 900913)
         self.assertEqual(params["ST_Transform_1"], 900913)
-        self.assertEqual(params["ST_DWITHIN_1"], 1)
+        self.assertEqual(params["ST_DWithin_1"], 1)
 
     def test_polygon_filter(self):
         from papyrus.protocol import create_geom_filter
@@ -153,10 +153,10 @@ class create_geom_filter_Tests(unittest.TestCase):
         compiled_filter = filter.compile(self._get_engine())
         params = compiled_filter.params
         filter_str = _compiled_to_string(compiled_filter)
-        self.assertEqual(filter_str, b'ST_DWITHIN("table".geom, ST_GeomFromWKB(%(ST_GeomFromWKB_1)s, %(ST_GeomFromWKB_2)s), %(ST_DWITHIN_1)s)')  # NOQA
+        self.assertEqual(filter_str, b'ST_DWithin("table".geom, ST_GeomFromWKB(%(ST_GeomFromWKB_1)s, %(ST_GeomFromWKB_2)s), %(ST_DWithin_1)s)')  # NOQA
         self.assertTrue(wkb.loads(bytes(params["ST_GeomFromWKB_1"])).equals(poly))  # NOQA
         self.assertEqual(params["ST_GeomFromWKB_2"], 4326)
-        self.assertEqual(params["ST_DWITHIN_1"], 1)
+        self.assertEqual(params["ST_DWithin_1"], 1)
 
     def test_polygon_filter_with_epsg(self):
         from papyrus.protocol import create_geom_filter
@@ -172,11 +172,11 @@ class create_geom_filter_Tests(unittest.TestCase):
         compiled_filter = filter.compile(self._get_engine())
         params = compiled_filter.params
         filter_str = _compiled_to_string(compiled_filter)
-        self.assertEqual(filter_str, b'ST_DWITHIN(ST_Transform("table".geom, %(ST_Transform_1)s), ST_GeomFromWKB(%(ST_GeomFromWKB_1)s, %(ST_GeomFromWKB_2)s), %(ST_DWITHIN_1)s)')  # NOQA
+        self.assertEqual(filter_str, b'ST_DWithin(ST_Transform("table".geom, %(ST_Transform_1)s), ST_GeomFromWKB(%(ST_GeomFromWKB_1)s, %(ST_GeomFromWKB_2)s), %(ST_DWithin_1)s)')  # NOQA
         self.assertTrue(wkb.loads(bytes(params["ST_GeomFromWKB_1"])).equals(poly))  # NOQA
         self.assertEqual(params["ST_GeomFromWKB_2"], 900913)
         self.assertEqual(params["ST_Transform_1"], 900913)
-        self.assertEqual(params["ST_DWITHIN_1"], 1)
+        self.assertEqual(params["ST_DWithin_1"], 1)
 
     def test_geom_filter_no_params(self):
         from papyrus.protocol import create_geom_filter
@@ -363,7 +363,7 @@ class Test_protocol(unittest.TestCase):
         from geoalchemy2.shape import from_shape
         from geojson import Feature
         from geojson.geometry import Default
-        from shapely.geometry import asShape
+        from papyrus._shapely_utils import asShape
 
         Base = declarative_base(metadata=MetaData())
 
