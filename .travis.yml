@@ -1,22 +1,16 @@
+dist: bionic
 language: python
 
-python: 3.5
+python:
+  - "2.7"
+  - "3.8"
+  - "3.9"
+  - "3.10"
+  - "3.11"
 
-env:
-  - TOX_ENV=py27
-  - TOX_ENV=py34
-  - TOX_ENV=py35
-
-matrix:
-  include:
-  - python: 3.6
-    env:
-    - TOX_ENV=py36
-
-install:
-  - sudo rm -rf /usr/lib/python2.7/dist-packages/six*
-  - pip install flake8 tox
+before_install:
+  - sudo apt-get -y install python3-venv
 
 script:
-  - flake8 papyrus
-  - tox -e $TOX_ENV --sitepackages -- -v --cover-package papyrus
+  - make check
+  - .build/venv/bin/nosetests -v --cover-package papyrus
