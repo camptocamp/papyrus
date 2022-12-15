@@ -1,8 +1,8 @@
 Papyrus
 =======
 
-.. image:: https://travis-ci.org/elemoine/papyrus.svg?branch=master
-    :target: https://travis-ci.org/elemoine/papyrus
+.. image:: https://travis-ci.org/camptocamp/papyrus.svg?branch=master
+    :target: https://travis-ci.org/camptocamp/papyrus
 
 .. image:: https://readthedocs.org/projects/papyrus/badge/?version=latest
     :target: http://papyrus.readthedocs.org/en/latest/?badge=latest

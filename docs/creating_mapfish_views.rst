@@ -84,7 +84,7 @@ be a better choice than relying on ``GeoInterface``.
 .. note::
 
     When using ``GeoInterface`` understanding its `code
-    <https://github.com/elemoine/papyrus/blob/master/papyrus/geo_interface.py>`_
+    <https://github.com/camptocamp/papyrus/blob/master/papyrus/geo_interface.py>`_
     can be useful. It can also be a source of inspiration for those who don't
     use it.
 

@@ -54,7 +54,7 @@ Documentation
 Contributing
 ------------
 
-Papyrus is on GitHub: http://github.com/elemoine/papyrus. Fork away. Pull
+Papyrus is on GitHub: http://github.com/camptocamp/papyrus. Fork away. Pull
 requests are welcome!
 
 Running the tests
