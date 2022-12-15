@@ -12,7 +12,6 @@ install_requires = [
     'pyramid>=1.1a3',
     'geojson>=1.1.0',
     'GeoAlchemy2>=0.2.4',
-    'six',
     ]
 
 if os.environ.get('READTHEDOCS') != 'True':
@@ -26,7 +25,6 @@ setup(name='papyrus',
           'Intended Audience :: Developers',
           'Operating System :: OS Independent',
           'Programming Language :: Python',
-          'Programming Language :: Python :: 2.7',
           'Programming Language :: Python :: 3.3',
           'Programming Language :: Python :: 3.4',
           'Programming Language :: Python :: 3.5',

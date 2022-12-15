@@ -23,8 +23,6 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-import six
-
 from pyramid.httpexceptions import (HTTPBadRequest, HTTPMethodNotAllowed,
                                     HTTPNotFound)
 from pyramid.response import Response
@@ -174,7 +172,7 @@ def create_filter(request, mapped_class, geom_attr, **kwargs):
 
 def asbool(val):
     # Convert the passed value to a boolean.
-    if isinstance(val, six.string_types):
+    if isinstance(val, str):
         return val.lower() not in ['false', '0']
     else:
         return bool(val)
