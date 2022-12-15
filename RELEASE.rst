@@ -40,4 +40,7 @@ and change that version to "Active".
 
 Upload the packages to PyPI::
 
-    $ python setup.py sdist bdist_wheel upload
+    $ python333 setup.py sdist bdist_wheel
+    $ ./.build/venv/bin/pip install twine
+    $ ./.build/venv/bin/twine check dist/*
+    $ ./.build/venv/bin/twine upload dist/*
