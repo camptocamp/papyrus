@@ -2,10 +2,9 @@ import datetime
 import decimal
 import functools
 
-from sqlalchemy.ext.associationproxy import _AssociationList
-
 from geojson import dumps as _dumps
 from geojson.codec import PyGFPEncoder
+from sqlalchemy.ext.associationproxy import _AssociationList
 
 
 class GeoJSONEncoder(PyGFPEncoder):

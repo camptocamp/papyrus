@@ -1,15 +1,13 @@
-from sqlalchemy.orm.util import class_mapper
-from sqlalchemy.orm.properties import ColumnProperty
-
-from geoalchemy2.types import Geometry
-from geoalchemy2.shape import from_shape, to_shape
-
 import geojson
+from geoalchemy2.shape import from_shape, to_shape
+from geoalchemy2.types import Geometry
+from sqlalchemy.orm.properties import ColumnProperty
+from sqlalchemy.orm.util import class_mapper
 
 from papyrus._shapely_utils import asShape
 
 
-class GeoInterface(object):
+class GeoInterface:
     """
 
     Base class for SQLAlchemy/GeoAlchemy mapped classes. Using this class
@@ -75,7 +73,7 @@ class GeoInterface(object):
                     continue
                 if p.columns[0].primary_key:
                     primary_key = p.key
-            if hasattr(feature, 'id') and feature.id is not None:
+            if hasattr(feature, "id") and feature.id is not None:
                 setattr(self, primary_key, feature.id)
             self.__update__(feature)
 
@@ -123,7 +121,7 @@ class GeoInterface(object):
                 if col.primary_key:
                     id = val
                 elif isinstance(col.type, Geometry):
-                    if hasattr(self, '_shape'):
+                    if hasattr(self, "_shape"):
                         geom = self._shape
                     elif val is not None:
                         geom = to_shape(val)
@@ -138,7 +136,7 @@ class GeoInterface(object):
 
     @property
     def __geo_interface__(self):
-        """ GeoInterface objects implement the Python Geo Interface, making
+        """GeoInterface objects implement the Python Geo Interface, making
         them candidates to serialization with the ``geojson`` module, or
         the Papyrus GeoJSON renderer.
         """

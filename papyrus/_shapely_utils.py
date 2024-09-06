@@ -1,6 +1,6 @@
 import shapely
 
-is_v2 = shapely.__version__.startswith('2.')
+is_v2 = shapely.__version__.startswith("2.")
 
 
 def asShape(obj):

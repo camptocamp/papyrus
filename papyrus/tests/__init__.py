@@ -2,5 +2,5 @@
 # Nose is abandonned since 2015. A proper solution would be to switch to pytest
 import collections
 
-if not hasattr(collections, 'Callable'):
-    collections.Callable = collections.abc.Callable
+if not hasattr(collections, "Callable"):
+    collections.abc.Callable = collections.abc.Callable
