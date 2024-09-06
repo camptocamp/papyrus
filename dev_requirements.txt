@@ -1,8 +1,0 @@
--e .
-nose
-coverage
-WebTest
-psycopg2-binary
-pyramid_handlers
-flake8
-mock

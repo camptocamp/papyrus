@@ -1,0 +1,85 @@
+[tool.black]
+line-length = 110
+target-version = ["py39"]
+
+[tool.isort]
+multi_line_output = 3
+include_trailing_comma = true
+force_grid_wrap = false
+use_parentheses = true
+line_length = 110
+
+[tool.mypy]
+python_version = 3.9
+ignore_missing_imports = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_return_any = true
+strict = true
+
+[tool.poetry]
+name = "papyrus"
+version = "0.0.0"
+description="Geospatial Extensions for Pyramid"
+readme = "README.md"
+authors = ["Camptocamp <info@camptocamp.com>"]
+keywords = ["FOSS4G", "Pylons", "Pyramid"]
+repository = "https://github.com/camptocamp/papyrus"
+license = "BSD"
+packages = [{ include = "papyrus" }]
+classifiers = [
+          'Framework :: Pyramid',
+          'Intended Audience :: Developers',
+          'Operating System :: OS Independent',
+          'Programming Language :: Python',
+          'Programming Language :: Python :: 2.7',
+          'Programming Language :: Python :: 3.8',
+          'Programming Language :: Python :: 3.9',
+          'Programming Language :: Python :: 3.10',
+          'Programming Language :: Python :: 3.11',
+          'License :: OSI Approved :: BSD License',
+          'Programming Language :: Python',
+          'Topic :: Internet :: WWW/HTTP',
+]
+
+[tool.poetry.scripts]
+security-md = "security_md.cli:main"
+
+[tool.poetry.dependencies]
+python = ">=3.9,<4.0"
+pyramid="2.0.2"
+geojson="3.1.0"
+GeoAlchemy="0.7.2"
+
+[tool.poetry.group.dev.dependencies]
+prospector = { version = "1.10.3", extras = ["with-bandit", "with-mypy", "with-pyroma"] }
+prospector-profile-utils = "1.7.2"
+prospector-profile-duplicated = "1.5.0"
+pytest = "8.3.2"
+
+[build-system]
+requires = [
+    "poetry-core>=1.0.0",
+    "poetry-dynamic-versioning[plugin]>=0.19.0",
+    "poetry-plugin-tweak-dependencies-version",
+    "poetry-dynamic-versioning",
+    "poetry-plugin-drop-python-upper-constraint",
+]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry-dynamic-versioning]
+enable = true
+vcs = "git"
+pattern = "^(?P<base>\\d+(\\.\\d+)*)"
+format-jinja = """
+{%- if env.get("VERSION_TYPE") == "version_branch" -%}
+{{serialize_pep440(bump_version(base, 1 if env.get("IS_MASTER") == "TRUE" else 2), dev=distance)}}
+{%- elif distance == 0 -%}
+{{serialize_pep440(base)}}
+{%- else -%}
+{{serialize_pep440(bump_version(base), dev=distance)}}
+{%- endif -%}
+"""
+
+[tool.poetry-plugin-tweak-dependencies-version]
+default = "major"
