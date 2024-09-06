@@ -214,6 +214,13 @@ class Protocol:
           request, and the database object to be updated. The
           latter is None if this is is an actual insertion.
 
+        before_insert
+          a callback function called after a feature is created but
+          before it is inserted in the database table, the function
+          receives the request, the feature read from the GeoJSON
+          document sent in the request, and the database object
+          that will be inserted.
+
         before_update
           a callback function called before a feature is updated
           in the database table, the function receives the request,
@@ -237,6 +244,7 @@ class Protocol:
         before_create: Optional[Callable[[pyramid.request.Request, geojson.Feature, Any], Any]] = None,
         before_update: Optional[Callable[[pyramid.request.Request, geojson.Feature, Any], Any]] = None,
         before_delete: Optional[Callable[[pyramid.request.Request, Any], Any]] = None,
+        before_insert: Optional[Callable[[pyramid.request.Request, geojson.Feature, Any], Any]] = None,
     ) -> None:
         self.Session = Session
         self.mapped_class = mapped_class
@@ -245,6 +253,7 @@ class Protocol:
         self.before_create = before_create
         self.before_update = before_update
         self.before_delete = before_delete
+        self.before_insert = before_insert
 
     def _filter_attrs(self, feature: geojson.Feature, request: pyramid.request.Request) -> geojson.Feature:
         """Remove some attributes from the feature and set the geometry to
@@ -353,7 +362,6 @@ class Protocol:
         session = self.Session()
         objects = []
         for feature in collection.features:
-            create = False
             obj = None
             if hasattr(feature, "id") and feature.id is not None:
                 obj = session.query(self.mapped_class).get(feature.id)
@@ -361,11 +369,11 @@ class Protocol:
                 self.before_create(request, feature, obj)
             if obj is None:
                 obj = self.mapped_class(feature)
-                create = True
+                if self.before_insert is not None:
+                    self.before_insert(request, feature, obj)
+                session.add(obj)
             else:
                 obj.__update__(feature)
-            if create:
-                session.add(obj)
             objects.append(obj)
         session.flush()
         collection = FeatureCollection(objects) if len(objects) > 0 else None
