@@ -278,7 +278,7 @@ class Protocol:
         return query.count()
 
     def read(self, request, filter=None, id=None):
-        """Build a query based on the filter or the idenfier, send the query
+        """Build a query based on the filter or the identifier, send the query
         to the database, and return a Feature or a FeatureCollection."""
         ret = None
         if id is not None:
