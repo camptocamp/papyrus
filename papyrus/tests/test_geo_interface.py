@@ -1,6 +1,8 @@
 import json
 import unittest
 
+import sqlalchemy.orm
+
 
 class GeoInterfaceTests(unittest.TestCase):
 
@@ -96,6 +98,7 @@ class GeoInterfaceTests(unittest.TestCase):
         from papyrus.geo_interface import GeoInterface
 
         md = MetaData()
+        registry = sqlalchemy.orm.registry()
 
         child1_table = Table(
             "child1",
@@ -122,20 +125,20 @@ class GeoInterfaceTests(unittest.TestCase):
             def __init__(self, name):
                 self.name = name
 
-        orm.mapper(Child1, child1_table)
+        registry.map_imperatively(Child1, child1_table)
 
         class Child2:
             def __init__(self, name):
                 self.name = name
 
-        orm.mapper(Child2, child2_table)
+        registry.map_imperatively(Child2, child2_table)
 
         class Parent(GeoInterface):
             children = association_proxy("children_", "name")
             child = association_proxy("child_", "name")
             __add_properties__ = ("child", "children")
 
-        orm.mapper(
+        registry.map_imperatively(
             Parent,
             parent_table,
             properties={"children_": orm.relationship(Child1), "child_": orm.relationship(Child2)},

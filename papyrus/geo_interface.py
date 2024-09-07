@@ -1,3 +1,5 @@
+from typing import Optional
+
 import geojson
 from geoalchemy2.shape import from_shape, to_shape
 from geoalchemy2.types import Geometry
@@ -59,7 +61,7 @@ class GeoInterface:
 
     """
 
-    def __init__(self, feature=None):
+    def __init__(self, feature: Optional[geojson.Feature] = None) -> None:
         """
         Called by the protocol on object creation.
 
@@ -77,7 +79,7 @@ class GeoInterface:
                 setattr(self, primary_key, feature.id)
             self.__update__(feature)
 
-    def __update__(self, feature):
+    def __update__(self, feature: geojson.Feature) -> None:
         """
         Called by the protocol on object update.
 
@@ -101,14 +103,14 @@ class GeoInterface:
                     setattr(self, p.key, feature.properties[p.key])
 
         if self.__add_properties__:
-            for k in self.__add_properties__:
+            for k in self.__add_properties__:  # pylint: disable=not-an-iterable
                 setattr(self, k, feature.properties.get(k))
 
-    def __read__(self):
+    def __read__(self) -> geojson.Feature:
         """
         Called by :py:attr:`.__geo_interface__`.
         """
-        id = None
+        id = None  # pylint: disable=redefined-builtin
         geom = None
         properties = {}
 
@@ -129,13 +131,13 @@ class GeoInterface:
                     properties[p.key] = val
 
         if self.__add_properties__:
-            for k in self.__add_properties__:
+            for k in self.__add_properties__:  # pylint: disable=not-an-iterable
                 properties[k] = getattr(self, k)
 
         return geojson.Feature(id=id, geometry=geom, properties=properties)
 
     @property
-    def __geo_interface__(self):
+    def __geo_interface__(self) -> geojson.Feature:
         """GeoInterface objects implement the Python Geo Interface, making
         them candidates to serialization with the ``geojson`` module, or
         the Papyrus GeoJSON renderer.

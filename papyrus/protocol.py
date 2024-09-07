@@ -22,7 +22,15 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-import six
+from typing import Any, Callable, Optional
+
+import geojson
+import pyramid.request
+import pyramid.response
+import sqlalchemy
+import sqlalchemy.orm
+import sqlalchemy.orm.session
+import sqlalchemy.sql.expression
 from geoalchemy2.shape import from_shape
 from geojson import Feature, FeatureCollection, GeoJSON, loads
 from pyramid.httpexceptions import HTTPBadRequest, HTTPMethodNotAllowed, HTTPNotFound
@@ -35,7 +43,7 @@ from sqlalchemy.sql import and_, asc, desc, func
 from papyrus._shapely_utils import asShape
 
 
-def _get_col_epsg(mapped_class, geom_attr):
+def _get_col_epsg(mapped_class: Any, geom_attr: str) -> int:
     """Get the EPSG code associated with a geometry attribute.
 
     Arguments:
@@ -47,10 +55,14 @@ def _get_col_epsg(mapped_class, geom_attr):
         the geometry attribute as defined in the mapped class.
     """
     col = class_mapper(mapped_class).get_property(geom_attr).columns[0]
-    return col.type.srid
+    return col.type.srid  # type: ignore[no-any-return]
 
 
-def create_geom_filter(request, mapped_class, geom_attr):
+def create_geom_filter(
+    request: pyramid.request.Request,
+    mapped_class: Any,
+    geom_attr: str,
+) -> Optional[sqlalchemy.sql.expression.ColumnElement[bool]]:
     """Create MapFish geometry filter based on the request params. Either
     a box or within or geometry filter, depending on the request params.
     Additional named arguments are passed to the spatial filter.
@@ -89,13 +101,14 @@ def create_geom_filter(request, mapped_class, geom_attr):
     column_epsg = _get_col_epsg(mapped_class, geom_attr)
     geom_attr = getattr(mapped_class, geom_attr)
     epsg = column_epsg if epsg is None else epsg
-    if epsg != column_epsg:
-        geom_attr = func.ST_Transform(geom_attr, epsg)
+    geom_column = func.ST_Transform(geom_attr, epsg) if epsg != column_epsg else geom_attr
     geometry = from_shape(shape, srid=epsg)
-    return func.ST_DWithin(geom_attr, geometry, tolerance)
+    return func.ST_DWithin(geom_column, geometry, tolerance)
 
 
-def create_attr_filter(request, mapped_class):
+def create_attr_filter(
+    request: pyramid.request.Request, mapped_class: type[str]
+) -> Optional[sqlalchemy.sql.expression.ColumnElement[bool]]:
     """Create an ``and_`` SQLAlchemy filter (a ClauseList object) based
     on the request params (``queryable``, ``eq``, ``ne``, ...).
 
@@ -133,7 +146,9 @@ def create_attr_filter(request, mapped_class):
     return and_(*filters) if len(filters) > 0 else None
 
 
-def create_filter(request, mapped_class, geom_attr, **kwargs):
+def create_filter(
+    request: pyramid.request.Request, mapped_class: Any, geom_attr: str, **kwargs: Any
+) -> Optional[sqlalchemy.sql.expression.ColumnElement[bool]]:
     """Create MapFish default filter based on the request params.
 
     Arguments:
@@ -163,7 +178,7 @@ def create_filter(request, mapped_class, geom_attr, **kwargs):
     return and_(geom_filter, attr_filter)
 
 
-def asbool(val):
+def asbool(val: str) -> bool:
     # Convert the passed value to a boolean.
     if isinstance(val, str):
         return val.lower() not in ["false", "0"]
@@ -211,16 +226,27 @@ class Protocol:
           and the database object about to be deleted.
     """
 
-    def __init__(self, Session, mapped_class, geom_attr, readonly=False, **kwargs):
+    def __init__(
+        self,
+        Session: sqlalchemy.orm.sessionmaker[  # pylint: disable=unsubscriptable-object
+            sqlalchemy.orm.session.Session
+        ],
+        mapped_class: Any,
+        geom_attr: str,
+        readonly: bool = False,
+        before_create: Optional[Callable[[pyramid.request.Request, geojson.Feature, Any], Any]] = None,
+        before_update: Optional[Callable[[pyramid.request.Request, geojson.Feature, Any], Any]] = None,
+        before_delete: Optional[Callable[[pyramid.request.Request, Any], Any]] = None,
+    ) -> None:
         self.Session = Session
         self.mapped_class = mapped_class
         self.geom_attr = geom_attr
         self.readonly = readonly
-        self.before_create = kwargs.get("before_create")
-        self.before_update = kwargs.get("before_update")
-        self.before_delete = kwargs.get("before_delete")
+        self.before_create = before_create
+        self.before_update = before_update
+        self.before_delete = before_delete
 
-    def _filter_attrs(self, feature, request):
+    def _filter_attrs(self, feature: geojson.Feature, request: pyramid.request.Request) -> geojson.Feature:
         """Remove some attributes from the feature and set the geometry to
         None in the feature based ``attrs`` and the ``no_geom``
         parameters."""
@@ -236,7 +262,9 @@ class Protocol:
             feature.geometry = None
         return feature
 
-    def _get_order_by(self, request):
+    def _get_order_by(
+        self, request: pyramid.request.Request
+    ) -> Optional[sqlalchemy.sql.expression.UnaryExpression[None]]:
         """Return an SA order_by"""
         attr = request.params.get("sort", request.params.get("order_by"))
         if attr is None or not hasattr(self.mapped_class, attr):
@@ -246,7 +274,13 @@ class Protocol:
         else:
             return asc(getattr(self.mapped_class, attr))
 
-    def _query(self, request, filter=None):
+    def _query(
+        self,
+        request: pyramid.request.Request,
+        filter: Optional[  # pylint: disable=redefined-builtin
+            sqlalchemy.sql.expression.ColumnElement[bool]
+        ] = None,
+    ) -> list[Any]:
         """Build a query based on the filter and the request params,
         and send the query to the database."""
         limit = None
@@ -266,18 +300,31 @@ class Protocol:
         if order_by is not None:
             query = query.order_by(order_by)
         query = query.limit(limit).offset(offset)
-        return query.all()
+        return query.all()  # type: ignore[no-any-return]
 
-    def count(self, request, filter=None):
+    def count(
+        self,
+        request: pyramid.request.Request,
+        filter: Optional[  # pylint: disable=redefined-builtin
+            sqlalchemy.sql.expression.ColumnElement[bool]
+        ] = None,
+    ) -> int:
         """Return the number of records matching the given filter."""
         if filter is None:
             filter = create_filter(request, self.mapped_class, self.geom_attr)
         query = self.Session().query(self.mapped_class)
         if filter is not None:
             query = query.filter(filter)
-        return query.count()
+        return query.count()  # type: ignore[no-any-return]
 
-    def read(self, request, filter=None, id=None):
+    def read(
+        self,
+        request: pyramid.request.Request,
+        filter: Optional[  # pylint: disable=redefined-builtin
+            sqlalchemy.sql.expression.ColumnElement[bool]
+        ] = None,
+        id: Optional[str] = None,  # pylint: disable=redefined-builtin
+    ) -> Any:
         """Build a query based on the filter or the identifier, send the query
         to the database, and return a Feature or a FeatureCollection."""
         ret = None
@@ -295,7 +342,7 @@ class Protocol:
             )
         return ret
 
-    def create(self, request):
+    def create(self, request: pyramid.request.Request) -> Any:
         """Read the GeoJSON feature collection from the request body and
         create new objects in the database."""
         if self.readonly:
@@ -325,7 +372,7 @@ class Protocol:
         request.response.status_int = 201
         return collection
 
-    def update(self, request, id):
+    def update(self, request: pyramid.request.Request, id: str) -> Any:  # pylint: disable=redefined-builtin
         """Read the GeoJSON feature from the request body and update the
         corresponding object in the database."""
         if self.readonly:
@@ -344,7 +391,9 @@ class Protocol:
         request.response.status_int = 200
         return obj
 
-    def delete(self, request, id):
+    def delete(
+        self, request: pyramid.request.Request, id: str  # pylint: disable=redefined-builtin
+    ) -> pyramid.response.Response:
         """Remove the targeted feature from the database"""
         if self.readonly:
             return HTTPMethodNotAllowed(headers={"Allow": "GET, HEAD"})

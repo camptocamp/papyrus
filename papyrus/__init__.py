@@ -1,4 +1,11 @@
-def add_papyrus_handler(self, route_name_prefix, base_url, handler):
+from typing import Callable
+
+import pyramid.config
+
+
+def add_papyrus_handler(
+    self: pyramid.config.Configurator, route_name_prefix: str, base_url: str, handler: Callable[[], str]
+) -> None:
     """Add a Papyrus handler, i.e. a handler defining the MapFish
     HTTP interface.
 
@@ -34,7 +41,7 @@ def add_papyrus_handler(self, route_name_prefix, base_url, handler):
     self.add_handler(route_name, base_url + "/{id}", handler, action="delete", request_method="DELETE")
 
 
-def add_papyrus_routes(self, route_name_prefix, base_url):
+def add_papyrus_routes(self: pyramid.config.Configurator, route_name_prefix: str, base_url: str) -> None:
     """A helper method that adds routes to view callables that, together,
     implement the MapFish HTTP interface.
 
@@ -67,7 +74,7 @@ def add_papyrus_routes(self, route_name_prefix, base_url):
     self.add_route(route_name, base_url + "/{id}", request_method="DELETE")
 
 
-def includeme(config):
+def includeme(config: pyramid.config.Configurator) -> None:
     """The function to pass to ``config.include``. Requires the
     ``pyramid_handlers`` module."""
     config.add_directive("add_papyrus_handler", add_papyrus_handler)

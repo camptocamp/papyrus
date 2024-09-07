@@ -6,3 +6,7 @@ inherits:
 bandit:
   options:
     config: .bandit.yaml
+
+pylint:
+  disable:
+    - invalid-name

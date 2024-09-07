@@ -22,6 +22,12 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - uses: camptocamp/initialise-gopass-summon-action@v2
+        with:
+          ci-gpg-private-key: ${{secrets.CI_GPG_PRIVATE_KEY}}
+          github-gopass-ci-token: ${{secrets.GOPASS_CI_GITHUB_TOKEN}}
+        if: env.HAS_SECRETS == 'HAS_SECRETS'
+
       - run: echo "${HOME}/.local/bin" >> ${GITHUB_PATH}
       - run: python3 -m pip install --user --requirement=ci/requirements.txt
 
@@ -48,12 +54,8 @@ jobs:
         run: |
           poetry run prospector --output-format=pylint --die-on-tool-error
 
-      - run: make check
-      - run: poetry run pytest -vn
+      - name: Tests
+        run: poetry run pytest -vv
 
       - name: Publish
         run: c2cciutils-publish
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.TOKEN }}
-        if: env.HAS_SECRETS == 'HAS_SECRETS'

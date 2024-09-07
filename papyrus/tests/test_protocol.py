@@ -30,7 +30,6 @@
 import unittest
 
 from pyramid import testing
-from six import text_type
 
 
 def query_to_str(query, engine):
