@@ -1,89 +1,103 @@
 {
-  'extends': ['config:recommended'],
-  timezone: 'Europe/Zurich',
-  schedule: 'after 5pm on the first day of the month',
-  semanticCommits: 'disabled',
-  labels: ['dependencies'],
+  extends: ["config:recommended"],
+  timezone: "Europe/Zurich",
+  schedule: "after 5pm on the first day of the month",
+  semanticCommits: "disabled",
+  labels: ["dependencies"],
   separateMajorMinor: true,
   separateMinorPatch: true,
   prHourlyLimit: 0,
   prConcurrentLimit: 0,
-  lockFileMaintenance: {enabled: true, automerge: true, schedule: 'after 5pm on the first day of the month'},
-  'pre-commit': {enabled: true},
-  baseBranches: ['master'],
+  lockFileMaintenance: {
+    enabled: true,
+    automerge: true,
+    schedule: "after 5pm on the first day of the month",
+  },
+  "pre-commit": { enabled: true },
+  baseBranches: ["master"],
   regexManagers: [
     /** Do updates on pre-commit additional dependencies */
     {
-      fileMatch: ['^\\.pre\\-commit\\-config\\.yaml$'],
-      matchStrings: [" +- '?(?<depName>[^' @=]+)(@|==)(?<currentValue>[^' @=]+)'? # (?<datasource>.+)"],
+      fileMatch: ["^\\.pre\\-commit\\-config\\.yaml$"],
+      matchStrings: [
+        " +- '?(?<depName>[^' @=]+)(@|==)(?<currentValue>[^' @=]+)'? # (?<datasource>.+)",
+      ],
     },
     /** Do update on the schema present in the ci/config.yaml */
     {
-      fileMatch: ['^ci/config\\.yaml$'],
+      fileMatch: ["^ci/config\\.yaml$"],
       matchStrings: [
-        '.*https://raw\\.githubusercontent\\.com/(?<depName>[^\\s]+)/(?<currentValue>[0-9\\.]+)/.*',
+        ".*https://raw\\.githubusercontent\\.com/(?<depName>[^\\s]+)/(?<currentValue>[0-9\\.]+)/.*",
       ],
-      datasourceTemplate: 'github-tags',
+      datasourceTemplate: "github-tags",
     },
   ],
   packageRules: [
     /** Auto merge the dev dependency update */
     {
-      matchDepTypes: ['devDependencies'],
+      matchDepTypes: ["devDependencies"],
       automerge: true,
     },
     /** Group and auto merge the patch updates */
     {
-      matchUpdateTypes: ['patch'],
-      groupName: 'all patch versions',
+      matchUpdateTypes: ["patch"],
+      groupName: "all patch versions",
       automerge: true,
     },
     /** Group and auto merge the minor updates */
     {
-      matchUpdateTypes: ['minor'],
-      groupName: 'all minor versions',
+      matchUpdateTypes: ["minor"],
+      groupName: "all minor versions",
       automerge: true,
     },
     /** Group Poetry packages */
     {
-      matchPackagePrefixes: ['poetry-'],
-      groupName: 'Poetry',
+      matchPackagePrefixes: ["poetry-"],
+      groupName: "Poetry",
       automerge: true,
       separateMajorMinor: false,
       separateMinorPatch: false,
-      matchDepNames: ['poetry', 'pip'],
+      matchDepNames: ["poetry", "pip"],
     },
     /** Accept only the patch on stabilization branches */
     {
-      matchBaseBranches: ['/^[0-9]+\\.[0-9]+$/'],
-      matchUpdateTypes: ['major', 'minor', 'pin', 'digest', 'lockFileMaintenance', 'rollback', 'bump'],
+      matchBaseBranches: ["/^[0-9]+\\.[0-9]+$/"],
+      matchUpdateTypes: [
+        "major",
+        "minor",
+        "pin",
+        "digest",
+        "lockFileMaintenance",
+        "rollback",
+        "bump",
+      ],
       enabled: false,
     },
     /** Support the 4 parts of shellcheck-py version with a v prefix */
     {
-      versioning: 'regex:^v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)\\.(?<build>\\d+)$',
-      matchDepNames: ['shellcheck-py/shellcheck-py'],
+      versioning: "regex:^v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)\\.(?<build>\\d+)$",
+      matchDepNames: ["shellcheck-py/shellcheck-py"],
     },
     /** Group and auto merge the GitHub action */
     {
-      matchFileNames: ['.github/workflows/*.yaml'],
-      groupName: 'github-actions',
+      matchFileNames: [".github/workflows/*.yaml"],
+      groupName: "github-actions",
       automerge: true,
       separateMajorMinor: false,
       separateMinorPatch: false,
     },
     /** Group and auto merge the pre-commit updates */
     {
-      matchFileNames: ['.pre-commit-config.yaml'],
-      groupName: 'pre-commit',
+      matchFileNames: [".pre-commit-config.yaml"],
+      groupName: "pre-commit",
       automerge: true,
       separateMajorMinor: false,
       separateMinorPatch: false,
     },
     /** Group and auto merge the CI dependencies */
     {
-      matchFileNames: ['.github/**', '.pre-commit-config.yaml', 'ci/**'],
-      groupName: 'CI dependencies',
+      matchFileNames: [".github/**", ".pre-commit-config.yaml", "ci/**"],
+      groupName: "CI dependencies",
       automerge: true,
     },
   ],

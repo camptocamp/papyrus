@@ -4,9 +4,9 @@ on:
   push:
     branches:
       - master
-      - '[0-9]+.[0-9]+'
+      - "[0-9]+.[0-9]+"
     tags:
-      - '*'
+      - "*"
   pull_request:
 
 env:
@@ -57,13 +57,13 @@ jobs:
     needs: pre-commit
 
     strategy:
-     fail-fast: false
-     matrix:
-      python-version:
-      - '3.9'
-      - '3.10'
-      - '3.11'
-      - '3.12'
+      fail-fast: false
+      matrix:
+        python-version:
+          - "3.9"
+          - "3.10"
+          - "3.11"
+          - "3.12"
 
     steps:
       - uses: actions/checkout@v3
