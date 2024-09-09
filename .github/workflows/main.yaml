@@ -13,25 +13,21 @@ env:
   HAS_SECRETS: ${{ secrets.HAS_SECRETS }}
 
 jobs:
-  main:
-    name: Continuous integration
+  pre-commit:
+    name: Check with pre-commit and Prospector
     runs-on: ubuntu-22.04
     timeout-minutes: 15
     if: "!startsWith(github.event.head_commit.message, '[skip ci] ')"
 
     steps:
       - uses: actions/checkout@v4
-
-      - uses: camptocamp/initialise-gopass-summon-action@v2
-        with:
-          ci-gpg-private-key: ${{secrets.CI_GPG_PRIVATE_KEY}}
-          github-gopass-ci-token: ${{secrets.GOPASS_CI_GITHUB_TOKEN}}
-        if: env.HAS_SECRETS == 'HAS_SECRETS'
-
       - run: echo "${HOME}/.local/bin" >> ${GITHUB_PATH}
       - run: python3 -m pip install --user --requirement=ci/requirements.txt
 
-      - uses: actions/cache@v4
+      - name: Print environment information
+        run: c2cciutils-env
+
+      - uses: actions/cache@v3
         with:
           path: ~/.cache/pre-commit
           key: pre-commit-${{ hashFiles('.pre-commit-config.yaml') }}
@@ -54,8 +50,54 @@ jobs:
         run: |
           poetry run prospector --output-format=pylint --die-on-tool-error
 
+  main:
+    name: Continuous integration
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    needs: pre-commit
+
+    strategy:
+     fail-fast: false
+     matrix:
+      python-version:
+      - '3.9'
+      - '3.10'
+      - '3.11'
+      - '3.12'
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-python@v3
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - run: echo "${HOME}/.local/bin" >> ${GITHUB_PATH}
+      - run: python3 -m pip install --user --requirement=ci/requirements.txt
+
+      - name: Install with Poetry
+        run: poetry install
+
       - name: Tests
         run: poetry run pytest -vv
+
+  publish:
+    name: Publish
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    needs: main
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: camptocamp/initialise-gopass-summon-action@v2
+        with:
+          ci-gpg-private-key: ${{secrets.CI_GPG_PRIVATE_KEY}}
+          github-gopass-ci-token: ${{secrets.GOPASS_CI_GITHUB_TOKEN}}
+        if: env.HAS_SECRETS == 'HAS_SECRETS'
+
+      - run: echo "${HOME}/.local/bin" >> ${GITHUB_PATH}
+      - run: python3 -m pip install --user --requirement=ci/requirements.txt
 
       - name: Publish
         run: c2cciutils-publish
