@@ -1,0 +1,160 @@
+#!/usr/bin/env python3
+
+import argparse
+import base64
+import json
+import os
+import sys
+
+import id  # pylint: disable=redefined-builtin
+import requests
+
+
+def _fatal(message: str) -> None:
+    # HACK: GitHub Actions' annotations don't work across multiple lines naively;
+    # translating `\n` into `%0A` (i.e., HTML percent-encoding) is known to work.
+    # See: https://github.com/actions/toolkit/issues/193
+    message = message.replace("\n", "%0A")
+    print(f"::error::Trusted publishing exchange failure: {message}", file=sys.stderr)
+    sys.exit(1)
+
+
+def _debug(message: str):
+    print(f"::debug::{message.title()}", file=sys.stderr)
+
+
+def _render_claims(token: str) -> str:
+    _, payload, _ = token.split(".", 2)
+
+    # urlsafe_b64decode needs padding; JWT payloads don't contain any.
+    payload += "=" * (4 - (len(payload) % 4))
+    claims = json.loads(base64.urlsafe_b64decode(payload))
+
+    return f"""
+The claims rendered below are **for debugging purposes only**. You should **not**
+use them to configure a trusted publisher unless they already match your expectations.
+
+If a claim is not present in the claim set, then it is rendered as `MISSING`.
+
+* `sub`: `{claims.get('sub', 'MISSING')}`
+* `repository`: `{claims.get('repository', 'MISSING')}`
+* `repository_owner`: `{claims.get('repository_owner', 'MISSING')}`
+* `repository_owner_id`: `{claims.get('repository_owner_id', 'MISSING')}`
+* `job_workflow_ref`: `{claims.get('job_workflow_ref', 'MISSING')}`
+* `ref`: `{claims.get('ref')}`
+
+See https://docs.pypi.org/trusted-publishers/troubleshooting/ for more help.
+"""
+
+
+def _get_token() -> str:
+    # Indices are expected to support `https://pypi.org/_/oidc/audience`,
+    # which tells OIDC exchange clients which audience to use.
+    audience_resp = requests.get("https://pypi.org/_/oidc/audience", timeout=5)
+    audience_resp.raise_for_status()
+
+    _debug(f"selected trusted publishing exchange endpoint: https://pypi.org/_/oidc/mint-token")
+
+    try:
+        oidc_token = id.detect_credential(audience=audience_resp.json()["audience"])
+    except id.IdentityError as identity_error:
+        _fatal(
+            f"""
+OpenID Connect token retrieval failed: {identity_error}
+
+This generally indicates a workflow configuration error, such as insufficient
+permissions. Make sure that your workflow has `id-token: write` configured
+at the job level, e.g.:
+
+```yaml
+permissions:
+  id-token: write
+```
+
+Learn more at https://docs.github.com/en/actions/deployment/security-hardening-your-deployments/about-security-hardening-with-openid-connect#adding-permissions-settings.
+"""
+        )
+
+    # Now we can do the actual token exchange.
+    mint_token_resp = requests.post(
+        "https://pypi.org/_/oidc/mint-token",
+        json={"token": oidc_token},
+        timeout=5,
+    )
+
+    try:
+        mint_token_payload = mint_token_resp.json()
+    except requests.JSONDecodeError:
+        # Token exchange failure normally produces a JSON error response, but
+        # we might have hit a server error instead.
+        _fatal(
+            f"""
+Token request failed: the index produced an unexpected
+{mint_token_resp.status_code} response.
+
+This strongly suggests a server configuration or downtime issue; wait
+a few minutes and try again.
+
+You can monitor PyPI's status here: https://status.python.org/
+"""
+        )
+
+    # On failure, the JSON response includes the list of errors that
+    # occurred during minting.
+    if not mint_token_resp.ok:
+        reasons = "\n".join(
+            f'* `{error["code"]}`: {error["description"]}' for error in mint_token_payload["errors"]
+        )
+
+        rendered_claims = _render_claims(oidc_token)
+
+        _fatal(
+            f"""
+Token request failed: the server refused the request for the following reasons:
+
+{reasons}
+
+This generally indicates a trusted publisher configuration error, but could
+also indicate an internal error on GitHub or PyPI's part.
+
+{rendered_claims}
+"""
+        )
+
+    pypi_token = mint_token_payload.get("token")
+    if pypi_token is None:
+        _fatal(
+            """
+Token response error: the index gave us an invalid response.
+
+This strongly suggests a server configuration or downtime issue; wait
+a few minutes and try again.
+"""
+        )
+
+    # Mask the newly minted PyPI token, so that we don't accidentally leak it in logs.
+    print(f"::add-mask::{pypi_token}")
+
+    # This final print will be captured by the subshell in `twine-upload.sh`.
+    return pypi_token
+
+
+def _main():
+    parser = argparse.ArgumentParser(description="Login zo pypi.org using OIDC")
+    parser.parse_args()
+
+    if "ACTIONS_ID_TOKEN_REQUEST_TOKEN" not in os.environ:
+        print(
+            """Not available, you probably miss the permission `id-token: write`.
+              See also: https://docs.github.com/en/actions/security-for-github-actions/security-hardening-your-deployments/about-security-hardening-with-openid-connect"""
+        )
+
+    with open(os.path.expanduser("~/.pypirc"), "w", encoding="utf-8") as f:
+        f.write("[pypi]\n")
+        f.write("repository: https://upload.pypi.org/legacy/\n")
+        f.write("username: __token__\n")
+        f.write(f"password: {_get_token()}\n")
+
+
+if __name__ == "__main__":
+    _main()

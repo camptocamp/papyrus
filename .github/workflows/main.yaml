@@ -87,6 +87,9 @@ jobs:
     timeout-minutes: 15
     needs: main
 
+    permissions:
+      id-token: write
+
     steps:
       - uses: actions/checkout@v4
 
@@ -99,5 +102,7 @@ jobs:
       - run: echo "${HOME}/.local/bin" >> ${GITHUB_PATH}
       - run: python3 -m pip install --user --requirement=ci/requirements.txt
 
+      - name: Login with IODC (OpenID Connect)
+        run: .github/pypi-login
       - name: Publish
         run: c2cciutils-publish
