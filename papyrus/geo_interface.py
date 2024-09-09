@@ -1,15 +1,15 @@
-from sqlalchemy.orm.util import class_mapper
-from sqlalchemy.orm.properties import ColumnProperty
-
-from geoalchemy2.types import Geometry
-from geoalchemy2.shape import from_shape, to_shape
+from typing import Optional
 
 import geojson
+from geoalchemy2.shape import from_shape, to_shape
+from geoalchemy2.types import Geometry
+from sqlalchemy.orm.properties import ColumnProperty
+from sqlalchemy.orm.util import class_mapper
 
 from papyrus._shapely_utils import asShape
 
 
-class GeoInterface(object):
+class GeoInterface:
     """
 
     Base class for SQLAlchemy/GeoAlchemy mapped classes. Using this class
@@ -61,7 +61,7 @@ class GeoInterface(object):
 
     """
 
-    def __init__(self, feature=None):
+    def __init__(self, feature: Optional[geojson.Feature] = None) -> None:
         """
         Called by the protocol on object creation.
 
@@ -75,11 +75,11 @@ class GeoInterface(object):
                     continue
                 if p.columns[0].primary_key:
                     primary_key = p.key
-            if hasattr(feature, 'id') and feature.id is not None:
+            if hasattr(feature, "id") and feature.id is not None:
                 setattr(self, primary_key, feature.id)
             self.__update__(feature)
 
-    def __update__(self, feature):
+    def __update__(self, feature: geojson.Feature) -> None:
         """
         Called by the protocol on object update.
 
@@ -103,14 +103,14 @@ class GeoInterface(object):
                     setattr(self, p.key, feature.properties[p.key])
 
         if self.__add_properties__:
-            for k in self.__add_properties__:
+            for k in self.__add_properties__:  # pylint: disable=not-an-iterable
                 setattr(self, k, feature.properties.get(k))
 
-    def __read__(self):
+    def __read__(self) -> geojson.Feature:
         """
         Called by :py:attr:`.__geo_interface__`.
         """
-        id = None
+        id = None  # pylint: disable=redefined-builtin
         geom = None
         properties = {}
 
@@ -123,7 +123,7 @@ class GeoInterface(object):
                 if col.primary_key:
                     id = val
                 elif isinstance(col.type, Geometry):
-                    if hasattr(self, '_shape'):
+                    if hasattr(self, "_shape"):
                         geom = self._shape
                     elif val is not None:
                         geom = to_shape(val)
@@ -131,14 +131,14 @@ class GeoInterface(object):
                     properties[p.key] = val
 
         if self.__add_properties__:
-            for k in self.__add_properties__:
+            for k in self.__add_properties__:  # pylint: disable=not-an-iterable
                 properties[k] = getattr(self, k)
 
         return geojson.Feature(id=id, geometry=geom, properties=properties)
 
     @property
-    def __geo_interface__(self):
-        """ GeoInterface objects implement the Python Geo Interface, making
+    def __geo_interface__(self) -> geojson.Feature:
+        """GeoInterface objects implement the Python Geo Interface, making
         them candidates to serialization with the ``geojson`` module, or
         the Papyrus GeoJSON renderer.
         """

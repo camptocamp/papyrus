@@ -1,20 +1,20 @@
 import datetime
 import decimal
 import functools
-
-from sqlalchemy.ext.associationproxy import _AssociationList
+from typing import Any
 
 from geojson import dumps as _dumps
 from geojson.codec import PyGFPEncoder
+from sqlalchemy.ext.associationproxy import _AssociationList
 
 
-class GeoJSONEncoder(PyGFPEncoder):
+class GeoJSONEncoder(PyGFPEncoder):  # type: ignore[misc]
     # SQLAlchemy's Reflecting Tables mechanism uses decimal.Decimal
     # for numeric columns and datetime.date for dates. Python json
     # doesn't deal with these types. This class provides a simple
     # encoder to deal with objects of these types.
 
-    def default(self, obj):
+    def default(self, obj: str) -> Any:
         if isinstance(obj, (datetime.date, datetime.datetime, datetime.time)):
             return obj.isoformat()
         if isinstance(obj, _AssociationList):

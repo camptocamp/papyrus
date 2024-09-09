@@ -1,14 +1,17 @@
-from six import BytesIO
+from io import BytesIO
+from typing import Any, Callable, Optional
+from xml.etree.ElementTree import TreeBuilder  # nosec
 
 import geojson
+import pyramid.request
+import sqlalchemy.sql.expression
 
-from six import string_types
 from papyrus.geojsonencoder import dumps
 from papyrus.xsd import XSDGenerator
 
 
-class GeoJSON(object):
-    """ GeoJSON renderer.
+class GeoJSON:
+    """GeoJSON renderer.
 
     This class is actually a renderer factory helper, implemented in
     the same way as Pyramid's JSONP renderer.
@@ -54,36 +57,37 @@ class GeoJSON(object):
 
     """
 
-    def __init__(self, jsonp_param_name='callback',
-                 collection_type=geojson.factory.FeatureCollection):
+    def __init__(
+        self, jsonp_param_name: str = "callback", collection_type: type = geojson.factory.FeatureCollection
+    ) -> None:
         self.jsonp_param_name = jsonp_param_name
-        if isinstance(collection_type, string_types):
+        if isinstance(collection_type, str):
             collection_type = getattr(geojson.factory, collection_type)
         self.collection_type = collection_type
 
-    def __call__(self, info):
-        def _render(value, system):
+    def __call__(self, info: str) -> Callable[[str, dict[str, str]], Any]:
+        def _render(value: str, system: dict[str, pyramid.request.Request]) -> Any:
             if isinstance(value, (list, tuple)):
                 value = self.collection_type(value)
             ret = dumps(value)
-            request = system.get('request')
+            request = system.get("request")
             if request is not None:
                 response = request.response
                 ct = response.content_type
                 if ct == response.default_content_type:
                     callback = request.params.get(self.jsonp_param_name)
                     if callback is None:
-                        response.content_type = 'application/geo+json'
+                        response.content_type = "application/geo+json"
                     else:
-                        response.content_type = 'text/javascript'
-                        ret = ('%(callback)s(%(json)s);' %
-                               {'callback': callback, 'json': ret})
+                        response.content_type = "text/javascript"
+                        ret = f"{callback}({ret});"
             return ret
+
         return _render
 
 
-class XSD(object):
-    """ XSD renderer.
+class XSD:
+    """XSD renderer.
 
     An XSD renderer generate an XML schema document from an SQLAlchemy
     Table object.
@@ -177,24 +181,30 @@ class XSD(object):
         config.add_renderer('xsd', XSD(element_callback=callback))
     """
 
-    def __init__(self,
-                 include_primary_keys=False,
-                 include_foreign_keys=False,
-                 sequence_callback=None,
-                 element_callback=None):
+    def __init__(
+        self,
+        include_primary_keys: bool = False,
+        include_foreign_keys: bool = False,
+        sequence_callback: Optional[Callable[[TreeBuilder, type[Any]], None]] = None,
+        element_callback: Optional[
+            Callable[[TreeBuilder, sqlalchemy.sql.expression.ColumnElement[Any]], None]
+        ] = None,
+    ) -> None:
         self.generator = XSDGenerator(
             include_primary_keys=include_primary_keys,
             include_foreign_keys=include_foreign_keys,
             sequence_callback=sequence_callback,
-            element_callback=element_callback
-            )
+            element_callback=element_callback,
+        )
 
-    def __call__(self, table):
-        def _render(cls, system):
-            request = system.get('request')
+    def __call__(self, table: str) -> Callable[[type[str], dict[str, str]], Optional[bytes]]:
+        def _render(cls: type[str], system: dict[str, pyramid.request.Request]) -> Optional[bytes]:
+            request = system.get("request")
             if request is not None:
                 response = request.response
-                response.content_type = 'application/xml'
+                response.content_type = "application/xml"
                 io = self.generator.get_class_xsd(BytesIO(), cls)
                 return io.getvalue()
+            return None
+
         return _render

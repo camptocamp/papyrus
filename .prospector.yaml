@@ -1,0 +1,12 @@
+inherits:
+  - duplicated
+  - utils:base
+  - utils:no-design-checks
+
+bandit:
+  options:
+    config: .bandit.yaml
+
+pylint:
+  disable:
+    - invalid-name
