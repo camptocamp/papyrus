@@ -271,19 +271,6 @@ files = [
 flake8 = "*"
 
 [[package]]
-name = "geoalchemy"
-version = "0.7.2"
-description = "Using SQLAlchemy with Spatial Databases"
-optional = false
-python-versions = "*"
-files = [
-    {file = "GeoAlchemy-0.7.2.tar.gz", hash = "sha256:78ce2f57a7982051030ccc9a59eb589bf6e0b3fad93875add4c1f7ef65f91863"},
-]
-
-[package.dependencies]
-SQLAlchemy = ">=0.6.1"
-
-[[package]]
 name = "geoalchemy2"
 version = "0.15.2"
 description = "Using SQLAlchemy with Spatial Databases"
@@ -1759,4 +1746,4 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<4.0"
-content-hash = "071206bbd08f3a41dee272d0cc7520ff5d9f911d06e8b9c99509d22ad80def22"
+content-hash = "87587a147828cdfd9c89017a219ea698b9dcd008b0f82ce823ceba5ba8e0a215"

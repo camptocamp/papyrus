@@ -48,7 +48,6 @@ security-md = "security_md.cli:main"
 python = ">=3.9,<4.0"
 pyramid="2.0.2"
 geojson="3.1.0"
-GeoAlchemy="0.7.2"
 shapely = "2.0.6"
 geoalchemy2 = "0.15.2"
 
