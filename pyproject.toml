@@ -55,7 +55,7 @@ geoalchemy2 = "0.15.2"
 prospector = { version = "1.10.3", extras = ["with-bandit", "with-mypy", "with-pyroma"] }
 prospector-profile-utils = "1.7.2"
 prospector-profile-duplicated = "1.5.0"
-pytest = "8.3.2"
+pytest = "8.3.3"
 pyramid-handlers = "0.5"
 psycopg2 = "2.9.9"
 
