@@ -52,9 +52,9 @@ shapely = "2.0.6"
 geoalchemy2 = "0.15.2"
 
 [tool.poetry.group.dev.dependencies]
-prospector = { version = "1.12.1", extras = ["with-bandit", "with-mypy", "with-pyroma"] }
-prospector-profile-utils = "1.9.1"
-prospector-profile-duplicated = "1.6.0"
+prospector = { version = "1.10.3", extras = ["with-bandit", "with-mypy", "with-pyroma"] }
+prospector-profile-utils = "1.7.2"
+prospector-profile-duplicated = "1.5.0"
 pytest = "8.3.3"
 pyramid-handlers = "0.5"
 psycopg2 = "2.9.10"
