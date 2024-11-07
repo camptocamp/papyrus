@@ -70,12 +70,14 @@ class GeoInterface:
         * ``feature`` The GeoJSON feature as received from the client.
         """
         if feature:
+            primary_key = None
             for p in class_mapper(self.__class__).iterate_properties:
                 if not isinstance(p, ColumnProperty):
                     continue
                 if p.columns[0].primary_key:
                     primary_key = p.key
             if hasattr(feature, "id") and feature.id is not None:
+                assert primary_key is not None
                 setattr(self, primary_key, feature.id)
             self.__update__(feature)
 
