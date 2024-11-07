@@ -80,7 +80,7 @@ class GeoJSON:
                         response.content_type = "application/geo+json"
                     else:
                         response.content_type = "text/javascript"
-                        ret = f"{callback}({ret});"
+                        ret = f"{callback}({ret});"  # noqa
             return ret
 
         return _render
