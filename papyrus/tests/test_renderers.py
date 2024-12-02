@@ -6,7 +6,6 @@ from pyramid import testing
 
 
 class Test_GeoJSON(unittest.TestCase):
-
     def _callFUT(self, **kwargs):
         from papyrus.renderers import GeoJSON
 
@@ -269,7 +268,6 @@ class Test_GeoJSON(unittest.TestCase):
 
 
 class Test_XSD(unittest.TestCase):
-
     def setUp(self):
         from sqlalchemy.ext.declarative import declarative_base
 

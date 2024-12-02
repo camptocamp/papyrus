@@ -6,26 +6,28 @@ import pyramid.config
 def add_papyrus_handler(
     self: pyramid.config.Configurator, route_name_prefix: str, base_url: str, handler: Callable[[], str]
 ) -> None:
-    """Add a Papyrus handler, i.e. a handler defining the MapFish
-    HTTP interface.
+    """
+    Add a Papyrus handler, i.e. a handler defining the MapFish HTTP interface.
 
-    Example::
-
+    Example:
+    -------
         import papyrus
         config.include(papyrus)
         config.add_papyrus_handler(
             'spots', '/spots', 'mypackage.handlers.SpotHandler')
 
-    Arguments:
+    Argument:
+    ---------
+    route_name_prefix:
+        The prefix used for the route names
+        passed to ``config.add_handler``.
+    base_url:
+        The web service's base URL, e.g. ``/spots``. No
+        trailing slash!
+    handler:
+        a dotted name or a reference to a handler class,
+        e.g. ``'mypackage.handlers.MyHandler'``.
 
-    ``route_name_prefix`` The prefix used for the route names
-    passed to ``config.add_handler``.
-
-    ``base_url`` The web service's base URL, e.g. ``/spots``. No
-    trailing slash!
-
-    ``handler`` a dotted name or a reference to a handler class,
-    e.g. ``'mypackage.handlers.MyHandler'``.
     """
     route_name = route_name_prefix + "_read_many"
     self.add_handler(route_name, base_url, handler, action="read_many", request_method="GET")
@@ -42,23 +44,28 @@ def add_papyrus_handler(
 
 
 def add_papyrus_routes(self: pyramid.config.Configurator, route_name_prefix: str, base_url: str) -> None:
-    """A helper method that adds routes to view callables that, together,
+    """
+    Add Papyrus routes, i.e. routes defining the MapFish HTTP interface.
+
+    A helper method that adds routes to view callables that, together,
     implement the MapFish HTTP interface.
 
-    Example::
-
+    Example:
+    -------
         import papyrus
         config.include(papyrus)
         config.add_papyrus_routes('spots', '/spots')
         config.scan()
 
-    Arguments:
+    Argument:
+    ---------
+    route_name_prefix:
+        The prefix used for the route names
+        passed to ``config.add_route``.
+    base_url:
+        The web service's base URL, e.g. ``/spots``. No
+        trailing slash!
 
-    ``route_name_prefix' The prefix used for the route names
-    passed to ``config.add_route``.
-
-    ``base_url`` The web service's base URL, e.g. ``/spots``. No
-    trailing slash!
     """
     route_name = route_name_prefix + "_read_many"
     self.add_route(route_name, base_url, request_method="GET")
@@ -75,7 +82,11 @@ def add_papyrus_routes(self: pyramid.config.Configurator, route_name_prefix: str
 
 
 def includeme(config: pyramid.config.Configurator) -> None:
-    """The function to pass to ``config.include``. Requires the
-    ``pyramid_handlers`` module."""
+    """
+    Initialize the Pyramid application with the Papyrus handlers.
+
+    The function to pass to ``config.include``,
+    requires the ``pyramid_handlers`` module.
+    """
     config.add_directive("add_papyrus_handler", add_papyrus_handler)
     config.add_directive("add_papyrus_routes", add_papyrus_routes)

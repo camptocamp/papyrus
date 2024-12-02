@@ -2,11 +2,13 @@ inherits:
   - duplicated
   - utils:base
   - utils:no-design-checks
+  - utils:unsafe
 
-bandit:
+mypy:
   options:
-    config: .bandit.yaml
+    python_version: "3.9"
 
-pylint:
+ruff:
   disable:
-    - invalid-name
+    - D103 # Missing docstring in public function
+    - D107 # Missing docstring in `__init__`

@@ -1,21 +1,5 @@
-[tool.black]
-line-length = 110
-target-version = ["py39"]
-
-[tool.isort]
-multi_line_output = 3
-include_trailing_comma = true
-force_grid_wrap = false
-use_parentheses = true
-line_length = 110
-
-[tool.mypy]
-python_version = 3.9
-ignore_missing_imports = true
-warn_redundant_casts = true
-warn_unused_ignores = true
-warn_return_any = true
-strict = true
+[tool.ruff]
+target-version = "py39"
 
 [tool.poetry]
 name = "papyrus"
@@ -52,7 +36,7 @@ shapely = "2.0.6"
 geoalchemy2 = "0.16.0"
 
 [tool.poetry.group.dev.dependencies]
-prospector = { version = "1.13.3", extras = ["with-bandit", "with-mypy", "with-pyroma"] }
+prospector = { version = "1.13.3", extras = ["with-bandit", "with-mypy", "with-pyroma", "with-ruff"] }
 prospector-profile-utils = "1.13.0"
 prospector-profile-duplicated = "1.8.0"
 pytest = "8.3.4"
