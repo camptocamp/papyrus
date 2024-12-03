@@ -11,7 +11,8 @@ from papyrus.xsd import XSDGenerator
 
 
 class GeoJSON:
-    """GeoJSON renderer.
+    """
+    GeoJSON renderer.
 
     This class is actually a renderer factory helper, implemented in
     the same way as Pyramid's JSONP renderer.
@@ -66,6 +67,8 @@ class GeoJSON:
         self.collection_type = collection_type
 
     def __call__(self, info: str) -> Callable[[str, dict[str, str]], Any]:
+        """Get the renderer function."""
+
         def _render(value: str, system: dict[str, pyramid.request.Request]) -> Any:
             if isinstance(value, (list, tuple)):
                 value = self.collection_type(value)
@@ -87,7 +90,8 @@ class GeoJSON:
 
 
 class XSD:
-    """XSD renderer.
+    """
+    XSD renderer.
 
     An XSD renderer generate an XML schema document from an SQLAlchemy
     Table object.
@@ -198,6 +202,8 @@ class XSD:
         )
 
     def __call__(self, table: str) -> Callable[[type[str], dict[str, str]], Optional[bytes]]:
+        """Get the renderer function."""
+
         def _render(cls: type[str], system: dict[str, pyramid.request.Request]) -> Optional[bytes]:
             request = system.get("request")
             if request is not None:

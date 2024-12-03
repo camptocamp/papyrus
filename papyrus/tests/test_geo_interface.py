@@ -5,7 +5,6 @@ import sqlalchemy.orm
 
 
 class GeoInterfaceTests(unittest.TestCase):
-
     def _get_mapped_class_declarative(self):
         from geoalchemy2.types import Geometry
         from sqlalchemy import Column, MetaData, orm, schema, types

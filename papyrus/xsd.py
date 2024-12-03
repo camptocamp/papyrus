@@ -21,13 +21,14 @@ def tag(tb: TreeBuilder, name: str, attrs: Optional[dict[str, str]] = None) -> G
 
 
 class UnsupportedColumnTypeError(RuntimeError):
+    """Unsupported column type error."""
 
     def __init__(self, type: str) -> None:  # pylint: disable=redefined-builtin
         self.type = type
 
 
 class XSDGenerator:
-    """XSD Generator"""
+    """XSD Generator."""
 
     SIMPLE_XSD_TYPES = {
         # SQLAlchemy types
@@ -78,7 +79,7 @@ class XSDGenerator:
     def add_column_xsd(
         self, tb: TreeBuilder, column: sqlalchemy.sql.expression.ColumnElement[Any], attrs: dict[str, str]
     ) -> TreeBuilder:
-        """Add the XSD for a column to tb (a TreeBuilder)"""
+        """Add the XSD for a column to tb (a TreeBuilder)."""
         if column.nullable:
             attrs["minOccurs"] = str(0)
             attrs["nillable"] = "true"
@@ -98,13 +99,13 @@ class XSDGenerator:
                 return tb
         if isinstance(column.type, sqlalchemy.Enum):
             with tag(tb, "xsd:element", attrs) as tb:  # pylint: disable=redefined-argument-from-local
-                with tag(tb, "xsd:simpleType") as tb:  # pylint: disable=redefined-argument-from-local
-                    with tag(
-                        tb, "xsd:restriction", {"base": "xsd:string"}
-                    ) as tb:  # pylint: disable=redefined-argument-from-local
-                        for enum in column.type.enums:
-                            with tag(tb, "xsd:enumeration", {"value": enum}):
-                                pass
+                with (
+                    tag(tb, "xsd:simpleType") as tb,  # pylint: disable=redefined-argument-from-local
+                    tag(tb, "xsd:restriction", {"base": "xsd:string"}) as tb2,
+                ):  # pylint: disable=redefined-argument-from-local
+                    for enum in column.type.enums:
+                        with tag(tb2, "xsd:enumeration", {"value": enum}):
+                            pass
                 self.element_callback(tb, column)
                 return tb
         if isinstance(column.type, sqlalchemy.Numeric):
@@ -115,21 +116,17 @@ class XSDGenerator:
                     return tb
             else:
                 with tag(tb, "xsd:element", attrs) as tb:  # pylint: disable=redefined-argument-from-local
-                    with tag(tb, "xsd:simpleType") as tb:  # pylint: disable=redefined-argument-from-local
-                        with tag(
-                            tb, "xsd:restriction", {"base": "xsd:decimal"}
-                        ) as tb:  # pylint: disable=redefined-argument-from-local
-                            if column.type.scale is not None:
-                                with tag(
-                                    tb, "xsd:fractionDigits", {"value": str(column.type.scale)}
-                                ) as tb:  # pylint: disable=redefined-argument-from-local
-                                    pass
-                            if column.type.precision is not None:
-                                precision = column.type.precision
-                                with tag(
-                                    tb, "xsd:totalDigits", {"value": str(precision)}
-                                ) as tb:  # pylint: disable=redefined-argument-from-local
-                                    pass
+                    with (
+                        tag(tb, "xsd:simpleType") as tb,  # pylint: disable=redefined-argument-from-local
+                        tag(tb, "xsd:restriction", {"base": "xsd:decimal"}) as tb2,
+                    ):  # pylint: disable=redefined-argument-from-local
+                        if column.type.scale is not None:
+                            with tag(tb2, "xsd:fractionDigits", {"value": str(column.type.scale)}) as tb:  # pylint: disable=redefined-argument-from-local
+                                pass
+                        if column.type.precision is not None:
+                            precision = column.type.precision
+                            with tag(tb2, "xsd:totalDigits", {"value": str(precision)}) as tb:  # pylint: disable=redefined-argument-from-local
+                                pass
                     self.element_callback(tb, column)
                     return tb
         if isinstance(
@@ -142,12 +139,12 @@ class XSDGenerator:
                     return tb
             else:
                 with tag(tb, "xsd:element", attrs) as tb:  # pylint: disable=redefined-argument-from-local
-                    with tag(tb, "xsd:simpleType") as tb:  # pylint: disable=redefined-argument-from-local
-                        with tag(
-                            tb, "xsd:restriction", {"base": "xsd:string"}
-                        ) as tb:  # pylint: disable=redefined-argument-from-local
-                            with tag(tb, "xsd:maxLength", {"value": str(column.type.length)}):
-                                pass
+                    with (
+                        tag(tb, "xsd:simpleType") as tb,  # pylint: disable=redefined-argument-from-local
+                        tag(tb, "xsd:restriction", {"base": "xsd:string"}) as tb,  # pylint: disable=redefined-argument-from-local
+                        tag(tb, "xsd:maxLength", {"value": str(column.type.length)}),
+                    ):
+                        pass
                     self.element_callback(tb, column)
                     return tb
         raise UnsupportedColumnTypeError(column.type)  # type: ignore[arg-type]
@@ -161,7 +158,7 @@ class XSDGenerator:
             return
         if column.foreign_keys and not self.include_foreign_keys:
             if len(column.foreign_keys) != 1:  # pragma: no cover
-                # FIXME understand when a column can have multiple
+                # FIXME understand when a column can have multiple  # pylint: disable=fixme
                 # foreign keys
                 raise NotImplementedError()
             return
@@ -169,8 +166,11 @@ class XSDGenerator:
         self.add_column_xsd(tb, column, attrs)
 
     def add_class_properties_xsd(self, tb: TreeBuilder, cls: type[str]) -> None:
-        """Add the XSD for the class properties to the ``TreeBuilder``. And
-        call the user ``sequence_callback``."""
+        """
+        Add the XSD for the class properties to the ``TreeBuilder``.
+
+        And call the user ``sequence_callback``.
+        """
         for p in class_mapper(cls).iterate_properties:
             if isinstance(p, ColumnProperty):
                 self.add_column_property_xsd(tb, p)
@@ -178,17 +178,19 @@ class XSDGenerator:
             self.sequence_callback(tb, cls)
 
     def get_class_xsd(self, io: BytesIO, cls: type[str]) -> BytesIO:
-        """Returns the XSD for a mapped class."""
+        """Get the XSD for a mapped class."""
         attrs = {}
         attrs["xmlns:gml"] = "http://www.opengis.net/gml"
         attrs["xmlns:xsd"] = "http://www.w3.org/2001/XMLSchema"
         tb: TreeBuilder = TreeBuilder()
-        with tag(tb, "xsd:schema", attrs) as tb:
-            with tag(tb, "xsd:complexType", {"name": cls.__name__}) as tb:
-                with tag(tb, "xsd:complexContent") as tb:
-                    with tag(tb, "xsd:extension", {"base": "gml:AbstractFeatureType"}) as tb:
-                        with tag(tb, "xsd:sequence") as tb:
-                            self.add_class_properties_xsd(tb, cls)
+        with (
+            tag(tb, "xsd:schema", attrs) as tb,
+            tag(tb, "xsd:complexType", {"name": cls.__name__}) as tb,
+            tag(tb, "xsd:complexContent") as tb,
+            tag(tb, "xsd:extension", {"base": "gml:AbstractFeatureType"}) as tb,
+            tag(tb, "xsd:sequence") as tb,
+        ):
+            self.add_class_properties_xsd(tb, cls)
 
         ElementTree(tb.close()).write(io, encoding="utf-8")
         return io

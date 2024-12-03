@@ -11,6 +11,7 @@ from papyrus._shapely_utils import asShape
 
 class GeoInterface:
     """
+    Interface for SQLAlchemy/GeoAlchemy mapped classes.
 
     Base class for SQLAlchemy/GeoAlchemy mapped classes. Using this class
     mapped objects implement the Python Geo Interface (``__geo_interface__``)
@@ -63,11 +64,14 @@ class GeoInterface:
 
     def __init__(self, feature: Optional[geojson.Feature] = None) -> None:
         """
+        Initialize the object from a GeoJSON feature.
+
         Called by the protocol on object creation.
 
         Arguments:
+        ---------
+        feature: The GeoJSON feature as received from the client.
 
-        * ``feature`` The GeoJSON feature as received from the client.
         """
         if feature:
             primary_key = None
@@ -83,11 +87,14 @@ class GeoInterface:
 
     def __update__(self, feature: geojson.Feature) -> None:
         """
+        Update the object from a GeoJSON feature.
+
         Called by the protocol on object update.
 
         Arguments:
+        ---------
+        feature: The GeoJSON feature as received from the client.
 
-        * ``feature`` The GeoJSON feature as received from the client.
         """
         for p in class_mapper(self.__class__).iterate_properties:
             if not isinstance(p, ColumnProperty):
@@ -110,6 +117,8 @@ class GeoInterface:
 
     def __read__(self) -> geojson.Feature:
         """
+        Read the object into a GeoJSON feature.
+
         Called by :py:attr:`.__geo_interface__`.
         """
         id = None  # pylint: disable=redefined-builtin
@@ -140,8 +149,10 @@ class GeoInterface:
 
     @property
     def __geo_interface__(self) -> geojson.Feature:
-        """GeoInterface objects implement the Python Geo Interface, making
-        them candidates to serialization with the ``geojson`` module, or
+        """
+        GeoInterface objects implement the Python Geo Interface.
+
+        making them candidates to serialization with the ``geojson`` module, or
         the Papyrus GeoJSON renderer.
         """
         return self.__read__()

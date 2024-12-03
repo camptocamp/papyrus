@@ -24,8 +24,7 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-""" This module includes unit tests for protocol.py """
-
+"""This module includes unit tests for protocol.py"""
 
 import unittest
 
@@ -45,7 +44,6 @@ def _compiled_to_string(compiled_filter):
 
 
 class create_geom_filter_Tests(unittest.TestCase):
-
     def _get_mapped_class(self):
         from geoalchemy2.types import Geometry
         from sqlalchemy import Column, MetaData, types
@@ -128,9 +126,7 @@ class create_geom_filter_Tests(unittest.TestCase):
             filter_str,
             b'ST_DWithin("table".geom, ST_GeomFromWKB(%(ST_GeomFromWKB_1)s, %(ST_GeomFromWKB_2)s), %(ST_DWithin_1)s)',
         )  # NOQA
-        self.assertTrue(
-            wkb.loads(bytes(params["ST_GeomFromWKB_1"])).equals(wkt.loads("POINT (40 5)"))
-        )  # NOQA
+        self.assertTrue(wkb.loads(bytes(params["ST_GeomFromWKB_1"])).equals(wkt.loads("POINT (40 5)")))  # NOQA
         self.assertEqual(params["ST_GeomFromWKB_2"], 4326)
         self.assertEqual(params["ST_DWithin_1"], 1)
 
@@ -149,9 +145,7 @@ class create_geom_filter_Tests(unittest.TestCase):
             filter_str,
             b'ST_DWithin(ST_Transform("table".geom, %(ST_Transform_1)s), ST_GeomFromWKB(%(ST_GeomFromWKB_1)s, %(ST_GeomFromWKB_2)s), %(ST_DWithin_1)s)',
         )  # NOQA
-        self.assertTrue(
-            wkb.loads(bytes(params["ST_GeomFromWKB_1"])).equals(wkt.loads("POINT (40 5)"))
-        )  # NOQA
+        self.assertTrue(wkb.loads(bytes(params["ST_GeomFromWKB_1"])).equals(wkt.loads("POINT (40 5)")))  # NOQA
         self.assertEqual(params["ST_GeomFromWKB_2"], 900913)
         self.assertEqual(params["ST_Transform_1"], 900913)
         self.assertEqual(params["ST_DWithin_1"], 1)
@@ -211,7 +205,6 @@ class create_geom_filter_Tests(unittest.TestCase):
 
 
 class create_attr_filter_Tests(unittest.TestCase):
-
     def _get_mapped_class(self):
         from geoalchemy2.types import Geometry
         from sqlalchemy import Column, MetaData, types
@@ -341,7 +334,6 @@ class create_attr_filter_Tests(unittest.TestCase):
 
 
 class asbool_Tests(unittest.TestCase):
-
     def test_asbool(self):
         from papyrus.protocol import asbool
 
@@ -363,7 +355,6 @@ class asbool_Tests(unittest.TestCase):
 
 
 class Test_protocol(unittest.TestCase):
-
     def _get_engine(self):
         from sqlalchemy import create_engine
 
