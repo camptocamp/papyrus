@@ -36,12 +36,12 @@ use them to configure a trusted publisher unless they already match your expecta
 
 If a claim is not present in the claim set, then it is rendered as `MISSING`.
 
-* `sub`: `{claims.get('sub', 'MISSING')}`
-* `repository`: `{claims.get('repository', 'MISSING')}`
-* `repository_owner`: `{claims.get('repository_owner', 'MISSING')}`
-* `repository_owner_id`: `{claims.get('repository_owner_id', 'MISSING')}`
-* `job_workflow_ref`: `{claims.get('job_workflow_ref', 'MISSING')}`
-* `ref`: `{claims.get('ref')}`
+* `sub`: `{claims.get("sub", "MISSING")}`
+* `repository`: `{claims.get("repository", "MISSING")}`
+* `repository_owner`: `{claims.get("repository_owner", "MISSING")}`
+* `repository_owner_id`: `{claims.get("repository_owner_id", "MISSING")}`
+* `job_workflow_ref`: `{claims.get("job_workflow_ref", "MISSING")}`
+* `ref`: `{claims.get("ref")}`
 
 See https://docs.pypi.org/trusted-publishers/troubleshooting/ for more help.
 """
@@ -103,7 +103,7 @@ You can monitor PyPI's status here: https://status.python.org/
     # occurred during minting.
     if not mint_token_resp.ok:
         reasons = "\n".join(
-            f'* `{error["code"]}`: {error["description"]}' for error in mint_token_payload["errors"]
+            f"* `{error['code']}`: {error['description']}" for error in mint_token_payload["errors"]
         )
 
         rendered_claims = _render_claims(oidc_token)

@@ -497,10 +497,9 @@ class Test_XSD(unittest.TestCase):
         from papyrus.xsd import tag
 
         def cb(tb, cls):
-            with tag(tb, "xsd:annotation"):
-                with tag(tb, "xsd:appinfo"):
-                    with tag(tb, "readonly", {"value": "true"}):
-                        pass
+            with tag(tb, "xsd:annotation"), tag(tb, "xsd:appinfo"):
+                with tag(tb, "readonly", {"value": "true"}):
+                    pass
 
         for column in (
             Column("_column", types.Integer),

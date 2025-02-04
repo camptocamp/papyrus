@@ -215,7 +215,6 @@ man_pages = [("index", "papyrus", "Papyrus Documentation", ["Éric Lemoine"], 1)
 intersphinx_mapping = {"http://docs.python.org/": None}
 
 # Mocks for Read the Dics
-import sys
 from unittest.mock import MagicMock
 
 

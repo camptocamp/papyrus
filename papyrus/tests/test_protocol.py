@@ -24,7 +24,7 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-"""This module includes unit tests for protocol.py"""
+"""This module includes unit tests for protocol.py."""
 
 import unittest
 
@@ -32,12 +32,13 @@ from pyramid import testing
 
 
 def query_to_str(query, engine):
-    """Helper function which compiles a query using a database engine"""
+    """Helper function which compiles a query using a database engine."""
     return str(query.statement.compile(engine)).encode("ascii", "backslashreplace")
 
 
 def _compiled_to_string(compiled_filter):
-    """Helper function which converts a compiled SQL expression
+    """
+    Helper function which converts a compiled SQL expression
     into a string.
     """
     return str(compiled_filter).encode("ascii", "backslashreplace")
