@@ -33,7 +33,7 @@ python = ">=3.9,<4.0"
 pyramid="2.0.2"
 geojson="3.2.0"
 shapely = "2.0.7"
-geoalchemy2 = "0.17.0"
+geoalchemy2 = "0.17.1"
 
 [tool.poetry.group.dev.dependencies]
 prospector = { version = "1.14.1", extras = ["with-bandit", "with-mypy", "with-pyroma", "with-ruff"] }
