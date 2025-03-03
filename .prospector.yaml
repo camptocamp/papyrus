@@ -2,13 +2,15 @@ inherits:
   - duplicated
   - utils:base
   - utils:no-design-checks
-  - utils:unsafe
+  - utils:fix
 
 mypy:
   options:
-    python_version: "3.9"
+    python-version: "3.9"
 
 ruff:
   disable:
     - D103 # Missing docstring in public function
     - D107 # Missing docstring in `__init__`
+  options:
+    target-version: py39
