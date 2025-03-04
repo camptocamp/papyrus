@@ -75,12 +75,12 @@ repos:
       - id: prospector
         args:
           - --profile=utils:pre-commit
+          - --profile=.prospector.yaml
           - --die-on-tool-error
           - --output-format=pylint
         additional_dependencies:
           - prospector-profile-duplicated==1.10.4 # pypi
           - prospector-profile-utils==1.21.9 # pypi
-          - ruff==0.9.9 # pypi
         exclude: |-
           (?x)(
             ^tests?/?
@@ -96,6 +96,7 @@ repos:
           - --output-format=pylint
           - --profile=utils:tests
           - --profile=utils:pre-commit
+          - --profile=.prospector-tests.yaml
         additional_dependencies:
           - prospector-profile-utils==1.21.4 # pypi
   - repo: https://github.com/pre-commit/mirrors-prettier

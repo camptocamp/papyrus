@@ -76,17 +76,15 @@ class create_geom_filter_Tests(unittest.TestCase):
         compiled_filter = filter.compile(self._get_engine())
         params = compiled_filter.params
         filter_str = _compiled_to_string(compiled_filter)
-        self.assertEqual(
-            filter_str,
-            b'ST_DWithin("table".geom, ST_GeomFromWKB(%(ST_GeomFromWKB_1)s, %(ST_GeomFromWKB_2)s), %(ST_DWithin_1)s)',
+        assert (
+            filter_str
+            == b'ST_DWithin("table".geom, ST_GeomFromWKB(%(ST_GeomFromWKB_1)s, %(ST_GeomFromWKB_2)s), %(ST_DWithin_1)s)'
         )  # NOQA
-        self.assertTrue(
-            wkb.loads(bytes(params["ST_GeomFromWKB_1"])).equals(
-                wkt.loads("POLYGON ((-180 -90, -180 90, 180 90, 180 -90, -180 -90))")
-            )
+        assert wkb.loads(bytes(params["ST_GeomFromWKB_1"])).equals(
+            wkt.loads("POLYGON ((-180 -90, -180 90, 180 90, 180 -90, -180 -90))")
         )  # NOQA
-        self.assertEqual(params["ST_GeomFromWKB_2"], 4326)
-        self.assertEqual(params["ST_DWithin_1"], 1)
+        assert params["ST_GeomFromWKB_2"] == 4326
+        assert params["ST_DWithin_1"] == 1
 
     def test_box_filter_with_epsg(self):
         from shapely import wkb, wkt
@@ -99,18 +97,16 @@ class create_geom_filter_Tests(unittest.TestCase):
         compiled_filter = filter.compile(self._get_engine())
         params = compiled_filter.params
         filter_str = _compiled_to_string(compiled_filter)
-        self.assertEqual(
-            filter_str,
-            b'ST_DWithin(ST_Transform("table".geom, %(ST_Transform_1)s), ST_GeomFromWKB(%(ST_GeomFromWKB_1)s, %(ST_GeomFromWKB_2)s), %(ST_DWithin_1)s)',
+        assert (
+            filter_str
+            == b'ST_DWithin(ST_Transform("table".geom, %(ST_Transform_1)s), ST_GeomFromWKB(%(ST_GeomFromWKB_1)s, %(ST_GeomFromWKB_2)s), %(ST_DWithin_1)s)'
         )  # NOQA
-        self.assertTrue(
-            wkb.loads(bytes(params["ST_GeomFromWKB_1"])).equals(
-                wkt.loads("POLYGON ((-180 -90, -180 90, 180 90, 180 -90, -180 -90))")
-            )
+        assert wkb.loads(bytes(params["ST_GeomFromWKB_1"])).equals(
+            wkt.loads("POLYGON ((-180 -90, -180 90, 180 90, 180 -90, -180 -90))")
         )  # NOQA
-        self.assertEqual(params["ST_GeomFromWKB_2"], 900913)
-        self.assertEqual(params["ST_Transform_1"], 900913)
-        self.assertEqual(params["ST_DWithin_1"], 1)
+        assert params["ST_GeomFromWKB_2"] == 900913
+        assert params["ST_Transform_1"] == 900913
+        assert params["ST_DWithin_1"] == 1
 
     def test_within_filter(self):
         from shapely import wkb, wkt
@@ -123,13 +119,13 @@ class create_geom_filter_Tests(unittest.TestCase):
         compiled_filter = filter.compile(self._get_engine())
         params = compiled_filter.params
         filter_str = _compiled_to_string(compiled_filter)
-        self.assertEqual(
-            filter_str,
-            b'ST_DWithin("table".geom, ST_GeomFromWKB(%(ST_GeomFromWKB_1)s, %(ST_GeomFromWKB_2)s), %(ST_DWithin_1)s)',
+        assert (
+            filter_str
+            == b'ST_DWithin("table".geom, ST_GeomFromWKB(%(ST_GeomFromWKB_1)s, %(ST_GeomFromWKB_2)s), %(ST_DWithin_1)s)'
         )  # NOQA
         self.assertTrue(wkb.loads(bytes(params["ST_GeomFromWKB_1"])).equals(wkt.loads("POINT (40 5)")))  # NOQA
-        self.assertEqual(params["ST_GeomFromWKB_2"], 4326)
-        self.assertEqual(params["ST_DWithin_1"], 1)
+        assert params["ST_GeomFromWKB_2"] == 4326
+        assert params["ST_DWithin_1"] == 1
 
     def test_within_filter_with_epsg(self):
         from shapely import wkb, wkt
@@ -142,14 +138,14 @@ class create_geom_filter_Tests(unittest.TestCase):
         compiled_filter = filter.compile(self._get_engine())
         params = compiled_filter.params
         filter_str = _compiled_to_string(compiled_filter)
-        self.assertEqual(
-            filter_str,
-            b'ST_DWithin(ST_Transform("table".geom, %(ST_Transform_1)s), ST_GeomFromWKB(%(ST_GeomFromWKB_1)s, %(ST_GeomFromWKB_2)s), %(ST_DWithin_1)s)',
+        assert (
+            filter_str
+            == b'ST_DWithin(ST_Transform("table".geom, %(ST_Transform_1)s), ST_GeomFromWKB(%(ST_GeomFromWKB_1)s, %(ST_GeomFromWKB_2)s), %(ST_DWithin_1)s)'
         )  # NOQA
         self.assertTrue(wkb.loads(bytes(params["ST_GeomFromWKB_1"])).equals(wkt.loads("POINT (40 5)")))  # NOQA
-        self.assertEqual(params["ST_GeomFromWKB_2"], 900913)
-        self.assertEqual(params["ST_Transform_1"], 900913)
-        self.assertEqual(params["ST_DWithin_1"], 1)
+        assert params["ST_GeomFromWKB_2"] == 900913
+        assert params["ST_Transform_1"] == 900913
+        assert params["ST_DWithin_1"] == 1
 
     def test_polygon_filter(self):
         from geojson import dumps
@@ -165,13 +161,13 @@ class create_geom_filter_Tests(unittest.TestCase):
         compiled_filter = filter.compile(self._get_engine())
         params = compiled_filter.params
         filter_str = _compiled_to_string(compiled_filter)
-        self.assertEqual(
-            filter_str,
-            b'ST_DWithin("table".geom, ST_GeomFromWKB(%(ST_GeomFromWKB_1)s, %(ST_GeomFromWKB_2)s), %(ST_DWithin_1)s)',
+        assert (
+            filter_str
+            == b'ST_DWithin("table".geom, ST_GeomFromWKB(%(ST_GeomFromWKB_1)s, %(ST_GeomFromWKB_2)s), %(ST_DWithin_1)s)'
         )  # NOQA
         self.assertTrue(wkb.loads(bytes(params["ST_GeomFromWKB_1"])).equals(poly))  # NOQA
-        self.assertEqual(params["ST_GeomFromWKB_2"], 4326)
-        self.assertEqual(params["ST_DWithin_1"], 1)
+        assert params["ST_GeomFromWKB_2"] == 4326
+        assert params["ST_DWithin_1"] == 1
 
     def test_polygon_filter_with_epsg(self):
         from geojson import dumps
@@ -187,14 +183,14 @@ class create_geom_filter_Tests(unittest.TestCase):
         compiled_filter = filter.compile(self._get_engine())
         params = compiled_filter.params
         filter_str = _compiled_to_string(compiled_filter)
-        self.assertEqual(
-            filter_str,
-            b'ST_DWithin(ST_Transform("table".geom, %(ST_Transform_1)s), ST_GeomFromWKB(%(ST_GeomFromWKB_1)s, %(ST_GeomFromWKB_2)s), %(ST_DWithin_1)s)',
+        assert (
+            filter_str
+            == b'ST_DWithin(ST_Transform("table".geom, %(ST_Transform_1)s), ST_GeomFromWKB(%(ST_GeomFromWKB_1)s, %(ST_GeomFromWKB_2)s), %(ST_DWithin_1)s)'
         )  # NOQA
         self.assertTrue(wkb.loads(bytes(params["ST_GeomFromWKB_1"])).equals(poly))  # NOQA
-        self.assertEqual(params["ST_GeomFromWKB_2"], 900913)
-        self.assertEqual(params["ST_Transform_1"], 900913)
-        self.assertEqual(params["ST_DWithin_1"], 1)
+        assert params["ST_GeomFromWKB_2"] == 900913
+        assert params["ST_Transform_1"] == 900913
+        assert params["ST_DWithin_1"] == 1
 
     def test_geom_filter_no_params(self):
         from papyrus.protocol import create_geom_filter
@@ -202,7 +198,7 @@ class create_geom_filter_Tests(unittest.TestCase):
         request = testing.DummyRequest()
         MappedClass = self._get_mapped_class()
         filter = create_geom_filter(request, MappedClass, "geom")
-        self.assertEqual(filter, None)
+        assert filter is None
 
 
 class create_attr_filter_Tests(unittest.TestCase):
@@ -229,8 +225,8 @@ class create_attr_filter_Tests(unittest.TestCase):
         request = testing.DummyRequest(params={"queryable": "id", "id__eq": "1"})
         MappedClass = self._get_mapped_class()
         filter = create_attr_filter(request, MappedClass)
-        self.assertTrue(isinstance(filter, sql.expression.ClauseElement))
-        self.assertTrue(sql.and_(MappedClass.id == "1").compare(filter))
+        assert isinstance(filter, sql.expression.ClauseElement)
+        assert sql.and_(MappedClass.id == "1").compare(filter)
 
     def test_create_attr_filter_lt(self):
         from sqlalchemy import sql
@@ -240,8 +236,8 @@ class create_attr_filter_Tests(unittest.TestCase):
         request = testing.DummyRequest(params={"queryable": "id", "id__lt": "1"})
         MappedClass = self._get_mapped_class()
         filter = create_attr_filter(request, MappedClass)
-        self.assertTrue(isinstance(filter, sql.expression.ClauseElement))
-        self.assertTrue(sql.and_(MappedClass.id < "1").compare(filter))
+        assert isinstance(filter, sql.expression.ClauseElement)
+        assert sql.and_(MappedClass.id < "1").compare(filter)
 
     def test_create_attr_filter_lte(self):
         from sqlalchemy import sql
@@ -251,8 +247,8 @@ class create_attr_filter_Tests(unittest.TestCase):
         request = testing.DummyRequest(params={"queryable": "id", "id__lte": "1"})
         MappedClass = self._get_mapped_class()
         filter = create_attr_filter(request, MappedClass)
-        self.assertTrue(isinstance(filter, sql.expression.ClauseElement))
-        self.assertTrue(sql.and_(MappedClass.id <= "1").compare(filter))
+        assert isinstance(filter, sql.expression.ClauseElement)
+        assert sql.and_(MappedClass.id <= "1").compare(filter)
 
     def test_create_attr_filter_gt(self):
         from sqlalchemy import sql
@@ -262,8 +258,8 @@ class create_attr_filter_Tests(unittest.TestCase):
         request = testing.DummyRequest(params={"queryable": "id", "id__gt": "1"})
         MappedClass = self._get_mapped_class()
         filter = create_attr_filter(request, MappedClass)
-        self.assertTrue(isinstance(filter, sql.expression.ClauseElement))
-        self.assertTrue(sql.and_(MappedClass.id > "1").compare(filter))
+        assert isinstance(filter, sql.expression.ClauseElement)
+        assert sql.and_(MappedClass.id > "1").compare(filter)
 
     def test_create_attr_filter_gte(self):
         from sqlalchemy import sql
@@ -273,8 +269,8 @@ class create_attr_filter_Tests(unittest.TestCase):
         request = testing.DummyRequest(params={"queryable": "id", "id__gte": "1"})
         MappedClass = self._get_mapped_class()
         filter = create_attr_filter(request, MappedClass)
-        self.assertTrue(isinstance(filter, sql.expression.ClauseElement))
-        self.assertTrue(sql.and_(MappedClass.id >= "1").compare(filter))
+        assert isinstance(filter, sql.expression.ClauseElement)
+        assert sql.and_(MappedClass.id >= "1").compare(filter)
 
     def test_create_attr_filter_like(self):
         from sqlalchemy import sql
@@ -284,8 +280,8 @@ class create_attr_filter_Tests(unittest.TestCase):
         request = testing.DummyRequest(params={"queryable": "text", "text__like": "foo"})
         MappedClass = self._get_mapped_class()
         filter = create_attr_filter(request, MappedClass)
-        self.assertTrue(isinstance(filter, sql.expression.ClauseElement))
-        self.assertTrue(sql.and_(MappedClass.text.like("foo")).compare(filter))
+        assert isinstance(filter, sql.expression.ClauseElement)
+        assert sql.and_(MappedClass.text.like("foo")).compare(filter)
 
     def test_create_attr_filter_ilike(self):
         from sqlalchemy import sql
@@ -295,8 +291,8 @@ class create_attr_filter_Tests(unittest.TestCase):
         request = testing.DummyRequest(params={"queryable": "text", "text__ilike": "foo"})
         MappedClass = self._get_mapped_class()
         filter = create_attr_filter(request, MappedClass)
-        self.assertTrue(isinstance(filter, sql.expression.ClauseElement))
-        self.assertTrue(sql.and_(MappedClass.text.ilike("foo")).compare(filter))
+        assert isinstance(filter, sql.expression.ClauseElement)
+        assert sql.and_(MappedClass.text.ilike("foo")).compare(filter)
 
     def test_create_attr_filter_and(self):
         from sqlalchemy import sql
@@ -307,7 +303,7 @@ class create_attr_filter_Tests(unittest.TestCase):
         MappedClass = self._get_mapped_class()
         filter = create_attr_filter(request, MappedClass)
         expected_filter = sql.and_(MappedClass.text.ilike("foo"), MappedClass.id == "1")
-        self.assertTrue(filter.operator == expected_filter.operator)
+        assert filter.operator == expected_filter.operator
 
     def test_create_attr_filter_no_queryable(self):
         from papyrus.protocol import create_attr_filter
@@ -315,7 +311,7 @@ class create_attr_filter_Tests(unittest.TestCase):
         request = testing.DummyRequest(params={"text__ilike": "foo", "id__eq": "1"})
         MappedClass = self._get_mapped_class()
         filter = create_attr_filter(request, MappedClass)
-        self.assertEqual(filter, None)
+        assert filter is None
 
     def test_create_attr_filter_unknown_op(self):
         from papyrus.protocol import create_attr_filter
@@ -323,7 +319,7 @@ class create_attr_filter_Tests(unittest.TestCase):
         request = testing.DummyRequest(params={"queryable": "text", "text__foo": "foo"})
         MappedClass = self._get_mapped_class()
         filter = create_attr_filter(request, MappedClass)
-        self.assertEqual(filter, None)
+        assert filter is None
 
     def test_create_attr_filter_attr_not_queryable(self):
         from papyrus.protocol import create_attr_filter
@@ -331,28 +327,28 @@ class create_attr_filter_Tests(unittest.TestCase):
         request = testing.DummyRequest(params={"queryable": "id", "text__ilike": "foo"})
         MappedClass = self._get_mapped_class()
         filter = create_attr_filter(request, MappedClass)
-        self.assertEqual(filter, None)
+        assert filter is None
 
 
 class asbool_Tests(unittest.TestCase):
     def test_asbool(self):
         from papyrus.protocol import asbool
 
-        self.assertEqual(asbool(0), False)
-        self.assertEqual(asbool(1), True)
-        self.assertEqual(asbool(2), True)
-        self.assertEqual(asbool("0"), False)
-        self.assertEqual(asbool("1"), True)
-        self.assertEqual(asbool("false"), False)
-        self.assertEqual(asbool("true"), True)
-        self.assertEqual(asbool("False"), False)
-        self.assertEqual(asbool("True"), True)
-        self.assertEqual(asbool("0"), False)
-        self.assertEqual(asbool("1"), True)
-        self.assertEqual(asbool("false"), False)
-        self.assertEqual(asbool("true"), True)
-        self.assertEqual(asbool("False"), False)
-        self.assertEqual(asbool("True"), True)
+        assert asbool(0) is False
+        assert asbool(1) is True
+        assert asbool(2) is True
+        assert asbool("0") is False
+        assert asbool("1") is True
+        assert asbool("false") is False
+        assert asbool("true") is True
+        assert asbool("False") is False
+        assert asbool("True") is True
+        assert asbool("0") is False
+        assert asbool("1") is True
+        assert asbool("false") is False
+        assert asbool("true") is True
+        assert asbool("False") is False
+        assert asbool("True") is True
 
 
 class Test_protocol(unittest.TestCase):
@@ -423,7 +419,7 @@ class Test_protocol(unittest.TestCase):
 
         feature = proto._filter_attrs(feature, request)
 
-        self.assertEqual(feature.properties, {"foo": "foo", "bar": "bar"})
+        assert feature.properties == {"foo": "foo", "bar": "bar"}
 
     def test__filter_attrs_no_geom(self):
         from geojson import Feature
@@ -442,7 +438,7 @@ class Test_protocol(unittest.TestCase):
 
         feature = proto._filter_attrs(feature, request)
 
-        self.assertEqual(feature.geometry, None)
+        assert feature.geometry is None
 
     def test___query(self):
         from papyrus.protocol import Protocol, create_attr_filter
@@ -461,51 +457,51 @@ class Test_protocol(unittest.TestCase):
         request = testing.DummyRequest()
         with patch("sqlalchemy.orm.query.Query.all", lambda q: q):
             query = proto._query(request)
-        self.assertTrue(b"SELECT" in query_to_str(query, engine))
+        assert b"SELECT" in query_to_str(query, engine)
 
         request = testing.DummyRequest(params={"queryable": "id", "id__eq": "1"})
         with patch("sqlalchemy.orm.query.Query.all", lambda q: q):
             query = proto._query(request)
-        self.assertTrue(b"WHERE" in query_to_str(query, engine))
+        assert b"WHERE" in query_to_str(query, engine)
 
         request = testing.DummyRequest(params={"queryable": "id", "id__eq": "1"})
         with patch("sqlalchemy.orm.query.Query.all", lambda q: q):
             filter = create_attr_filter(request, MappedClass)
             query = proto._query(testing.DummyRequest(), filter=filter)
-        self.assertTrue(b"WHERE" in query_to_str(query, engine))
+        assert b"WHERE" in query_to_str(query, engine)
 
         request = testing.DummyRequest(params={"limit": "2"})
         with patch("sqlalchemy.orm.query.Query.all", lambda q: q):
             query = proto._query(request)
-        self.assertTrue(b"LIMIT" in query_to_str(query, engine))
+        assert b"LIMIT" in query_to_str(query, engine)
 
         request = testing.DummyRequest(params={"maxfeatures": "2"})
         with patch("sqlalchemy.orm.query.Query.all", lambda q: q):
             query = proto._query(request)
-        self.assertTrue(b"LIMIT" in query_to_str(query, engine))
+        assert b"LIMIT" in query_to_str(query, engine)
 
         request = testing.DummyRequest(params={"limit": "2", "offset": "10"})
         with patch("sqlalchemy.orm.query.Query.all", lambda q: q):
             query = proto._query(request)
-        self.assertTrue(b"OFFSET" in query_to_str(query, engine))
+        assert b"OFFSET" in query_to_str(query, engine)
 
         request = testing.DummyRequest(params={"order_by": "text"})
         with patch("sqlalchemy.orm.query.Query.all", lambda q: q):
             query = proto._query(request)
-        self.assertTrue(b"ORDER BY" in query_to_str(query, engine))
-        self.assertTrue(b"ASC" in query_to_str(query, engine))
+        assert b"ORDER BY" in query_to_str(query, engine)
+        assert b"ASC" in query_to_str(query, engine)
 
         request = testing.DummyRequest(params={"sort": "text"})
         with patch("sqlalchemy.orm.query.Query.all", lambda q: q):
             query = proto._query(request)
-        self.assertTrue(b"ORDER BY" in query_to_str(query, engine))
-        self.assertTrue(b"ASC" in query_to_str(query, engine))
+        assert b"ORDER BY" in query_to_str(query, engine)
+        assert b"ASC" in query_to_str(query, engine)
 
         request = testing.DummyRequest(params={"order_by": "text", "dir": "DESC"})
         with patch("sqlalchemy.orm.query.Query.all", lambda q: q):
             query = proto._query(request)
-        self.assertTrue(b"ORDER BY" in query_to_str(query, engine))
-        self.assertTrue(b"DESC" in query_to_str(query, engine))
+        assert b"ORDER BY" in query_to_str(query, engine)
+        assert b"DESC" in query_to_str(query, engine)
 
     def test_count(self):
         from papyrus.protocol import Protocol
@@ -526,7 +522,7 @@ class Test_protocol(unittest.TestCase):
         request = testing.DummyRequest()
         with patch("sqlalchemy.orm.query.Query.count", lambda q: q):
             query = proto.count(request)
-        self.assertTrue(b"SELECT" in query_to_str(query, engine))
+        assert b"SELECT" in query_to_str(query, engine)
 
     def test_read_id(self):
         from geojson import Feature
@@ -543,8 +539,8 @@ class Test_protocol(unittest.TestCase):
         request = testing.DummyRequest()
 
         feature = proto.read(request, id="a")
-        self.assertEqual(feature.id, "a")
-        self.assertEqual(feature.properties["text"], "foo")
+        assert feature.id == "a"
+        assert feature.properties["text"] == "foo"
 
     def test_read_notfound(self):
         from pyramid.httpexceptions import HTTPNotFound
@@ -559,7 +555,7 @@ class Test_protocol(unittest.TestCase):
         request = testing.DummyRequest()
 
         resp = proto.read(request, id="a")
-        self.assertTrue(isinstance(resp, HTTPNotFound))
+        assert isinstance(resp, HTTPNotFound)
 
     def test_read_many(self):
         from geojson import Feature, FeatureCollection
@@ -581,8 +577,8 @@ class Test_protocol(unittest.TestCase):
         proto._query = _query
 
         features = proto.read(testing.DummyRequest())
-        self.assertTrue(isinstance(features, FeatureCollection))
-        self.assertEqual(len(features.features), 2)
+        assert isinstance(features, FeatureCollection)
+        assert len(features.features) == 2
 
     def test_create_forbidden(self):
         from pyramid.testing import DummyRequest
@@ -599,8 +595,8 @@ class Test_protocol(unittest.TestCase):
         request.method = "POST"
         request.body = '{"type": "FeatureCollection", "features": [{"type": "Feature", "properties": {"text": "foo"}, "geometry": {"type": "Point", "coordinates": [45, 5]}}, {"type": "Feature", "properties": {"text": "foo"}, "geometry": {"type": "Point", "coordinates": [45, 5]}}]}'  # NOQA
         response = proto.create(request)
-        self.assertTrue(response.headers.get("Allow") == "GET, HEAD")
-        self.assertEqual(response.status_int, 405)
+        assert response.headers.get("Allow") == "GET, HEAD"
+        assert response.status_int == 405
 
     def test_create_badrequest(self):
         from pyramid.testing import DummyRequest
@@ -617,7 +613,7 @@ class Test_protocol(unittest.TestCase):
         request.method = "POST"
         request.body = '{"type": "Feature", "properties": {"text": "foo"}, "geometry": {"type": "Point", "coordinates": [45, 5]}}'  # NOQA
         response = proto.create(request)
-        self.assertEqual(response.status_int, 400)
+        assert response.status_int == 400
 
     def test_create(self):
         from pyramid.testing import DummyRequest
@@ -648,23 +644,23 @@ class Test_protocol(unittest.TestCase):
         request.method = "POST"
         request.body = '{"type": "FeatureCollection", "features": [{"type": "Feature", "properties": {"text": "foo"}, "geometry": {"type": "Point", "coordinates": [45, 5]}}, {"type": "Feature", "properties": {"text": "foo"}, "geometry": {"type": "Point", "coordinates": [45, 5]}}]}'  # NOQA
         proto.create(request)
-        self.assertEqual(len(Session.new), 2)
+        assert len(Session.new) == 2
         for obj in Session.new:
-            self.assertEqual(obj.text, "foo")
-            self.assertEqual(obj.geom.shape.x, 45)
-            self.assertEqual(obj.geom.shape.y, 5)
+            assert obj.text == "foo"
+            assert obj.geom.shape.x == 45
+            assert obj.geom.shape.y == 5
         Session.rollback()
 
         # test before_create
-        self.assertTrue(hasattr(request, "_log"))
-        self.assertEqual(len(request._log), 2)
-        self.assertEqual(request._log[0]["feature"].properties["text"], "foo")
-        self.assertEqual(request._log[0]["obj"], None)
-        self.assertEqual(request._log[1]["feature"].properties["text"], "foo")
-        self.assertEqual(request._log[1]["obj"], None)
+        assert hasattr(request, "_log")
+        assert len(request._log) == 2
+        assert request._log[0]["feature"].properties["text"] == "foo"
+        assert request._log[0]["obj"] is None
+        assert request._log[1]["feature"].properties["text"] == "foo"
+        assert request._log[1]["obj"] is None
 
         # test response status
-        self.assertEqual(request.response.status_int, 201)
+        assert request.response.status_int == 201
 
     def test_create_empty(self):
         from pyramid.testing import DummyRequest
@@ -682,7 +678,7 @@ class Test_protocol(unittest.TestCase):
         request.method = "POST"
         request.body = '{"type": "FeatureCollection", "features": []}'
         resp = proto.create(request)
-        self.assertEqual(resp, None)
+        assert resp is None
 
     def test_create_update(self):
         from geojson import Feature, FeatureCollection
@@ -709,14 +705,14 @@ class Test_protocol(unittest.TestCase):
         request.body = '{"type": "FeatureCollection", "features": [{"type": "Feature", "id": "a", "properties": {"text": "foo"}, "geometry": {"type": "Point", "coordinates": [45, 5]}}, {"type": "Feature", "id": "b", "properties": {"text": "bar"}, "geometry": {"type": "Point", "coordinates": [46, 6]}}]}'  # NOQA
         features = proto.create(request)
 
-        self.assertTrue(isinstance(features, FeatureCollection))
-        self.assertEqual(len(features.features), 2)
-        self.assertEqual(features.features[0].id, "a")
-        self.assertEqual(features.features[0].text, "foo")
-        self.assertTrue(features.features[0].geom.shape.equals(Point(45, 5)))
-        self.assertEqual(features.features[1].id, "b")
-        self.assertEqual(features.features[1].text, "bar")
-        self.assertTrue(features.features[1].geom.shape.equals(Point(46, 6)))
+        assert isinstance(features, FeatureCollection)
+        assert len(features.features) == 2
+        assert features.features[0].id == "a"
+        assert features.features[0].text == "foo"
+        assert features.features[0].geom.shape.equals(Point(45, 5))
+        assert features.features[1].id == "b"
+        assert features.features[1].text == "bar"
+        assert features.features[1].geom.shape.equals(Point(46, 6))
 
     def test_update_forbidden(self):
         from pyramid.testing import DummyRequest
@@ -733,8 +729,8 @@ class Test_protocol(unittest.TestCase):
         request.method = "PUT"
         request.body = '{"type": "Feature", "id": 1, "properties": {"text": "foo"}, "geometry": {"type": "Point", "coordinates": [45, 5]}}'  # NOQA
         response = proto.update(request, 1)
-        self.assertTrue(response.headers.get("Allow") == "GET, HEAD")
-        self.assertEqual(response.status_int, 405)
+        assert response.headers.get("Allow") == "GET, HEAD"
+        assert response.status_int == 405
 
     def test_update_notfound(self):
         from pyramid.testing import DummyRequest
@@ -754,7 +750,7 @@ class Test_protocol(unittest.TestCase):
         request.method = "PUT"
         request.body = '{"type": "Feature", "id": 1, "properties": {"text": "foo"}, "geometry": {"type": "Point", "coordinates": [45, 5]}}'  # NOQA
         response = proto.update(request, 1)
-        self.assertEqual(response.status_int, 404)
+        assert response.status_int == 404
 
     def test_update_badrequest(self):
         from pyramid.testing import DummyRequest
@@ -773,7 +769,7 @@ class Test_protocol(unittest.TestCase):
         request.method = "PUT"
         request.body = '{"type": "Point", "coordinates": [45, 5]}'
         response = proto.update(request, "a")
-        self.assertEqual(response.status_int, 400)
+        assert response.status_int == 400
 
     def test_update(self):
         from geoalchemy2.elements import WKBElement
@@ -805,18 +801,18 @@ class Test_protocol(unittest.TestCase):
 
         obj = proto.update(request, "a")
 
-        self.assertTrue(isinstance(obj, MappedClass))
-        self.assertTrue(isinstance(obj.geom, WKBElement))
-        self.assertEqual(obj.text, "foo")
+        assert isinstance(obj, MappedClass)
+        assert isinstance(obj.geom, WKBElement)
+        assert obj.text == "foo"
 
         # test before_update
-        self.assertTrue(hasattr(request, "_log"))
-        self.assertEqual(request._log["feature"].id, "a")
-        self.assertEqual(request._log["feature"].properties["text"], "foo")
-        self.assertTrue(isinstance(request._log["obj"], MappedClass))
+        assert hasattr(request, "_log")
+        assert request._log["feature"].id == "a"
+        assert request._log["feature"].properties["text"] == "foo"
+        assert isinstance(request._log["obj"], MappedClass)
 
         # test response status
-        self.assertEqual(request.response.status_int, 200)
+        assert request.response.status_int == 200
 
     def test_delete_forbidden(self):
         from papyrus.protocol import Protocol
@@ -828,8 +824,8 @@ class Test_protocol(unittest.TestCase):
         proto = Protocol(Session, MappedClass, "geom", readonly=True)
         request = testing.DummyRequest()
         response = proto.delete(request, 1)
-        self.assertTrue(response.headers.get("Allow") == "GET, HEAD")
-        self.assertEqual(response.status_int, 405)
+        assert response.headers.get("Allow") == "GET, HEAD"
+        assert response.status_int == 405
 
     def test_delete_notfound(self):
         from papyrus.protocol import Protocol
@@ -842,7 +838,7 @@ class Test_protocol(unittest.TestCase):
         proto = Protocol(MockSession, self._get_mapped_class(), "geom")
         request = testing.DummyRequest()
         response = proto.delete(request, 1)
-        self.assertEqual(response.status_int, 404)
+        assert response.status_int == 404
 
     def test_delete(self):
         from geojson import Feature
@@ -867,9 +863,9 @@ class Test_protocol(unittest.TestCase):
         proto = Protocol(MockSession, MappedClass, "geom", before_delete=before_delete)
         request = testing.DummyRequest()
         response = proto.delete(request, "a")
-        self.assertTrue(isinstance(response, Response))
-        self.assertEqual(response.status_int, 204)
+        assert isinstance(response, Response)
+        assert response.status_int == 204
 
         # test before_delete
-        self.assertTrue(hasattr(request, "_log"))
-        self.assertTrue(isinstance(request._log["obj"], MappedClass))
+        assert hasattr(request, "_log")
+        assert isinstance(request._log["obj"], MappedClass)

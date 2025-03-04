@@ -15,7 +15,7 @@ class Test_GeoJSON(unittest.TestCase):
     def test_json(self):
         renderer = self._callFUT()
         result = renderer({"a": 1}, {})
-        self.assertEqual(result, '{"a": 1}')
+        assert result == '{"a": 1}'
 
     def test_geojson(self):
         renderer = self._callFUT()
@@ -28,16 +28,13 @@ class Test_GeoJSON(unittest.TestCase):
         request = testing.DummyRequest()
         result = renderer(f, {"request": request})
         result_parsed = json.loads(result)
-        self.assertEqual(
-            result_parsed,
-            {
-                "geometry": {"type": "Point", "coordinates": [53, -4]},
-                "type": "Feature",
-                "id": 1,
-                "properties": {"title": "Dict 1"},
-            },
-        )  # NOQA
-        self.assertEqual(request.response.content_type, "application/geo+json")
+        assert result_parsed == {
+            "geometry": {"type": "Point", "coordinates": [53, -4]},
+            "type": "Feature",
+            "id": 1,
+            "properties": {"title": "Dict 1"},
+        }  # NOQA
+        assert request.response.content_type == "application/geo+json"
 
     def test_geojson_content_type(self):
         renderer = self._callFUT()
@@ -51,16 +48,13 @@ class Test_GeoJSON(unittest.TestCase):
         request.response.content_type = "text/javascript"
         result = renderer(f, {"request": request})
         result_parsed = json.loads(result)
-        self.assertEqual(
-            result_parsed,
-            {
-                "geometry": {"type": "Point", "coordinates": [53, -4]},
-                "type": "Feature",
-                "id": 1,
-                "properties": {"title": "Dict 1"},
-            },
-        )  # NOQA
-        self.assertEqual(request.response.content_type, "text/javascript")
+        assert result_parsed == {
+            "geometry": {"type": "Point", "coordinates": [53, -4]},
+            "type": "Feature",
+            "id": 1,
+            "properties": {"title": "Dict 1"},
+        }  # NOQA
+        assert request.response.content_type == "text/javascript"
 
     def test_Decimal(self):
         renderer = self._callFUT()
@@ -75,16 +69,13 @@ class Test_GeoJSON(unittest.TestCase):
         request = testing.DummyRequest()
         result = renderer(f, {"request": request})
         result_parsed = json.loads(result)
-        self.assertEqual(
-            result_parsed,
-            {
-                "geometry": {"type": "Point", "coordinates": [53, -4]},
-                "type": "Feature",
-                "id": 1,
-                "properties": {"decimal": 0.003},
-            },
-        )  # NOQA
-        self.assertEqual(request.response.content_type, "application/geo+json")
+        assert result_parsed == {
+            "geometry": {"type": "Point", "coordinates": [53, -4]},
+            "type": "Feature",
+            "id": 1,
+            "properties": {"decimal": 0.003},
+        }  # NOQA
+        assert request.response.content_type == "application/geo+json"
 
     def test_date(self):
         renderer = self._callFUT()
@@ -99,16 +90,13 @@ class Test_GeoJSON(unittest.TestCase):
         request = testing.DummyRequest()
         result = renderer(f, {"request": request})
         result_parsed = json.loads(result)
-        self.assertEqual(
-            result_parsed,
-            {
-                "geometry": {"type": "Point", "coordinates": [53, -4]},
-                "type": "Feature",
-                "id": 1,
-                "properties": {"date": "2011-05-21"},
-            },
-        )  # NOQA
-        self.assertEqual(request.response.content_type, "application/geo+json")
+        assert result_parsed == {
+            "geometry": {"type": "Point", "coordinates": [53, -4]},
+            "type": "Feature",
+            "id": 1,
+            "properties": {"date": "2011-05-21"},
+        }  # NOQA
+        assert request.response.content_type == "application/geo+json"
 
     def test_time(self):
         renderer = self._callFUT()
@@ -123,16 +111,13 @@ class Test_GeoJSON(unittest.TestCase):
         request = testing.DummyRequest()
         result = renderer(f, {"request": request})
         result_parsed = json.loads(result)
-        self.assertEqual(
-            result_parsed,
-            {
-                "geometry": {"type": "Point", "coordinates": [53, -4]},
-                "type": "Feature",
-                "id": 1,
-                "properties": {"time": "11:05:21"},
-            },
-        )  # NOQA
-        self.assertEqual(request.response.content_type, "application/geo+json")
+        assert result_parsed == {
+            "geometry": {"type": "Point", "coordinates": [53, -4]},
+            "type": "Feature",
+            "id": 1,
+            "properties": {"time": "11:05:21"},
+        }  # NOQA
+        assert request.response.content_type == "application/geo+json"
 
     def test_datetime(self):
         renderer = self._callFUT()
@@ -148,16 +133,13 @@ class Test_GeoJSON(unittest.TestCase):
         request = testing.DummyRequest()
         result = renderer(f, {"request": request})
         result_parsed = json.loads(result)
-        self.assertEqual(
-            result_parsed,
-            {
-                "geometry": {"type": "Point", "coordinates": [53, -4]},
-                "type": "Feature",
-                "id": 1,
-                "properties": {"datetime": "2011-05-21T20:55:12"},
-            },
-        )  # NOQA
-        self.assertEqual(request.response.content_type, "application/geo+json")
+        assert result_parsed == {
+            "geometry": {"type": "Point", "coordinates": [53, -4]},
+            "type": "Feature",
+            "id": 1,
+            "properties": {"datetime": "2011-05-21T20:55:12"},
+        }  # NOQA
+        assert request.response.content_type == "application/geo+json"
 
     def test_jsonp(self):
         renderer = self._callFUT()
@@ -170,19 +152,16 @@ class Test_GeoJSON(unittest.TestCase):
         request = testing.DummyRequest()
         request.params["callback"] = "jsonp_cb"
         result = renderer(f, {"request": request})
-        self.assertTrue(re.match(r"jsonp_cb\({.*}\);", result) is not None)
+        assert re.match("jsonp_cb\\({.*}\\);", result) is not None
         result_json = result[9:-2]
         json_parsed = json.loads(result_json)
-        self.assertEqual(
-            json_parsed,
-            {
-                "geometry": {"type": "Point", "coordinates": [53, -4]},
-                "type": "Feature",
-                "id": 1,
-                "properties": {"title": "Dict 1"},
-            },
-        )  # NOQA
-        self.assertEqual(request.response.content_type, "text/javascript")
+        assert json_parsed == {
+            "geometry": {"type": "Point", "coordinates": [53, -4]},
+            "type": "Feature",
+            "id": 1,
+            "properties": {"title": "Dict 1"},
+        }  # NOQA
+        assert request.response.content_type == "text/javascript"
 
     def test_jsonp_param_name(self):
         renderer = self._callFUT(jsonp_param_name="cb")
@@ -196,32 +175,26 @@ class Test_GeoJSON(unittest.TestCase):
         request.params["callback"] = "jsonp_cb"
         result = renderer(f, {"request": request})
         result_parsed = json.loads(result)
-        self.assertEqual(
-            result_parsed,
-            {
-                "geometry": {"type": "Point", "coordinates": [53, -4]},
-                "type": "Feature",
-                "id": 1,
-                "properties": {"title": "Dict 1"},
-            },
-        )  # NOQA
-        self.assertEqual(request.response.content_type, "application/geo+json")
+        assert result_parsed == {
+            "geometry": {"type": "Point", "coordinates": [53, -4]},
+            "type": "Feature",
+            "id": 1,
+            "properties": {"title": "Dict 1"},
+        }  # NOQA
+        assert request.response.content_type == "application/geo+json"
         request = testing.DummyRequest()
         request.params["cb"] = "jsonp_cb"
         result = renderer(f, {"request": request})
-        self.assertTrue(re.match(r"jsonp_cb\({.*}\);", result) is not None)
+        assert re.match("jsonp_cb\\({.*}\\);", result) is not None
         result_json = result[9:-2]
         json_parsed = json.loads(result_json)
-        self.assertEqual(
-            json_parsed,
-            {
-                "geometry": {"type": "Point", "coordinates": [53, -4]},
-                "type": "Feature",
-                "id": 1,
-                "properties": {"title": "Dict 1"},
-            },
-        )  # NOQA
-        self.assertEqual(request.response.content_type, "text/javascript")
+        assert json_parsed == {
+            "geometry": {"type": "Point", "coordinates": [53, -4]},
+            "type": "Feature",
+            "id": 1,
+            "properties": {"title": "Dict 1"},
+        }  # NOQA
+        assert request.response.content_type == "text/javascript"
 
     def test_type_for_array_default(self):
         renderer = self._callFUT()
@@ -234,21 +207,18 @@ class Test_GeoJSON(unittest.TestCase):
         request = testing.DummyRequest()
         result = renderer([f], {"request": request})
         result_parsed = json.loads(result)
-        self.assertEqual(
-            result_parsed,
-            {
-                "type": "FeatureCollection",
-                "features": [
-                    {
-                        "geometry": {"type": "Point", "coordinates": [53, -4]},
-                        "type": "Feature",
-                        "id": 1,
-                        "properties": {"title": "Dict 1"},
-                    }
-                ],
-            },
-        )  # NOQA
-        self.assertEqual(request.response.content_type, "application/geo+json")
+        assert result_parsed == {
+            "type": "FeatureCollection",
+            "features": [
+                {
+                    "geometry": {"type": "Point", "coordinates": [53, -4]},
+                    "type": "Feature",
+                    "id": 1,
+                    "properties": {"title": "Dict 1"},
+                }
+            ],
+        }  # NOQA
+        assert request.response.content_type == "application/geo+json"
 
     def test_collection_type(self):
         renderer = self._callFUT(collection_type="GeometryCollection")
@@ -256,15 +226,15 @@ class Test_GeoJSON(unittest.TestCase):
         request = testing.DummyRequest()
         result = renderer(f, {"request": request})
         result_parsed = json.loads(result)
-        self.assertEqual(result_parsed, {"type": "Point", "coordinates": [53, -4]})
-        self.assertEqual(request.response.content_type, "application/geo+json")
+        assert result_parsed == {"type": "Point", "coordinates": [53, -4]}
+        assert request.response.content_type == "application/geo+json"
         result = renderer([f], {"request": request})
         result_parsed = json.loads(result)
-        self.assertEqual(
-            result_parsed,
-            {"type": "GeometryCollection", "geometries": [{"type": "Point", "coordinates": [53, -4]}]},
-        )  # NOQA
-        self.assertEqual(request.response.content_type, "application/geo+json")
+        assert result_parsed == {
+            "type": "GeometryCollection",
+            "geometries": [{"type": "Point", "coordinates": [53, -4]}],
+        }  # NOQA
+        assert request.response.content_type == "application/geo+json"
 
 
 class Test_XSD(unittest.TestCase):
@@ -295,11 +265,11 @@ class Test_XSD(unittest.TestCase):
             setattr(C, k, p)
         request = testing.DummyRequest()
         result = renderer(C, {"request": request})
-        self.assertEqual(request.response.content_type, "application/xml")
+        assert request.response.content_type == "application/xml"
         from xml.etree.ElementTree import XML
 
         xml = XML(result)
-        self.assertEqual(xml.tag, "{http://www.w3.org/2001/XMLSchema}schema")
+        assert xml.tag == "{http://www.w3.org/2001/XMLSchema}schema"
         return xml.findall(self._make_xpath(". complexType complexContent extension sequence element"))
 
     def test_enum(self):
@@ -307,140 +277,149 @@ class Test_XSD(unittest.TestCase):
 
         column = Column("_column", types.Enum("red", "green", "blue"))
         elements = self._get_elements((("column", column),))
-        self.assertEqual(len(elements), 1)
-        self.assertEqual(elements[0].attrib, {"minOccurs": "0", "name": "column", "nillable": "true"})
+        assert len(elements) == 1
+        assert elements[0].attrib == {"minOccurs": "0", "name": "column", "nillable": "true"}
         restrictions = elements[0].findall(self._make_xpath(". simpleType restriction"))
-        self.assertEqual(len(restrictions), 1)
-        self.assertEqual(restrictions[0].attrib, {"base": "xsd:string"})
+        assert len(restrictions) == 1
+        assert restrictions[0].attrib == {"base": "xsd:string"}
         enumerations = restrictions[0].findall(self._make_xpath(". enumeration"))
-        self.assertEqual(len(enumerations), 3)
-        self.assertEqual(enumerations[0].attrib, {"value": "red"})
-        self.assertEqual(enumerations[1].attrib, {"value": "green"})
-        self.assertEqual(enumerations[2].attrib, {"value": "blue"})
+        assert len(enumerations) == 3
+        assert enumerations[0].attrib == {"value": "red"}
+        assert enumerations[1].attrib == {"value": "green"}
+        assert enumerations[2].attrib == {"value": "blue"}
 
     def test_foreign_keys(self):
         from sqlalchemy import Column, ForeignKey, types
 
         column = Column("_column", types.Integer, ForeignKey("other.id"))
         elements = self._get_elements((("column", column),))
-        self.assertEqual(len(elements), 0)
+        assert len(elements) == 0
 
     def test_include_foreign_keys(self):
         from sqlalchemy import Column, ForeignKey, types
 
         column = Column("_column", types.Integer, ForeignKey("other.id"))
         elements = self._get_elements((("column", column),), include_foreign_keys=True)
-        self.assertEqual(len(elements), 1)
-        self.assertEqual(
-            elements[0].attrib,
-            {"minOccurs": "0", "nillable": "true", "name": "column", "type": "xsd:integer"},
-        )
+        assert len(elements) == 1
+        assert elements[0].attrib == {
+            "minOccurs": "0",
+            "nillable": "true",
+            "name": "column",
+            "type": "xsd:integer",
+        }
 
     def test_primary_keys(self):
         from sqlalchemy import Column, types
 
         column = Column("_column", types.Integer, primary_key=True)
         elements = self._get_elements((("column", column),))
-        self.assertEqual(len(elements), 0)
+        assert len(elements) == 0
 
     def test_include_primary_keys(self):
         from sqlalchemy import Column, types
 
         column = Column("_column", types.Integer, primary_key=True)
         elements = self._get_elements((("column", column),), include_primary_keys=True)
-        self.assertEqual(len(elements), 2)
-        self.assertEqual(elements[1].attrib, {"name": "column", "type": "xsd:integer"})
+        assert len(elements) == 2
+        assert elements[1].attrib == {"name": "column", "type": "xsd:integer"}
 
     def test_integer(self):
         from sqlalchemy import Column, types
 
         column = Column("_column", types.Integer)
         elements = self._get_elements((("column", column),))
-        self.assertEqual(len(elements), 1)
-        self.assertEqual(
-            elements[0].attrib,
-            {"minOccurs": "0", "name": "column", "nillable": "true", "type": "xsd:integer"},
-        )
+        assert len(elements) == 1
+        assert elements[0].attrib == {
+            "minOccurs": "0",
+            "name": "column",
+            "nillable": "true",
+            "type": "xsd:integer",
+        }
 
     def test_numeric(self):
         from sqlalchemy import Column, types
 
         column = Column("_column", types.Numeric)
         elements = self._get_elements((("column", column),))
-        self.assertEqual(len(elements), 1)
-        self.assertEqual(
-            elements[0].attrib,
-            {"minOccurs": "0", "name": "column", "nillable": "true", "type": "xsd:decimal"},
-        )
+        assert len(elements) == 1
+        assert elements[0].attrib == {
+            "minOccurs": "0",
+            "name": "column",
+            "nillable": "true",
+            "type": "xsd:decimal",
+        }
 
     def test_numeric_precision(self):
         from sqlalchemy import Column, types
 
         column = Column("_column", types.Numeric(precision=5))
         elements = self._get_elements((("column", column),))
-        self.assertEqual(len(elements), 1)
-        self.assertEqual(elements[0].attrib, {"minOccurs": "0", "name": "column", "nillable": "true"})
+        assert len(elements) == 1
+        assert elements[0].attrib == {"minOccurs": "0", "name": "column", "nillable": "true"}
         restrictions = elements[0].findall(self._make_xpath(". simpleType restriction"))
-        self.assertEqual(len(restrictions), 1)
-        self.assertEqual(restrictions[0].attrib, {"base": "xsd:decimal"})
+        assert len(restrictions) == 1
+        assert restrictions[0].attrib == {"base": "xsd:decimal"}
         totalDigitss = restrictions[0].findall(self._make_xpath(". totalDigits"))
-        self.assertEqual(len(totalDigitss), 1)
-        self.assertEqual(totalDigitss[0].attrib, {"value": "5"})
+        assert len(totalDigitss) == 1
+        assert totalDigitss[0].attrib == {"value": "5"}
 
     def test_numeric_precision_scale(self):
         from sqlalchemy import Column, types
 
         column = Column("_column", types.Numeric(5, 2))
         elements = self._get_elements((("column", column),))
-        self.assertEqual(len(elements), 1)
-        self.assertEqual(elements[0].attrib, {"minOccurs": "0", "name": "column", "nillable": "true"})
+        assert len(elements) == 1
+        assert elements[0].attrib == {"minOccurs": "0", "name": "column", "nillable": "true"}
         restrictions = elements[0].findall(self._make_xpath(". simpleType restriction"))
-        self.assertEqual(len(restrictions), 1)
-        self.assertEqual(restrictions[0].attrib, {"base": "xsd:decimal"})
+        assert len(restrictions) == 1
+        assert restrictions[0].attrib == {"base": "xsd:decimal"}
         totalDigitss = restrictions[0].findall(self._make_xpath(". totalDigits"))
-        self.assertEqual(len(totalDigitss), 1)
-        self.assertEqual(totalDigitss[0].attrib, {"value": "5"})
+        assert len(totalDigitss) == 1
+        assert totalDigitss[0].attrib == {"value": "5"}
         fractionDigitss = restrictions[0].findall(self._make_xpath(". fractionDigits"))
-        self.assertEqual(len(fractionDigitss), 1)
-        self.assertEqual(fractionDigitss[0].attrib, {"value": "2"})
+        assert len(fractionDigitss) == 1
+        assert fractionDigitss[0].attrib == {"value": "2"}
 
     def test_numeric_scale(self):
         from sqlalchemy import Column, types
 
         column = Column("_column", types.Numeric(scale=2))
         elements = self._get_elements((("column", column),))
-        self.assertEqual(len(elements), 1)
-        self.assertEqual(elements[0].attrib, {"minOccurs": "0", "name": "column", "nillable": "true"})
+        assert len(elements) == 1
+        assert elements[0].attrib == {"minOccurs": "0", "name": "column", "nillable": "true"}
         restrictions = elements[0].findall(self._make_xpath(". simpleType restriction"))
-        self.assertEqual(len(restrictions), 1)
-        self.assertEqual(restrictions[0].attrib, {"base": "xsd:decimal"})
+        assert len(restrictions) == 1
+        assert restrictions[0].attrib == {"base": "xsd:decimal"}
         fractionDigitss = restrictions[0].findall(self._make_xpath(". fractionDigits"))
-        self.assertEqual(len(fractionDigitss), 1)
-        self.assertEqual(fractionDigitss[0].attrib, {"value": "2"})
+        assert len(fractionDigitss) == 1
+        assert fractionDigitss[0].attrib == {"value": "2"}
 
     def test_string(self):
         from sqlalchemy import Column, types
 
         column = Column("_column", types.String)
         elements = self._get_elements((("column", column),))
-        self.assertEqual(len(elements), 1)
-        self.assertEqual(
-            elements[0].attrib, {"minOccurs": "0", "name": "column", "nillable": "true", "type": "xsd:string"}
-        )
+        assert len(elements) == 1
+        assert elements[0].attrib == {
+            "minOccurs": "0",
+            "name": "column",
+            "nillable": "true",
+            "type": "xsd:string",
+        }
 
     def test_string_length(self):
         from sqlalchemy import Column, types
 
         column = Column("_column", types.String(10))
         elements = self._get_elements((("column", column),))
-        self.assertEqual(len(elements), 1)
-        self.assertEqual(elements[0].attrib, {"minOccurs": "0", "name": "column", "nillable": "true"})
+        assert len(elements) == 1
+        assert elements[0].attrib == {"minOccurs": "0", "name": "column", "nillable": "true"}
         restrictions = elements[0].findall(self._make_xpath(". simpleType restriction"))
-        self.assertEqual(len(restrictions), 1)
-        self.assertEqual(restrictions[0].attrib, {"base": "xsd:string"})
+        assert len(restrictions) == 1
+        assert restrictions[0].attrib == {"base": "xsd:string"}
         maxLengths = restrictions[0].findall(self._make_xpath(". maxLength"))
-        self.assertEqual(len(maxLengths), 1)
-        self.assertEqual(maxLengths[0].attrib, {"value": "10"})
+        assert len(maxLengths) == 1
+        assert maxLengths[0].attrib == {"value": "10"}
 
     def test_unsupported(self):
         from sqlalchemy import Column, types
@@ -480,14 +459,14 @@ class Test_XSD(unittest.TestCase):
                                 pass
 
         elements = self._get_elements((("column", column), ("rel", rel)), sequence_callback=cb)
-        self.assertEqual(len(elements), 1)
-        self.assertEqual(elements[0].attrib, {"minOccurs": "0", "name": "rel", "nillable": "true"})
+        assert len(elements) == 1
+        assert elements[0].attrib == {"minOccurs": "0", "name": "rel", "nillable": "true"}
         restrictions = elements[0].findall(self._make_xpath(". simpleType restriction"))
-        self.assertEqual(restrictions[0].attrib, {"base": "xsd:string"})
+        assert restrictions[0].attrib == {"base": "xsd:string"}
         enumerations = restrictions[0].findall(self._make_xpath(". enumeration"))
-        self.assertEqual(len(enumerations), 2)
-        self.assertEqual(enumerations[0].attrib, {"value": "male"})
-        self.assertEqual(enumerations[1].attrib, {"value": "female"})
+        assert len(enumerations) == 2
+        assert enumerations[0].attrib == {"value": "male"}
+        assert enumerations[1].attrib == {"value": "female"}
 
     def test_element_callback(self):
         from geoalchemy2.types import Geometry
@@ -511,9 +490,9 @@ class Test_XSD(unittest.TestCase):
             self.base = declarative_base()
 
             elements = self._get_elements((("column", column),), element_callback=cb)
-            self.assertEqual(len(elements), 1)
+            assert len(elements) == 1
             appinfos = elements[0].findall(self._make_xpath(". annotation appinfo"))
-            self.assertEqual(len(appinfos), 1)
+            assert len(appinfos) == 1
             readonlys = appinfos[0].findall("readonly")
-            self.assertEqual(len(readonlys), 1)
-            self.assertEqual(readonlys[0].attrib, {"value": "true"})
+            assert len(readonlys) == 1
+            assert readonlys[0].attrib == {"value": "true"}

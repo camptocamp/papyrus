@@ -173,15 +173,15 @@ class GeoInterfaceTests(unittest.TestCase):
             geometry=Point(coordinates=[55, -5]),
         )
         obj.__update__(feature)
-        self.assertEqual(obj.id, 1)
-        self.assertEqual(obj.text, "bar")
-        self.assertEqual(obj.child, "bar")
-        self.assertEqual(obj.children, ["bar", "bar"])
-        self.assertTrue(isinstance(obj.geom, WKBElement))
+        assert obj.id == 1
+        assert obj.text == "bar"
+        assert obj.child == "bar"
+        assert obj.children == ["bar", "bar"]
+        assert isinstance(obj.geom, WKBElement)
         point = to_shape(obj.geom)
-        self.assertEqual(point.x, 55)
-        self.assertEqual(point.y, -5)
-        self.assertEqual(obj.geom.srid, 3000)
+        assert point.x == 55
+        assert point.y == -5
+        assert obj.geom.srid == 3000
 
     def test_init_declarative(self):
         mapped_class = self._get_mapped_class_declarative()
@@ -206,15 +206,15 @@ class GeoInterfaceTests(unittest.TestCase):
             geometry=Point(coordinates=[53, -4]),
         )
         obj = mapped_class(feature)
-        self.assertEqual(obj.id, 1)
-        self.assertEqual(obj.text, "foo")
-        self.assertEqual(obj.child, "foo")
-        self.assertEqual(obj.children, ["foo", "foo"])
-        self.assertTrue(isinstance(obj.geom, WKBElement))
+        assert obj.id == 1
+        assert obj.text == "foo"
+        assert obj.child == "foo"
+        assert obj.children == ["foo", "foo"]
+        assert isinstance(obj.geom, WKBElement)
         point = to_shape(obj.geom)
-        self.assertEqual(point.x, 53)
-        self.assertEqual(point.y, -4)
-        self.assertEqual(obj.geom.srid, 3000)
+        assert point.x == 53
+        assert point.y == -4
+        assert obj.geom.srid == 3000
 
     def test_geo_interface_declarative(self):
         mapped_class = self._get_mapped_class_declarative()
@@ -242,15 +242,12 @@ class GeoInterfaceTests(unittest.TestCase):
         obj = mapped_class(feature)
         obj_json = dumps(obj)
         json_parsed = json.loads(obj_json)
-        self.assertEqual(
-            json_parsed,
-            {
-                "geometry": {"type": "Point", "coordinates": [53.0, -4.0]},
-                "type": "Feature",
-                "id": 1,
-                "properties": {"text": "foo", "children": ["foo", "bar"], "child": "bar"},
-            },
-        )  # NOQA
+        assert json_parsed == {
+            "geometry": {"type": "Point", "coordinates": [53.0, -4.0]},
+            "type": "Feature",
+            "id": 1,
+            "properties": {"text": "foo", "children": ["foo", "bar"], "child": "bar"},
+        }  # NOQA
 
     def test_geo_interface_declarative_no_feature(self):
         mapped_class = self._get_mapped_class_declarative()
@@ -266,14 +263,11 @@ class GeoInterfaceTests(unittest.TestCase):
         obj = mapped_class()
         obj_json = dumps(obj)
         json_parsed = json.loads(obj_json)
-        self.assertEqual(
-            json_parsed,
-            {
-                "geometry": None,
-                "type": "Feature",
-                "properties": {"text": None, "children": [], "child": None},
-            },
-        )  # NOQA
+        assert json_parsed == {
+            "geometry": None,
+            "type": "Feature",
+            "properties": {"text": None, "children": [], "child": None},
+        }  # NOQA
 
     def test_geo_interface_declarative_shape_unset(self):
         mapped_class = self._get_mapped_class_declarative()
@@ -300,12 +294,9 @@ class GeoInterfaceTests(unittest.TestCase):
         del obj._shape
         obj_json = dumps(obj)
         json_parsed = json.loads(obj_json)
-        self.assertEqual(
-            json_parsed,
-            {
-                "geometry": {"type": "Point", "coordinates": [53.0, -4.0]},
-                "type": "Feature",
-                "id": 1,
-                "properties": {"text": "foo", "children": ["foo", "foo"], "child": "foo"},
-            },
-        )  # NOQA
+        assert json_parsed == {
+            "geometry": {"type": "Point", "coordinates": [53.0, -4.0]},
+            "type": "Feature",
+            "id": 1,
+            "properties": {"text": "foo", "children": ["foo", "foo"], "child": "foo"},
+        }  # NOQA

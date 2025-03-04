@@ -4,7 +4,10 @@ import pyramid.config
 
 
 def add_papyrus_handler(
-    self: pyramid.config.Configurator, route_name_prefix: str, base_url: str, handler: Callable[[], str]
+    self: pyramid.config.Configurator,
+    route_name_prefix: str,
+    base_url: str,
+    handler: Callable[[], str],
 ) -> None:
     """
     Add a Papyrus handler, i.e. a handler defining the MapFish HTTP interface.

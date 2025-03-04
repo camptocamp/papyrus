@@ -90,7 +90,7 @@ def create_geom_filter(
     if box is not None:
         box = [float(x) for x in box.split(",")]
         shape = Polygon(
-            ((box[0], box[1]), (box[0], box[3]), (box[2], box[3]), (box[2], box[1]), (box[0], box[1]))
+            ((box[0], box[1]), (box[0], box[3]), (box[2], box[3]), (box[2], box[1]), (box[0], box[1])),
         )
     elif "lon" in request.params and "lat" in request.params:
         shape = Point(float(request.params["lon"]), float(request.params["lat"]))
@@ -108,7 +108,8 @@ def create_geom_filter(
 
 
 def create_attr_filter(
-    request: pyramid.request.Request, mapped_class: type[str]
+    request: pyramid.request.Request,
+    mapped_class: type[str],
 ) -> Optional[sqlalchemy.sql.expression.ColumnElement[bool]]:
     """
     Create an ``and_`` SQLAlchemy filter (a ClauseList object).
@@ -147,7 +148,10 @@ def create_attr_filter(
 
 
 def create_filter(
-    request: pyramid.request.Request, mapped_class: Any, geom_attr: str, **kwargs: Any
+    request: pyramid.request.Request,
+    mapped_class: Any,
+    geom_attr: str,
+    **kwargs: Any,
 ) -> Optional[sqlalchemy.sql.expression.ColumnElement[bool]]:
     r"""
     Create MapFish default filter based on the request params.
@@ -178,8 +182,7 @@ def asbool(val: str) -> bool:
     r"""Convert the passed value to a boolean."""
     if isinstance(val, str):
         return val.lower() not in ["false", "0", "off", "no"]
-    else:
-        return bool(val)
+    return bool(val)
 
 
 class Protocol:
@@ -273,7 +276,8 @@ class Protocol:
         return feature
 
     def _get_order_by(
-        self, request: pyramid.request.Request
+        self,
+        request: pyramid.request.Request,
     ) -> Optional[sqlalchemy.sql.expression.UnaryExpression[None]]:
         """Return an SA order_by."""
         attr = request.params.get("sort", request.params.get("order_by"))
@@ -281,8 +285,7 @@ class Protocol:
             return None
         if request.params.get("dir", "").upper() == "DESC":
             return desc(getattr(self.mapped_class, attr))
-        else:
-            return asc(getattr(self.mapped_class, attr))
+        return asc(getattr(self.mapped_class, attr))
 
     def _query(
         self,
@@ -354,7 +357,7 @@ class Protocol:
         else:
             objs = self._query(request, filter)
             ret = FeatureCollection(
-                [self._filter_attrs(o.__geo_interface__, request) for o in objs if o is not None]
+                [self._filter_attrs(o.__geo_interface__, request) for o in objs if o is not None],
             )
         return ret
 

@@ -3,14 +3,20 @@ inherits:
   - utils:base
   - utils:no-design-checks
   - utils:fix
+  - .prospector-tests.yaml
 
 mypy:
   options:
     python-version: "3.9"
 
 ruff:
+  options:
+    target-version: py39
   disable:
     - D103 # Missing docstring in public function
     - D107 # Missing docstring in `__init__`
-  options:
-    target-version: py39
+    - TD # TODO
+    - FIX # FIXME
+    - A001 # Variable `{}` is shadowing a Python builtin
+    - A002 # Function argument `{}` is shadowing a Python builtin
+    - PLW2901 # Outer `{}` statement variable `{}` overwritten by inner `{}` statement target
