@@ -788,13 +788,13 @@ testing = ["pytest", "pytest-benchmark"]
 
 [[package]]
 name = "prospector"
-version = "1.14.1"
+version = "1.15.2"
 description = "Prospector is a tool to analyse Python code by aggregating the result of other tools."
 optional = false
 python-versions = "<4.0,>=3.9"
 files = [
-    {file = "prospector-1.14.1-py3-none-any.whl", hash = "sha256:3cdb71c20c26a72a370e94de7f47f8492299d8843af3be5c5d7d5118d591e910"},
-    {file = "prospector-1.14.1.tar.gz", hash = "sha256:4f969c7d3df9f81c3c626e92ea25c243627da2d707285805ad36ed7c378ee3ec"},
+    {file = "prospector-1.15.2-py3-none-any.whl", hash = "sha256:06f8986e96a2d7f82904821710745418496e5c163241a922cac8dc3e3bc7dd43"},
+    {file = "prospector-1.15.2.tar.gz", hash = "sha256:e080667fc33baa93f5b2ab3d88650bbef201a9edcb1982a3ccf6b0696e1f4ab0"},
 ]
 
 [package.dependencies]
@@ -841,17 +841,17 @@ files = [
 
 [[package]]
 name = "prospector-profile-utils"
-version = "1.17.0"
+version = "1.22.3"
 description = "Some utility Prospector profiles."
 optional = false
-python-versions = "<4.0,>=3.9"
+python-versions = "*"
 files = [
-    {file = "prospector_profile_utils-1.17.0-py3-none-any.whl", hash = "sha256:0cb7fe9dfca2b49c21733bbc4d3aabd51c7c0890c5e636b8d2f7b81c342aef6e"},
-    {file = "prospector_profile_utils-1.17.0.tar.gz", hash = "sha256:ac75faf9b13a6b6c18173cad71e6879e6ac40c5f5fda57c69f064b8a955705bd"},
+    {file = "prospector_profile_utils-1.22.3-py2.py3-none-any.whl", hash = "sha256:56f10178f80c8f3c40fc1a68515d047bee3fddf32669753761d3ce9eb17792cf"},
+    {file = "prospector_profile_utils-1.22.3.tar.gz", hash = "sha256:f3e782787be6309a3c3574f4ec8f3785daddf736b1d2c2c2ee380cc789df2941"},
 ]
 
 [package.dependencies]
-prospector = ">=1.13.0"
+prospector = {version = ">=1.14.0", extras = ["with-mypy", "with-ruff"]}
 
 [[package]]
 name = "psycopg2"
@@ -1733,4 +1733,4 @@ testing = ["coverage[toml]", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<4.0"
-content-hash = "e48ece49f6689c63f6b1a06056658a9f6ffa5355eb5564cb785f6cf2bd076e0b"
+content-hash = "bcdeba7aae86c03db7f3fe224345b36a09871c56c7cbac455267f13191ec987c"
