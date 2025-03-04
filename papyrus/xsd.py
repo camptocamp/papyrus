@@ -1,7 +1,7 @@
 from collections.abc import Generator
 from contextlib import contextmanager
 from io import BytesIO
-from typing import Any, Callable, Optional
+from typing import Any, Callable, ClassVar, Optional
 from xml.etree.ElementTree import ElementTree, TreeBuilder  # nosec
 
 import sqlalchemy
@@ -30,7 +30,7 @@ class UnsupportedColumnTypeError(RuntimeError):
 class XSDGenerator:
     """XSD Generator."""
 
-    SIMPLE_XSD_TYPES = {
+    SIMPLE_XSD_TYPES: ClassVar[dict[type, str]] = {
         # SQLAlchemy types
         sqlalchemy.BigInteger: "xsd:integer",
         sqlalchemy.Boolean: "xsd:boolean",
@@ -45,7 +45,7 @@ class XSDGenerator:
         sqlalchemy.Time: "xsd:time",
     }
 
-    SIMPLE_GEOMETRY_XSD_TYPES = {
+    SIMPLE_GEOMETRY_XSD_TYPES: ClassVar[dict[str, str]] = {
         # GeoAlchemy types
         "CURVE": "gml:CurvePropertyType",
         "GEOMETRYCOLLECTION": "gml:GeometryCollectionPropertyType",
@@ -67,17 +67,20 @@ class XSDGenerator:
         element_callback: Optional[
             Callable[[TreeBuilder, sqlalchemy.sql.expression.ColumnElement[Any]], None]
         ] = None,
-    ):
+    ) -> None:
         self.include_primary_keys = include_primary_keys
         self.include_foreign_keys = include_foreign_keys
         self.sequence_callback = sequence_callback
         if element_callback:
             self.element_callback = element_callback
         else:
-            self.element_callback = lambda tb, column: None
+            self.element_callback = lambda tb, column: None  # noqa: ARG005
 
     def add_column_xsd(
-        self, tb: TreeBuilder, column: sqlalchemy.sql.expression.ColumnElement[Any], attrs: dict[str, str]
+        self,
+        tb: TreeBuilder,
+        column: sqlalchemy.sql.expression.ColumnElement[Any],
+        attrs: dict[str, str],
     ) -> TreeBuilder:
         """Add the XSD for a column to tb (a TreeBuilder)."""
         if column.nullable:
@@ -130,7 +133,8 @@ class XSDGenerator:
                     self.element_callback(tb, column)
                     return tb
         if isinstance(
-            column.type, (sqlalchemy.String, sqlalchemy.Text, sqlalchemy.Unicode, sqlalchemy.UnicodeText)
+            column.type,
+            (sqlalchemy.String, sqlalchemy.Text, sqlalchemy.Unicode, sqlalchemy.UnicodeText),
         ):
             if column.type.length is None:
                 attrs["type"] = "xsd:string"
@@ -160,7 +164,7 @@ class XSDGenerator:
             if len(column.foreign_keys) != 1:  # pragma: no cover
                 # FIXME understand when a column can have multiple  # pylint: disable=fixme
                 # foreign keys
-                raise NotImplementedError()
+                raise NotImplementedError
             return
         attrs = {"name": column_property.key}
         self.add_column_xsd(tb, column, attrs)

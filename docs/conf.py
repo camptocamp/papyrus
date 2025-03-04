@@ -223,8 +223,7 @@ class Mock(MagicMock):
     def __getattr__(cls, name):
         if name == "_mock_methods":
             return name._mock_methods
-        else:
-            return Mock()
+        return Mock()
 
 
 MOCK_MODULES = [

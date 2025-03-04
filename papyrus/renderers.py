@@ -59,7 +59,9 @@ class GeoJSON:
     """
 
     def __init__(
-        self, jsonp_param_name: str = "callback", collection_type: type = geojson.factory.FeatureCollection
+        self,
+        jsonp_param_name: str = "callback",
+        collection_type: type = geojson.factory.FeatureCollection,
     ) -> None:
         self.jsonp_param_name = jsonp_param_name
         if isinstance(collection_type, str):
@@ -68,6 +70,7 @@ class GeoJSON:
 
     def __call__(self, info: str) -> Callable[[str, dict[str, str]], Any]:
         """Get the renderer function."""
+        del info  # Unused
 
         def _render(value: str, system: dict[str, pyramid.request.Request]) -> Any:
             if isinstance(value, (list, tuple)):
@@ -83,7 +86,7 @@ class GeoJSON:
                         response.content_type = "application/geo+json"
                     else:
                         response.content_type = "text/javascript"
-                        ret = f"{callback}({ret});"  # noqa
+                        ret = f"{callback}({ret});"
             return ret
 
         return _render
@@ -203,6 +206,7 @@ class XSD:
 
     def __call__(self, table: str) -> Callable[[type[str], dict[str, str]], Optional[bytes]]:
         """Get the renderer function."""
+        del table  # Unused
 
         def _render(cls: type[str], system: dict[str, pyramid.request.Request]) -> Optional[bytes]:
             request = system.get("request")
