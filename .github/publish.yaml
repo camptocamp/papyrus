@@ -3,5 +3,3 @@
 pypi:
   packages:
     - {}
-dispatch:
-  - {}
