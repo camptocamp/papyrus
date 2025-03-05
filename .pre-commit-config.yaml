@@ -19,7 +19,7 @@ repos:
         files: |-
           ^\.github/publish\.yaml$
   - repo: https://github.com/sbrunner/hooks
-    rev: 1.3.0
+    rev: 1.4.0
     hooks:
       - id: copyright
       - id: poetry2-lock
@@ -56,7 +56,7 @@ repos:
           - --builtin-schema
           - github-workflows-require-timeout
   - repo: https://github.com/renovatebot/pre-commit-hooks
-    rev: 39.185.0
+    rev: 39.185.9
     hooks:
       - id: renovate-config-validator
   - repo: https://github.com/sirwart/ripsecrets
@@ -79,8 +79,8 @@ repos:
           - --die-on-tool-error
           - --output-format=pylint
         additional_dependencies:
-          - prospector-profile-duplicated==1.10.4 # pypi
-          - prospector-profile-utils==1.21.9 # pypi
+          - prospector-profile-duplicated==1.10.5 # pypi
+          - prospector-profile-utils==1.22.3 # pypi
         exclude: |-
           (?x)(
             ^tests?/?
@@ -98,7 +98,7 @@ repos:
           - --profile=utils:pre-commit
           - --profile=.prospector-tests.yaml
         additional_dependencies:
-          - prospector-profile-utils==1.21.4 # pypi
+          - prospector-profile-utils==1.22.3 # pypi
   - repo: https://github.com/pre-commit/mirrors-prettier
     rev: v3.1.0
     hooks:
