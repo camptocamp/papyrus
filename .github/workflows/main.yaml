@@ -105,7 +105,7 @@ jobs:
           python-version: "3.13"
       - run: python3 -m pip install --requirement=ci/requirements.txt
 
-      - name: Login with IODC (OpenID Connect)
+      - name: Login with OIDC (OpenID Connect)
         run: .github/pypi-login
       - name: Publish
         run: tag-publish

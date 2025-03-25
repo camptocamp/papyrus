@@ -1,13 +1,16 @@
 #!/usr/bin/env python3
+# pylint: disable=invalid-name
 
 import argparse
 import base64
 import json
 import os
 import sys
+from pathlib import Path
 
-import id  # pylint: disable=redefined-builtin
 import requests
+
+import id as identity  # pylint: disable=redefined-builtin
 
 
 def _fatal(message: str) -> None:
@@ -19,7 +22,7 @@ def _fatal(message: str) -> None:
     sys.exit(1)
 
 
-def _debug(message: str):
+def _debug(message: str) -> None:
     print(f"::debug::{message.title()}", file=sys.stderr)
 
 
@@ -53,11 +56,11 @@ def _get_token() -> str:
     audience_resp = requests.get("https://pypi.org/_/oidc/audience", timeout=5)
     audience_resp.raise_for_status()
 
-    _debug(f"selected trusted publishing exchange endpoint: https://pypi.org/_/oidc/mint-token")
+    _debug("selected trusted publishing exchange endpoint: https://pypi.org/_/oidc/mint-token")
 
     try:
-        oidc_token = id.detect_credential(audience=audience_resp.json()["audience"])
-    except id.IdentityError as identity_error:
+        oidc_token = identity.detect_credential(audience=audience_resp.json()["audience"])
+    except identity.IdentityError as identity_error:
         _fatal(
             f"""
 OpenID Connect token retrieval failed: {identity_error}
@@ -72,7 +75,7 @@ permissions:
 ```
 
 Learn more at https://docs.github.com/en/actions/deployment/security-hardening-your-deployments/about-security-hardening-with-openid-connect#adding-permissions-settings.
-"""
+""",
         )
 
     # Now we can do the actual token exchange.
@@ -96,7 +99,7 @@ This strongly suggests a server configuration or downtime issue; wait
 a few minutes and try again.
 
 You can monitor PyPI's status here: https://status.python.org/
-"""
+""",
         )
 
     # On failure, the JSON response includes the list of errors that
@@ -118,7 +121,7 @@ This generally indicates a trusted publisher configuration error, but could
 also indicate an internal error on GitHub or PyPI's part.
 
 {rendered_claims}
-"""
+""",
         )
 
     pypi_token = mint_token_payload.get("token")
@@ -129,8 +132,10 @@ Token response error: the index gave us an invalid response.
 
 This strongly suggests a server configuration or downtime issue; wait
 a few minutes and try again.
-"""
+""",
         )
+
+    assert isinstance(pypi_token, str)
 
     # Mask the newly minted PyPI token, so that we don't accidentally leak it in logs.
     print(f"::add-mask::{pypi_token}")
@@ -139,17 +144,18 @@ a few minutes and try again.
     return pypi_token
 
 
-def _main():
+def _main() -> None:
     parser = argparse.ArgumentParser(description="Login zo pypi.org using OIDC")
     parser.parse_args()
 
     if "ACTIONS_ID_TOKEN_REQUEST_TOKEN" not in os.environ:
         print(
             """Not available, you probably miss the permission `id-token: write`.
-              See also: https://docs.github.com/en/actions/security-for-github-actions/security-hardening-your-deployments/about-security-hardening-with-openid-connect"""
+              See also: https://docs.github.com/en/actions/security-for-github-actions/security-hardening-your-deployments/about-security-hardening-with-openid-connect""",
         )
 
-    with open(os.path.expanduser("~/.pypirc"), "w", encoding="utf-8") as f:
+    pypirc_path = Path.home() / ".pypirc"
+    with pypirc_path.open("w", encoding="utf-8") as f:
         f.write("[pypi]\n")
         f.write("repository: https://upload.pypi.org/legacy/\n")
         f.write("username: __token__\n")

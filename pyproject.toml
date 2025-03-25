@@ -41,12 +41,15 @@ shapely = "2.0.7"
 geoalchemy2 = "0.17.1"
 
 [tool.poetry.group.dev.dependencies]
-prospector = { version = "1.15.3", extras = ["with-bandit", "with-mypy", "with-pyroma", "with-ruff", "with_ruff", "with_pyroma"] }
+prospector = { version = "1.16.0", extras = ["with-bandit", "with-mypy", "with-pyroma", "with-ruff", "with_ruff", "with_pyroma"] }
 prospector-profile-utils = "1.22.3"
 prospector-profile-duplicated = "1.10.5"
 pytest = "8.3.4"
 pyramid-handlers = "0.5"
 psycopg2 = "2.9.10"
+id = "1.5.0"
+claims = "0.3.0"
+types-requests = "2.32.0.20250306"
 
 [tool.poetry-dynamic-versioning]
 enable = true
