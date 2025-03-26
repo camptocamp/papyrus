@@ -11,22 +11,4 @@
     "github>camptocamp/gs-renovate-config-preset:json-schema.json5#0.9.0",
     "github>camptocamp/gs-renovate-config-preset:shellcheck.json5#0.9.0",
   ],
-  packageRules: [
-    /** Group and auto merge the GitHub action */
-    {
-      matchFileNames: [".github/workflows/*.yaml"],
-      groupName: "github-actions",
-      automerge: true,
-      separateMajorMinor: false,
-      separateMinorPatch: false,
-    },
-    /** Group and auto merge the pre-commit updates */
-    {
-      matchFileNames: [".pre-commit-config.yaml"],
-      groupName: "pre-commit",
-      automerge: true,
-      separateMajorMinor: false,
-      separateMinorPatch: false,
-    },
-  ],
 }
