@@ -8,9 +8,8 @@ import os
 import sys
 from pathlib import Path
 
-import requests
-
 import id as identity  # pylint: disable=redefined-builtin
+import requests
 
 
 def _fatal(message: str) -> None:
