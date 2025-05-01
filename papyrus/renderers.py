@@ -194,7 +194,8 @@ class XSD:
         include_primary_keys: bool = False,
         include_foreign_keys: bool = False,
         sequence_callback: Callable[[TreeBuilder, type[Any]], None] | None = None,
-        element_callback: Callable[[TreeBuilder, sqlalchemy.sql.expression.ColumnElement[Any]], None] | None = None,
+        element_callback: Callable[[TreeBuilder, sqlalchemy.sql.expression.ColumnElement[Any]], None]
+        | None = None,
     ) -> None:
         self.generator = XSDGenerator(
             include_primary_keys=include_primary_keys,
