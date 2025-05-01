@@ -291,7 +291,7 @@ class Protocol:
     def _query(
         self,
         request: pyramid.request.Request,
-        filter: sqlalchemy.sql.expression.ColumnElement[bool] | None = None,
+        filter: sqlalchemy.sql.expression.ColumnElement[bool] | None = None,  # pylint: disable=redefined-builtin
     ) -> list[Any]:
         """
         Build a query based on the filter and the request params.
@@ -320,7 +320,7 @@ class Protocol:
     def count(
         self,
         request: pyramid.request.Request,
-        filter: sqlalchemy.sql.expression.ColumnElement[bool] | None = None,
+        filter: sqlalchemy.sql.expression.ColumnElement[bool] | None = None,  # pylint: disable=redefined-builtin
     ) -> int:
         """Return the number of records matching the given filter."""
         if filter is None:
@@ -333,7 +333,7 @@ class Protocol:
     def read(
         self,
         request: pyramid.request.Request,
-        filter: sqlalchemy.sql.expression.ColumnElement[bool] | None = None,
+        filter: sqlalchemy.sql.expression.ColumnElement[bool] | None = None,  # pylint: disable=redefined-builtin
         id: str | None = None,  # pylint: disable=redefined-builtin
     ) -> Any:
         """
