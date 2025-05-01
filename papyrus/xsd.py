@@ -133,7 +133,7 @@ class XSDGenerator:
                     return tb
         if isinstance(
             column.type,
-            (sqlalchemy.String, sqlalchemy.Text, sqlalchemy.Unicode, sqlalchemy.UnicodeText),
+            sqlalchemy.String | sqlalchemy.Text | sqlalchemy.Unicode | sqlalchemy.UnicodeText,
         ):
             if column.type.length is None:
                 attrs["type"] = "xsd:string"

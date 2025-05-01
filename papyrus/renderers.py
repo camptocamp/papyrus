@@ -74,7 +74,7 @@ class GeoJSON:
         del info  # Unused
 
         def _render(value: str, system: dict[str, pyramid.request.Request]) -> Any:
-            if isinstance(value, (list, tuple)):
+            if isinstance(value, list | tuple):
                 value = self.collection_type(value)
             ret = dumps(value)
             request = system.get("request")
