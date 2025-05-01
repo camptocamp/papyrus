@@ -37,7 +37,7 @@ security-md = "security_md.cli:main"
 python = ">=3.9,<4.0"
 pyramid="2.0.2"
 geojson="3.2.0"
-shapely = "2.0.7"
+shapely = "2.1.0"
 geoalchemy2 = "0.17.1"
 
 [tool.poetry.group.dev.dependencies]
