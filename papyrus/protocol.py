@@ -22,7 +22,8 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-from typing import Any, Callable, Optional
+from collections.abc import Callable
+from typing import Any
 
 import geojson
 import pyramid.request
@@ -64,7 +65,7 @@ def create_geom_filter(
     request: pyramid.request.Request,
     mapped_class: Any,
     geom_attr: str,
-) -> Optional[sqlalchemy.sql.expression.ColumnElement[bool]]:
+) -> sqlalchemy.sql.expression.ColumnElement[bool] | None:
     """
     Create MapFish geometry filter based on the request params.
 
@@ -110,7 +111,7 @@ def create_geom_filter(
 def create_attr_filter(
     request: pyramid.request.Request,
     mapped_class: type[str],
-) -> Optional[sqlalchemy.sql.expression.ColumnElement[bool]]:
+) -> sqlalchemy.sql.expression.ColumnElement[bool] | None:
     """
     Create an ``and_`` SQLAlchemy filter (a ClauseList object).
 
@@ -152,7 +153,7 @@ def create_filter(
     mapped_class: Any,
     geom_attr: str,
     **kwargs: Any,
-) -> Optional[sqlalchemy.sql.expression.ColumnElement[bool]]:
+) -> sqlalchemy.sql.expression.ColumnElement[bool] | None:
     r"""
     Create MapFish default filter based on the request params.
 
@@ -241,10 +242,10 @@ class Protocol:
         mapped_class: Any,
         geom_attr: str,
         readonly: bool = False,
-        before_create: Optional[Callable[[pyramid.request.Request, geojson.Feature, Any], Any]] = None,
-        before_update: Optional[Callable[[pyramid.request.Request, geojson.Feature, Any], Any]] = None,
-        before_delete: Optional[Callable[[pyramid.request.Request, Any], Any]] = None,
-        before_insert: Optional[Callable[[pyramid.request.Request, geojson.Feature, Any], Any]] = None,
+        before_create: Callable[[pyramid.request.Request, geojson.Feature, Any], Any] | None = None,
+        before_update: Callable[[pyramid.request.Request, geojson.Feature, Any], Any] | None = None,
+        before_delete: Callable[[pyramid.request.Request, Any], Any] | None = None,
+        before_insert: Callable[[pyramid.request.Request, geojson.Feature, Any], Any] | None = None,
     ) -> None:
         self.Session = Session  # pylint: disable=invalid-name
         self.mapped_class = mapped_class
@@ -278,7 +279,7 @@ class Protocol:
     def _get_order_by(
         self,
         request: pyramid.request.Request,
-    ) -> Optional[sqlalchemy.sql.expression.UnaryExpression[None]]:
+    ) -> sqlalchemy.sql.expression.UnaryExpression[None] | None:
         """Return an SA order_by."""
         attr = request.params.get("sort", request.params.get("order_by"))
         if attr is None or not hasattr(self.mapped_class, attr):
@@ -290,9 +291,7 @@ class Protocol:
     def _query(
         self,
         request: pyramid.request.Request,
-        filter: Optional[  # pylint: disable=redefined-builtin
-            sqlalchemy.sql.expression.ColumnElement[bool]
-        ] = None,
+        filter: sqlalchemy.sql.expression.ColumnElement[bool] | None = None,
     ) -> list[Any]:
         """
         Build a query based on the filter and the request params.
@@ -321,9 +320,7 @@ class Protocol:
     def count(
         self,
         request: pyramid.request.Request,
-        filter: Optional[  # pylint: disable=redefined-builtin
-            sqlalchemy.sql.expression.ColumnElement[bool]
-        ] = None,
+        filter: sqlalchemy.sql.expression.ColumnElement[bool] | None = None,
     ) -> int:
         """Return the number of records matching the given filter."""
         if filter is None:
@@ -336,10 +333,8 @@ class Protocol:
     def read(
         self,
         request: pyramid.request.Request,
-        filter: Optional[  # pylint: disable=redefined-builtin
-            sqlalchemy.sql.expression.ColumnElement[bool]
-        ] = None,
-        id: Optional[str] = None,  # pylint: disable=redefined-builtin
+        filter: sqlalchemy.sql.expression.ColumnElement[bool] | None = None,
+        id: str | None = None,  # pylint: disable=redefined-builtin
     ) -> Any:
         """
         Build a query based on the filter or the identifier.

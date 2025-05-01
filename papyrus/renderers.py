@@ -1,5 +1,6 @@
+from collections.abc import Callable
 from io import BytesIO
-from typing import Any, Callable, Optional
+from typing import Any
 from xml.etree.ElementTree import TreeBuilder  # nosec
 
 import geojson
@@ -192,10 +193,8 @@ class XSD:
         self,
         include_primary_keys: bool = False,
         include_foreign_keys: bool = False,
-        sequence_callback: Optional[Callable[[TreeBuilder, type[Any]], None]] = None,
-        element_callback: Optional[
-            Callable[[TreeBuilder, sqlalchemy.sql.expression.ColumnElement[Any]], None]
-        ] = None,
+        sequence_callback: Callable[[TreeBuilder, type[Any]], None] | None = None,
+        element_callback: Callable[[TreeBuilder, sqlalchemy.sql.expression.ColumnElement[Any]], None] | None = None,
     ) -> None:
         self.generator = XSDGenerator(
             include_primary_keys=include_primary_keys,
@@ -204,11 +203,11 @@ class XSD:
             element_callback=element_callback,
         )
 
-    def __call__(self, table: str) -> Callable[[type[str], dict[str, str]], Optional[bytes]]:
+    def __call__(self, table: str) -> Callable[[type[str], dict[str, str]], bytes | None]:
         """Get the renderer function."""
         del table  # Unused
 
-        def _render(cls: type[str], system: dict[str, pyramid.request.Request]) -> Optional[bytes]:
+        def _render(cls: type[str], system: dict[str, pyramid.request.Request]) -> bytes | None:
             request = system.get("request")
             if request is not None:
                 response = request.response

@@ -1,4 +1,3 @@
-from typing import Optional
 
 import geojson
 from geoalchemy2.shape import from_shape, to_shape
@@ -62,7 +61,7 @@ class GeoInterface:
 
     """
 
-    def __init__(self, feature: Optional[geojson.Feature] = None) -> None:
+    def __init__(self, feature: geojson.Feature | None = None) -> None:
         """
         Initialize the object from a GeoJSON feature.
 
