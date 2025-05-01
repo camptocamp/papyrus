@@ -56,7 +56,7 @@ repos:
           - --builtin-schema
           - github-workflows-require-timeout
   - repo: https://github.com/renovatebot/pre-commit-hooks
-    rev: 39.264.0
+    rev: 40.0.5
     hooks:
       - id: renovate-config-validator
   - repo: https://github.com/sirwart/ripsecrets
@@ -106,6 +106,6 @@ repos:
         additional_dependencies:
           - prettier@3.5.3 # npm
   - repo: https://github.com/sbrunner/python-versions-hook
-    rev: 0.8.0
+    rev: 1.0.0
     hooks:
       - id: python-versions
