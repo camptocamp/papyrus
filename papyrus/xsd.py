@@ -1,7 +1,7 @@
-from collections.abc import Generator
+from collections.abc import Callable, Generator
 from contextlib import contextmanager
 from io import BytesIO
-from typing import Any, Callable, ClassVar, Optional
+from typing import Any, ClassVar
 from xml.etree.ElementTree import ElementTree, TreeBuilder  # nosec
 
 import sqlalchemy
@@ -12,7 +12,7 @@ from sqlalchemy.orm.util import class_mapper
 
 
 @contextmanager
-def tag(tb: TreeBuilder, name: str, attrs: Optional[dict[str, str]] = None) -> Generator[TreeBuilder]:
+def tag(tb: TreeBuilder, name: str, attrs: dict[str, str] | None = None) -> Generator[TreeBuilder]:
     if attrs is None:
         attrs = {}
     tb.start(name, attrs)
@@ -63,10 +63,9 @@ class XSDGenerator:
         self,
         include_primary_keys: bool = False,
         include_foreign_keys: bool = False,
-        sequence_callback: Optional[Callable[[TreeBuilder, type[str]], None]] = None,
-        element_callback: Optional[
-            Callable[[TreeBuilder, sqlalchemy.sql.expression.ColumnElement[Any]], None]
-        ] = None,
+        sequence_callback: Callable[[TreeBuilder, type[str]], None] | None = None,
+        element_callback: Callable[[TreeBuilder, sqlalchemy.sql.expression.ColumnElement[Any]], None]
+        | None = None,
     ) -> None:
         self.include_primary_keys = include_primary_keys
         self.include_foreign_keys = include_foreign_keys
@@ -134,7 +133,7 @@ class XSDGenerator:
                     return tb
         if isinstance(
             column.type,
-            (sqlalchemy.String, sqlalchemy.Text, sqlalchemy.Unicode, sqlalchemy.UnicodeText),
+            sqlalchemy.String | sqlalchemy.Text | sqlalchemy.Unicode | sqlalchemy.UnicodeText,
         ):
             if column.type.length is None:
                 attrs["type"] = "xsd:string"
