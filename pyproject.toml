@@ -36,7 +36,7 @@ security-md = "security_md.cli:main"
 python = ">=3.10,<4.0"
 pyramid="2.0.2"
 geojson="3.2.0"
-shapely = "2.1.0"
+shapely = "2.1.1"
 geoalchemy2 = "0.17.1"
 
 [tool.poetry.group.dev.dependencies]
@@ -48,7 +48,7 @@ pyramid-handlers = "0.5"
 psycopg2 = "2.9.10"
 id = "1.5.0"
 claims = "0.3.0"
-types-requests = "2.32.0.20250328"
+types-requests = "2.32.0.20250515"
 
 [tool.poetry-dynamic-versioning]
 enable = true
