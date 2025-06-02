@@ -69,6 +69,10 @@ format-jinja = """
 [tool.poetry-plugin-tweak-dependencies-version]
 default = "major"
 
+[project]
+dependencies = ["pyramid<3,>=2", "geojson<4,>=3", "shapely<3,>=2", "geoalchemy2<1,>=0"]
+requires-python = ">=3.10"
+
 [build-system]
 requires = [
     "poetry-core>=1.0.0",
