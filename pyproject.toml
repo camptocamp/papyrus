@@ -6,31 +6,7 @@ line-length = 110
 convention = "numpy"
 
 [tool.poetry]
-name = "papyrus"
 version = "0.0.0"
-description="Geospatial Extensions for Pyramid"
-readme = "README.md"
-authors = ["Camptocamp <info@camptocamp.com>"]
-keywords = ["FOSS4G", "Pylons", "Pyramid"]
-repository = "https://github.com/camptocamp/papyrus"
-license = "BSD"
-packages = [{ include = "papyrus" }]
-classifiers = [
-    'Framework :: Pyramid',
-    'Intended Audience :: Developers',
-    'License :: OSI Approved :: BSD License',
-    'Operating System :: OS Independent',
-    'Programming Language :: Python',
-    'Programming Language :: Python :: 3',
-    'Programming Language :: Python :: 3.10',
-    'Programming Language :: Python :: 3.11',
-    'Programming Language :: Python :: 3.12',
-    'Programming Language :: Python :: 3.13',
-    'Topic :: Internet :: WWW/HTTP',
-]
-
-[tool.poetry.scripts]
-security-md = "security_md.cli:main"
 
 [tool.poetry.dependencies]
 python = ">=3.10,<4.0"
@@ -69,12 +45,42 @@ format-jinja = """
 [tool.poetry-plugin-tweak-dependencies-version]
 default = "major"
 
+[project]
+dependencies = ["pyramid<3,>=2", "geojson<4,>=3", "shapely<3,>=2", "geoalchemy2<1,>=0"]
+requires-python = ">=3.10"
+dynamic = ["dependencies", "version"]
+name = "papyrus"
+description = "Geospatial Extensions for Pyramid"
+readme = "README.md"
+keywords = ["FOSS4G", "Pylons", "Pyramid"]
+license = "BSD"
+classifiers = [
+    'Framework :: Pyramid',
+    'Intended Audience :: Developers',
+    'License :: OSI Approved :: BSD License',
+    'Operating System :: OS Independent',
+    'Programming Language :: Python',
+    'Programming Language :: Python :: 3',
+    'Programming Language :: Python :: 3.10',
+    'Programming Language :: Python :: 3.11',
+    'Programming Language :: Python :: 3.12',
+    'Programming Language :: Python :: 3.13',
+    'Topic :: Internet :: WWW/HTTP',
+]
+authors = [{name = "Camptocamp",email = "info@camptocamp.com"}]
+packages = [{ include = "papyrus" }]
+
+[project.urls]
+repository = "https://github.com/camptocamp/papyrus"
+"Bug Tracker" = "https://github.com/camptocamp/papyrus/issues"
+
+[project.scripts]
+security-md = "security_md.cli:main"
+
 [build-system]
 requires = [
     "poetry-core>=1.0.0",
     "poetry-dynamic-versioning[plugin]>=0.19.0",
-    "poetry-plugin-tweak-dependencies-version",
     "poetry-dynamic-versioning",
-    "poetry-plugin-drop-python-upper-constraint",
 ]
 build-backend = "poetry.core.masonry.api"
