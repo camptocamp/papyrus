@@ -111,7 +111,7 @@ jobs:
         run: tag-publish
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - run: git diff --exit-code --patch > /tmp/dpkg-versions.patch || true
+      - run: git diff --exit-code --patch > /tmp/dpkg-versions.patch; git diff --color; git reset --hard || true
         if: failure()
       - uses: actions/upload-artifact@v4.6.2
         with:
