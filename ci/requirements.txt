@@ -7,3 +7,4 @@ pre-commit==4.2.0
 id==1.5.0
 cryptography>=44.0.1 # not directly required, pinned by Snyk to avoid a vulnerability
 tag-publish==1.1.0
+requests>=2.32.4 # not directly required, pinned by Snyk to avoid a vulnerability
