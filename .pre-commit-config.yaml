@@ -43,7 +43,7 @@ repos:
     hooks:
       - id: git-check
   - repo: https://github.com/python-jsonschema/check-jsonschema
-    rev: 0.33.0
+    rev: 0.33.1
     hooks:
       - id: check-github-actions
       - id: check-github-workflows
@@ -64,7 +64,7 @@ repos:
     hooks:
       - id: ripsecrets
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.11.12
+    rev: v0.12.1
     hooks:
       - id: ruff-format
         args:
@@ -81,8 +81,8 @@ repos:
         additional_dependencies:
           - prospector-profile-duplicated==1.10.5 # pypi
           - prospector-profile-utils==1.23.0 # pypi
-          - pylint[spelling]==3.3.6 # pypi
-          - ruff==0.11.9 # pypi
+          - pylint[spelling]==3.3.7 # pypi
+          - ruff==0.12.1 # pypi
         exclude: |-
           (?x)(
             ^tests?/?
@@ -106,7 +106,7 @@ repos:
     hooks:
       - id: prettier
         additional_dependencies:
-          - prettier@3.5.3 # npm
+          - prettier@3.6.2 # npm
   - repo: https://github.com/sbrunner/python-versions-hook
     rev: 1.1.2
     hooks:
