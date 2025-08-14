@@ -94,7 +94,9 @@ jobs:
         run: poetry run pytest -vv
 
       - id: success
-        run: echo "::set-output name=success-${matrix.python-version//\./-}::true"
+        run: |
+          VERSION=$(echo "${{ matrix.python-version }}" | tr '.' '-')
+          echo "::set-output name=success-${VERSION}::true"
 
   publish:
     name: Publish
@@ -103,6 +105,7 @@ jobs:
     needs:
       - main
       - pre-commit
+    if: always()
 
     permissions:
       id-token: write
