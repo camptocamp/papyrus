@@ -12,12 +12,19 @@ on:
 env:
   HAS_SECRETS: ${{ secrets.HAS_SECRETS }}
 
+permissions:
+  contents: write
+  id-token: write
+
 jobs:
   pre-commit:
     name: Check with pre-commit and Prospector
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     if: "!startsWith(github.event.head_commit.message, '[skip ci] ')"
+
+    outputs:
+      success: ${{ steps.success.outputs.success }}
 
     steps:
       - uses: actions/checkout@v4
@@ -34,7 +41,6 @@ jobs:
           path: ~/.cache/pre-commit
           key: pre-commit-${{ hashFiles('.pre-commit-config.yaml') }}
           restore-keys: "pre-commit-${{ hashFiles('.pre-commit-config.yaml') }}\npre-commit-"
-        if: matrix.python-version != '3.7'
       - run: pre-commit run --all-files --color=always
       - run: git diff --exit-code --patch > /tmp/pre-commit.patch; git diff --color; git reset --hard || true
         if: failure()
@@ -52,20 +58,25 @@ jobs:
         run: |
           poetry run prospector --output-format=pylint --die-on-tool-error
 
+      - id: success
+        run: echo "::set-output name=success::true"
+
   main:
     name: Continuous integration
     runs-on: ubuntu-24.04
     timeout-minutes: 15
-    needs: pre-commit
+
+    outputs:
+      success-3-10: ${{ steps.success.outputs.success-3-10 }}
+      success-3-x: ${{ steps.success.outputs.success-3-x }}
 
     strategy:
       fail-fast: false
       matrix:
         python-version:
-          - "3.9"
+          # Test the min and max Python versions supported by the project
           - "3.10"
-          - "3.11"
-          - "3.12"
+          - "3.x"
 
     steps:
       - uses: actions/checkout@v4
@@ -82,16 +93,25 @@ jobs:
       - name: Tests
         run: poetry run pytest -vv
 
+      - id: success
+        run: echo "::set-output name=success-${matrix.python-version//\./-}::true"
+
   publish:
     name: Publish
     runs-on: ubuntu-24.04
     timeout-minutes: 15
-    needs: main
+    needs:
+      - main
+      - pre-commit
 
     permissions:
       id-token: write
 
     steps:
+      - run: "[[ ${{ needs.pre-commit.outputs.success }} == 'true' ]]"
+      - run: "[[ ${{ needs.main.outputs.success-3-10 }} == 'true' ]]"
+      - run: "[[ ${{ needs.main.outputs.success-3-x }} == 'true' ]]"
+
       - uses: actions/checkout@v4
 
       - uses: camptocamp/initialise-gopass-summon-action@v2
@@ -119,6 +139,3 @@ jobs:
           path: /tmp/dpkg-versions.patch
           retention-days: 1
         if: failure()
-permissions:
-  contents: write
-  id-token: write
