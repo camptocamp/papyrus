@@ -108,7 +108,10 @@ class GeoInterfaceTests(unittest.TestCase):
         )
 
         child2_table = Table(
-            "child2", md, Column("id", types.Integer, primary_key=True), Column("name", types.Unicode),
+            "child2",
+            md,
+            Column("id", types.Integer, primary_key=True),
+            Column("name", types.Unicode),
         )
 
         parent_table = Table(
