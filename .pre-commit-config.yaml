@@ -80,7 +80,7 @@ repos:
           - --output-format=pylint
         additional_dependencies:
           - prospector-profile-duplicated==1.10.5 # pypi
-          - prospector-profile-utils==1.26.3 # pypi
+          - prospector-profile-utils==1.26.4 # pypi
           - pylint[spelling]==3.3.8 # pypi
           - ruff==0.12.10 # pypi
         exclude: |-
@@ -100,7 +100,7 @@ repos:
           - --profile=utils:pre-commit
           - --profile=.prospector-tests.yaml
         additional_dependencies:
-          - prospector-profile-utils==1.26.3 # pypi
+          - prospector-profile-utils==1.26.4 # pypi
   - repo: https://github.com/pre-commit/mirrors-prettier
     rev: v3.1.0
     hooks:
