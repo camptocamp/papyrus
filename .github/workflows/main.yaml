@@ -27,8 +27,8 @@ jobs:
       success: ${{ steps.success.outputs.success }}
 
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5.6.0
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6.0.0
         with:
           python-version: "3.13"
       - run: python3 -m pip install --requirement=ci/requirements.txt
@@ -79,9 +79,9 @@ jobs:
           - "3.x"
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
 
@@ -115,7 +115,7 @@ jobs:
       - run: "[[ ${{ needs.main.outputs.success-3-10 }} == 'true' ]]"
       - run: "[[ ${{ needs.main.outputs.success-3-x }} == 'true' ]]"
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - uses: camptocamp/initialise-gopass-summon-action@v2
         with:
@@ -123,7 +123,7 @@ jobs:
           github-gopass-ci-token: ${{secrets.GOPASS_CI_GITHUB_TOKEN}}
         if: env.HAS_SECRETS == 'HAS_SECRETS'
 
-      - uses: actions/setup-python@v5.6.0
+      - uses: actions/setup-python@v6.0.0
         with:
           python-version: "3.13"
       - run: python3 -m pip install --requirement=ci/requirements.txt
