@@ -78,12 +78,11 @@ class create_geom_filter_Tests(unittest.TestCase):
         filter_str = _compiled_to_string(compiled_filter)
         assert (
             filter_str
-            == b'ST_DWithin("table".geom, ST_GeomFromWKB(%(ST_GeomFromWKB_1)s, %(ST_GeomFromWKB_2)s), %(ST_DWithin_1)s)'
+            == b'ST_DWithin("table".geom, ST_GeomFromWKB(%(ST_GeomFromWKB_1)s, 4326), %(ST_DWithin_1)s)'
         )  # NOQA
         assert wkb.loads(bytes(params["ST_GeomFromWKB_1"])).equals(
             wkt.loads("POLYGON ((-180 -90, -180 90, 180 90, 180 -90, -180 -90))")
         )  # NOQA
-        assert params["ST_GeomFromWKB_2"] == 4326
         assert params["ST_DWithin_1"] == 1
 
     def test_box_filter_with_epsg(self):
@@ -99,12 +98,11 @@ class create_geom_filter_Tests(unittest.TestCase):
         filter_str = _compiled_to_string(compiled_filter)
         assert (
             filter_str
-            == b'ST_DWithin(ST_Transform("table".geom, %(ST_Transform_1)s), ST_GeomFromWKB(%(ST_GeomFromWKB_1)s, %(ST_GeomFromWKB_2)s), %(ST_DWithin_1)s)'
+            == b'ST_DWithin(ST_Transform("table".geom, %(ST_Transform_1)s), ST_GeomFromWKB(%(ST_GeomFromWKB_1)s, 900913), %(ST_DWithin_1)s)'
         )  # NOQA
         assert wkb.loads(bytes(params["ST_GeomFromWKB_1"])).equals(
             wkt.loads("POLYGON ((-180 -90, -180 90, 180 90, 180 -90, -180 -90))")
         )  # NOQA
-        assert params["ST_GeomFromWKB_2"] == 900913
         assert params["ST_Transform_1"] == 900913
         assert params["ST_DWithin_1"] == 1
 
@@ -121,10 +119,9 @@ class create_geom_filter_Tests(unittest.TestCase):
         filter_str = _compiled_to_string(compiled_filter)
         assert (
             filter_str
-            == b'ST_DWithin("table".geom, ST_GeomFromWKB(%(ST_GeomFromWKB_1)s, %(ST_GeomFromWKB_2)s), %(ST_DWithin_1)s)'
+            == b'ST_DWithin("table".geom, ST_GeomFromWKB(%(ST_GeomFromWKB_1)s, 4326), %(ST_DWithin_1)s)'
         )  # NOQA
         self.assertTrue(wkb.loads(bytes(params["ST_GeomFromWKB_1"])).equals(wkt.loads("POINT (40 5)")))  # NOQA
-        assert params["ST_GeomFromWKB_2"] == 4326
         assert params["ST_DWithin_1"] == 1
 
     def test_within_filter_with_epsg(self):
@@ -140,10 +137,9 @@ class create_geom_filter_Tests(unittest.TestCase):
         filter_str = _compiled_to_string(compiled_filter)
         assert (
             filter_str
-            == b'ST_DWithin(ST_Transform("table".geom, %(ST_Transform_1)s), ST_GeomFromWKB(%(ST_GeomFromWKB_1)s, %(ST_GeomFromWKB_2)s), %(ST_DWithin_1)s)'
+            == b'ST_DWithin(ST_Transform("table".geom, %(ST_Transform_1)s), ST_GeomFromWKB(%(ST_GeomFromWKB_1)s, 900913), %(ST_DWithin_1)s)'
         )  # NOQA
         self.assertTrue(wkb.loads(bytes(params["ST_GeomFromWKB_1"])).equals(wkt.loads("POINT (40 5)")))  # NOQA
-        assert params["ST_GeomFromWKB_2"] == 900913
         assert params["ST_Transform_1"] == 900913
         assert params["ST_DWithin_1"] == 1
 
@@ -163,10 +159,9 @@ class create_geom_filter_Tests(unittest.TestCase):
         filter_str = _compiled_to_string(compiled_filter)
         assert (
             filter_str
-            == b'ST_DWithin("table".geom, ST_GeomFromWKB(%(ST_GeomFromWKB_1)s, %(ST_GeomFromWKB_2)s), %(ST_DWithin_1)s)'
+            == b'ST_DWithin("table".geom, ST_GeomFromWKB(%(ST_GeomFromWKB_1)s, 4326), %(ST_DWithin_1)s)'
         )  # NOQA
         self.assertTrue(wkb.loads(bytes(params["ST_GeomFromWKB_1"])).equals(poly))  # NOQA
-        assert params["ST_GeomFromWKB_2"] == 4326
         assert params["ST_DWithin_1"] == 1
 
     def test_polygon_filter_with_epsg(self):
@@ -185,10 +180,9 @@ class create_geom_filter_Tests(unittest.TestCase):
         filter_str = _compiled_to_string(compiled_filter)
         assert (
             filter_str
-            == b'ST_DWithin(ST_Transform("table".geom, %(ST_Transform_1)s), ST_GeomFromWKB(%(ST_GeomFromWKB_1)s, %(ST_GeomFromWKB_2)s), %(ST_DWithin_1)s)'
+            == b'ST_DWithin(ST_Transform("table".geom, %(ST_Transform_1)s), ST_GeomFromWKB(%(ST_GeomFromWKB_1)s, 900913), %(ST_DWithin_1)s)'
         )  # NOQA
         self.assertTrue(wkb.loads(bytes(params["ST_GeomFromWKB_1"])).equals(poly))  # NOQA
-        assert params["ST_GeomFromWKB_2"] == 900913
         assert params["ST_Transform_1"] == 900913
         assert params["ST_DWithin_1"] == 1
 
@@ -366,7 +360,7 @@ class Test_protocol(unittest.TestCase):
         return Session
 
     def _get_mapped_class(self):
-        from geoalchemy2.shape import from_shape
+        from geoalchemy2.shape import from_shape, to_shape
         from geoalchemy2.types import Geometry
         from geojson import Feature
         from geojson.geometry import Default
@@ -392,14 +386,13 @@ class Test_protocol(unittest.TestCase):
                 if geometry is not None and not isinstance(geometry, Default):
                     shape = asShape(feature.geometry)
                     self.geom = from_shape(shape, srid=4326)
-                    self.geom.shape = shape
                 self.text = feature.properties.get("text", None)
 
             @property
             def __geo_interface__(self):
                 id = self.id
-                geometry = self.geom.shape
-                properties = dict(text=self.text)
+                geometry = to_shape(self.geom) if self.geom is not None else None
+                properties = {"text": self.text}
                 return Feature(id=id, geometry=geometry, properties=properties)
 
         return MappedClass
@@ -616,6 +609,7 @@ class Test_protocol(unittest.TestCase):
         assert response.status_int == 400
 
     def test_create(self):
+        from geoalchemy2.shape import to_shape
         from pyramid.testing import DummyRequest
 
         from papyrus.protocol import Protocol
@@ -647,8 +641,9 @@ class Test_protocol(unittest.TestCase):
         assert len(Session.new) == 2
         for obj in Session.new:
             assert obj.text == "foo"
-            assert obj.geom.shape.x == 45
-            assert obj.geom.shape.y == 5
+            shape = to_shape(obj.geom)
+            assert shape.x == 45
+            assert shape.y == 5
         Session.rollback()
 
         # test before_create
@@ -681,9 +676,9 @@ class Test_protocol(unittest.TestCase):
         assert resp is None
 
     def test_create_update(self):
+        from geoalchemy2.shape import to_shape
         from geojson import Feature, FeatureCollection
         from pyramid.testing import DummyRequest
-        from shapely.geometry import Point
 
         from papyrus.protocol import Protocol
 
@@ -709,10 +704,14 @@ class Test_protocol(unittest.TestCase):
         assert len(features.features) == 2
         assert features.features[0].id == "a"
         assert features.features[0].text == "foo"
-        assert features.features[0].geom.shape.equals(Point(45, 5))
+        shape_0 = to_shape(features.features[0].geom)
+        assert shape_0.x == 45
+        assert shape_0.y == 5
         assert features.features[1].id == "b"
         assert features.features[1].text == "bar"
-        assert features.features[1].geom.shape.equals(Point(46, 6))
+        shape_1 = to_shape(features.features[1].geom)
+        assert shape_1.x == 46
+        assert shape_1.y == 6
 
     def test_update_forbidden(self):
         from pyramid.testing import DummyRequest
