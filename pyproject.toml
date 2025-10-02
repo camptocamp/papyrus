@@ -12,19 +12,19 @@ version = "0.0.0"
 python = ">=3.10,<4.0"
 pyramid="2.0.2"
 geojson="3.2.0"
-shapely = "2.1.1"
-geoalchemy2 = "0.17.1"
+shapely = "2.1.2"
+geoalchemy2 = "0.18.0"
 
 [tool.poetry.group.dev.dependencies]
 prospector = { version = "1.17.3", extras = ["with-bandit", "with-mypy", "with-pyroma", "with-ruff", "with_ruff", "with_pyroma"] }
 prospector-profile-utils = "1.26.5"
 prospector-profile-duplicated = "1.10.5"
-pytest = "8.3.5"
+pytest = "8.4.2"
 pyramid-handlers = "0.5"
 psycopg2 = "2.9.10"
 id = "1.5.0"
 claims = "0.3.0"
-types-requests = "2.32.0.20250515"
+types-requests = "2.32.4.20250913"
 
 [tool.poetry-dynamic-versioning]
 enable = true
