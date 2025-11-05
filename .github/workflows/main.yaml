@@ -30,7 +30,7 @@ jobs:
       - uses: actions/checkout@v5
       - uses: actions/setup-python@v6.0.0
         with:
-          python-version: "3.13"
+          python-version: "3.14"
       - run: python3 -m pip install --requirement=ci/requirements.txt
 
       - name: Print environment information
@@ -125,7 +125,7 @@ jobs:
 
       - uses: actions/setup-python@v6.0.0
         with:
-          python-version: "3.13"
+          python-version: "3.14"
       - run: python3 -m pip install --requirement=ci/requirements.txt
 
       - name: Login with OIDC (OpenID Connect)
