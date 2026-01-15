@@ -18,7 +18,7 @@ geoalchemy2 = "0.18.1"
 [tool.poetry.group.dev.dependencies]
 prospector = { version = "1.17.3", extras = ["with-bandit", "with-mypy", "with-pyroma", "with-ruff", "with_ruff", "with_pyroma"] }
 prospector-profile-utils = "1.26.5"
-prospector-profile-duplicated = "1.10.5"
+prospector-profile-duplicated = "1.11.0"
 pytest = "9.0.2"
 pyramid-handlers = "0.5"
 psycopg2 = "2.9.11"
