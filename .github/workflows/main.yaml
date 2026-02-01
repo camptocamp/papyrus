@@ -28,7 +28,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v6
-      - uses: actions/setup-python@v6.1.0
+      - uses: actions/setup-python@v6.2.0
         with:
           python-version: "3.13"
       - run: python3 -m pip install --requirement=ci/requirements.txt
@@ -123,7 +123,7 @@ jobs:
           github-gopass-ci-token: ${{secrets.GOPASS_CI_GITHUB_TOKEN}}
         if: env.HAS_SECRETS == 'HAS_SECRETS'
 
-      - uses: actions/setup-python@v6.1.0
+      - uses: actions/setup-python@v6.2.0
         with:
           python-version: "3.13"
       - run: python3 -m pip install --requirement=ci/requirements.txt
