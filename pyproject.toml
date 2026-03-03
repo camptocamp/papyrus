@@ -14,6 +14,7 @@ pyramid="2.0.2"
 geojson="3.2.0"
 shapely = "2.1.2"
 geoalchemy2 = "0.18.4"
+setuptools = "80.10.2"
 
 [tool.poetry.group.dev.dependencies]
 prospector = { version = "1.18.0", extras = ["with-bandit", "with-mypy", "with-pyroma", "with-ruff", "with_ruff", "with_pyroma"] }
@@ -44,9 +45,10 @@ format-jinja = """
 
 [tool.poetry-plugin-tweak-dependencies-version]
 default = "major"
+setuptools = "<80.11.0"
 
 [project]
-dependencies = ["pyramid<3,>=2", "geojson<4,>=3", "shapely<3,>=2", "geoalchemy2<1,>=0"]
+dependencies = ["pyramid<3,>=2", "geojson<4,>=3", "shapely<3,>=2", "geoalchemy2<1,>=0", "setuptools<80.11.0"]
 requires-python = ">=3.10"
 dynamic = ["dependencies", "version"]
 name = "papyrus"
@@ -57,7 +59,6 @@ license = "BSD"
 classifiers = [
     'Framework :: Pyramid',
     'Intended Audience :: Developers',
-    'License :: OSI Approved :: BSD License',
     'Operating System :: OS Independent',
     'Programming Language :: Python',
     'Programming Language :: Python :: 3',
