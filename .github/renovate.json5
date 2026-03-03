@@ -12,4 +12,12 @@
     "github>camptocamp/gs-renovate-config-preset:own.json5#1.8.5",
     "github>camptocamp/gs-renovate-config-preset:security.json5#1.8.5",
   ],
+  packageRules: [
+    /** Keep setuptools below 81.0.0 for pyramid */
+    {
+      enabled: false,
+      matchDepNames: ["setuptools"],
+      allowedVersions: "<81.0.0",
+    },
+  ],
 }
