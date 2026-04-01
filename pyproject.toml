@@ -10,7 +10,7 @@ version = "0.0.0"
 
 [tool.poetry.dependencies]
 python = ">=3.10,<4.0"
-pyramid="2.0.2"
+pyramid="2.1"
 geojson="3.2.0"
 shapely = "2.1.2"
 geoalchemy2 = "0.18.4"
@@ -25,7 +25,7 @@ pyramid-handlers = "0.5"
 psycopg2 = "2.9.11"
 id = "1.6.1"
 claims = "0.3.0"
-types-requests = "2.32.4.20260107"
+types-requests = "2.32.4.20260324"
 
 [tool.poetry-dynamic-versioning]
 enable = true
