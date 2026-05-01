@@ -2,7 +2,7 @@ poetry==2.3.4
 c2cciutils==1.7.5
 poetry-dynamic-versioning==1.10.0
 poetry-plugin-export==1.10.0
-pre-commit==4.5.1
+pre-commit==4.6.0
 # OIDC (OpenID connect)
 id==1.6.1
 cryptography>=44.0.1 # not directly required, pinned by Snyk to avoid a vulnerability
