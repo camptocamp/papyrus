@@ -1,11 +1,51 @@
+[tool.ruff]
+target-version = "py310"
+line-length = 110
 
-[build-system]
-requires = [
-    "poetry-core>=1.0.0",
-    "poetry-dynamic-versioning[plugin]>=0.19.0",
-    "poetry-dynamic-versioning",
-]
-build-backend = "poetry.core.masonry.api"
+[tool.ruff.lint.pydocstyle]
+convention = "numpy"
+
+[tool.poetry]
+version = "0.0.0"
+
+[tool.poetry.dependencies]
+python = ">=3.10,<4.0"
+pyramid="2.1"
+geojson="3.2.0"
+shapely = "2.1.2"
+geoalchemy2 = "0.18.4"
+setuptools = "80.10.2"
+
+[tool.poetry.group.dev.dependencies]
+prospector = { version = "1.19.0", extras = ["with-bandit", "with-mypy", "with-pyroma", "with-ruff", "with_ruff", "with_pyroma"] }
+prospector-profile-utils = "1.27.0"
+prospector-profile-duplicated = "1.12.0"
+pytest = "9.1.1"
+pyramid-handlers = "0.5"
+psycopg2 = "2.9.12"
+id = "1.6.1"
+claims = "0.3.0"
+types-requests = "2.33.0.20260518"
+
+[tool.poetry-dynamic-versioning]
+enable = true
+vcs = "git"
+pattern = "^(?P<base>\\d+(\\.\\d+)*)"
+format-jinja = """
+{%- if env.get("VERSION_TYPE") == "default_branch" -%}
+{{serialize_pep440(bump_version(base, 1), dev=distance)}}
+{%- elif env.get("VERSION_TYPE") == "stabilization_branch" -%}
+{{serialize_pep440(bump_version(base, 2), dev=distance)}}
+{%- elif distance == 0 -%}
+{{serialize_pep440(base)}}
+{%- else -%}
+{{serialize_pep440(bump_version(base), dev=distance)}}
+{%- endif -%}
+"""
+
+[tool.poetry-plugin-tweak-dependencies-version]
+default = "major"
+setuptools = "<80.11.0"
 
 [project]
 dependencies = ["pyramid<3,>=2", "geojson<4,>=3", "shapely<3,>=2", "geoalchemy2<1,>=0", "setuptools<80.11.0"]
@@ -38,51 +78,10 @@ repository = "https://github.com/camptocamp/papyrus"
 [project.scripts]
 security-md = "security_md.cli:main"
 
-[tool.ruff]
-target-version = "py310"
-line-length = 110
-
-[tool.ruff.lint.pydocstyle]
-convention = "numpy"
-
-[tool.poetry]
-version = "0.0.0"
-
-[tool.poetry.dependencies]
-python = ">=3.10,<4.0"
-pyramid="2.1"
-geojson="3.2.0"
-shapely = "2.1.2"
-geoalchemy2 = "0.18.4"
-setuptools = "80.10.2"
-
-[tool.poetry.group.dev.dependencies]
-prospector = { version = "1.18.0", extras = ["with-bandit", "with-mypy", "with-pyroma", "with-ruff", "with_ruff", "with_pyroma"] }
-prospector-profile-utils = "1.27.0"
-prospector-profile-duplicated = "1.12.0"
-pytest = "9.1.1"
-pyramid-handlers = "0.5"
-psycopg2 = "2.9.12"
-id = "1.6.1"
-claims = "0.3.0"
-types-requests = "2.33.0.20260518"
-
-[tool.poetry-dynamic-versioning]
-enable = true
-vcs = "git"
-pattern = "^(?P<base>\\d+(\\.\\d+)*)"
-format-jinja = """
-{%- if env.get("VERSION_TYPE") == "default_branch" -%}
-{{serialize_pep440(bump_version(base, 1), dev=distance)}}
-{%- elif env.get("VERSION_TYPE") == "stabilization_branch" -%}
-{{serialize_pep440(bump_version(base, 2), dev=distance)}}
-{%- elif distance == 0 -%}
-{{serialize_pep440(base)}}
-{%- else -%}
-{{serialize_pep440(bump_version(base), dev=distance)}}
-{%- endif -%}
-"""
-
-[tool.poetry-plugin-tweak-dependencies-version]
-default = "major"
-setuptools = "<80.11.0"
+[build-system]
+requires = [
+    "poetry-core>=1.0.0",
+    "poetry-dynamic-versioning[plugin]>=0.19.0",
+    "poetry-dynamic-versioning",
+]
+build-backend = "poetry.core.masonry.api"
