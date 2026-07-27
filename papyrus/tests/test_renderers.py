@@ -451,8 +451,8 @@ class Test_XSD(unittest.TestCase):
             attrs["minOccurs"] = str(0)
             attrs["nillable"] = "true"
             attrs["name"] = "rel"
-            with tag(tb, "xsd:element", attrs) as tb, tag(tb, "xsd:simpleType") as tb:
-                with tag(tb, "xsd:restriction", {"base": "xsd:string"}) as tb:
+            with tag(tb, "xsd:element", attrs) as element_tb, tag(element_tb, "xsd:simpleType") as simple_tb:
+                with tag(simple_tb, "xsd:restriction", {"base": "xsd:string"}) as tb:
                     for enum in ("male", "female"):
                         with tag(tb, "xsd:enumeration", {"value": enum}):
                             pass
@@ -475,9 +475,8 @@ class Test_XSD(unittest.TestCase):
         from papyrus.xsd import tag
 
         def cb(tb, cls):
-            with tag(tb, "xsd:annotation"), tag(tb, "xsd:appinfo"):
-                with tag(tb, "readonly", {"value": "true"}):
-                    pass
+            with tag(tb, "xsd:annotation"), tag(tb, "xsd:appinfo"), tag(tb, "readonly", {"value": "true"}):
+                pass
 
         for column in (
             Column("_column", types.Integer),

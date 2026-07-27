@@ -88,7 +88,7 @@ class XSDGenerator:
         for cls, xsd_type in self.SIMPLE_XSD_TYPES.items():
             if isinstance(column.type, cls):
                 attrs["type"] = xsd_type
-                with tag(tb, "xsd:element", attrs) as tb:  # pylint: disable=redefined-argument-from-local
+                with tag(tb, "xsd:element", attrs) as tb:  # noqa: PLR1704  # pylint: disable=redefined-argument-from-local
                     self.element_callback(tb, column)
                     return tb
         if isinstance(column.type, Geometry):
@@ -96,11 +96,11 @@ class XSDGenerator:
             assert geometry_type is not None
             xsd_type = self.SIMPLE_GEOMETRY_XSD_TYPES[geometry_type]
             attrs["type"] = xsd_type
-            with tag(tb, "xsd:element", attrs) as tb:  # pylint: disable=redefined-argument-from-local
+            with tag(tb, "xsd:element", attrs) as tb:  # noqa: PLR1704  # pylint: disable=redefined-argument-from-local
                 self.element_callback(tb, column)
                 return tb
         if isinstance(column.type, sqlalchemy.Enum):
-            with tag(tb, "xsd:element", attrs) as tb:  # pylint: disable=redefined-argument-from-local
+            with tag(tb, "xsd:element", attrs) as tb:  # noqa: PLR1704  # pylint: disable=redefined-argument-from-local
                 with (
                     tag(tb, "xsd:simpleType") as tb,  # pylint: disable=redefined-argument-from-local
                     tag(tb, "xsd:restriction", {"base": "xsd:string"}) as tb2,
