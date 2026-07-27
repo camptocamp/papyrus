@@ -451,10 +451,9 @@ class Test_XSD(unittest.TestCase):
             attrs["minOccurs"] = str(0)
             attrs["nillable"] = "true"
             attrs["name"] = "rel"
-            with tag(tb, "xsd:element", attrs) as element_tb, tag(element_tb, "xsd:simpleType") as simple_tb:
-                with tag(simple_tb, "xsd:restriction", {"base": "xsd:string"}) as tb:
-                    for enum in ("male", "female"):
-                        with tag(tb, "xsd:enumeration", {"value": enum}):
+            with tag(tb, "xsd:element", attrs) as element_tb, tag(element_tb, "xsd:simpleType") as simple_tb, tag(simple_tb, "xsd:restriction", {"base": "xsd:string"}) as restriction_tb:
+                for enum in ("male", "female"):
+                    with tag(restriction_tb, "xsd:enumeration", {"value": enum}):
                             pass
 
         elements = self._get_elements((("column", column), ("rel", rel)), sequence_callback=cb)
