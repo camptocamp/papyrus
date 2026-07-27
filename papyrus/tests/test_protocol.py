@@ -525,7 +525,7 @@ class Test_protocol(unittest.TestCase):
 
         class Session:
             def query(self, mapped_class):
-                feature = Feature(id="a", geometry=Point(1, 2), properties=dict(text="foo"))
+                feature = Feature(id="a", geometry=Point(1, 2), properties={"text": "foo"})
                 return {"a": mapped_class(feature)}
 
         proto = Protocol(Session, self._get_mapped_class(), "geom")
@@ -629,7 +629,7 @@ class Test_protocol(unittest.TestCase):
         def before_create(request, feature, obj):
             if not hasattr(request, "_log"):
                 request._log = []
-            request._log.append(dict(feature=feature, obj=obj))
+            request._log.append({"feature": feature, "obj": obj})
 
         proto = Protocol(MockSession, MappedClass, "geom", before_create=before_create)
 
@@ -789,7 +789,7 @@ class Test_protocol(unittest.TestCase):
 
         # a before_update callback
         def before_update(request, feature, obj):
-            request._log = dict(feature=feature, obj=obj)
+            request._log = {"feature": feature, "obj": obj}
 
         proto = Protocol(MockSession, MappedClass, "geom", before_update=before_update)
 
@@ -857,7 +857,7 @@ class Test_protocol(unittest.TestCase):
 
         # a before_update callback
         def before_delete(request, obj):
-            request._log = dict(obj=obj)
+            request._log = {"obj": obj}
 
         proto = Protocol(MockSession, MappedClass, "geom", before_delete=before_delete)
         request = testing.DummyRequest()

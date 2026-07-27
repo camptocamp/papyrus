@@ -88,7 +88,7 @@ class XSDGenerator:
         for cls, xsd_type in self.SIMPLE_XSD_TYPES.items():
             if isinstance(column.type, cls):
                 attrs["type"] = xsd_type
-                with tag(tb, "xsd:element", attrs) as tb:  # pylint: disable=redefined-argument-from-local
+                with tag(tb, "xsd:element", attrs) as tb:  # noqa: PLR1704  # pylint: disable=redefined-argument-from-local
                     self.element_callback(tb, column)
                     return tb
         if isinstance(column.type, Geometry):
