@@ -1,3 +1,5 @@
+# Copyright (c) 2008-2026 Camptocamp.  All rights reserved.
+
 from collections.abc import Callable, Generator
 from contextlib import contextmanager
 from io import BytesIO

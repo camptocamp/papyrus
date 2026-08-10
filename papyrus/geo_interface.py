@@ -1,3 +1,5 @@
+# Copyright (c) 2008-2026 Camptocamp.  All rights reserved.
+
 import geojson
 from geoalchemy2.shape import from_shape, to_shape
 from geoalchemy2.types import Geometry
