@@ -1,3 +1,5 @@
+# Copyright (c) 2008-2026 Camptocamp.  All rights reserved.
+
 import shapely
 
 is_v2 = shapely.__version__.startswith("2.")

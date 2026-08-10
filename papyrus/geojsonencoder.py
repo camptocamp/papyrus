@@ -1,3 +1,5 @@
+# Copyright (c) 2008-2026 Camptocamp.  All rights reserved.
+
 import datetime
 import decimal
 import functools
