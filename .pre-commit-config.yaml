@@ -102,6 +102,7 @@ repos:
         additional_dependencies:
           - prospector-profile-utils==1.27.0 # pypi
           - ruff==0.16.0 # pypi
+          - pylint[spelling]==4.0.7 # pypi
   - repo: https://github.com/pre-commit/mirrors-prettier
     rev: v3.1.0
     hooks:
