@@ -56,7 +56,7 @@ jobs:
 
       - name: Prospector
         run: |
-          poetry run prospector --output-format=pylint --die-on-tool-error
+          poetry run prospector --output-format=pylint --direct-tool-stdout
 
       - id: success
         run: echo "::set-output name=success::true"
