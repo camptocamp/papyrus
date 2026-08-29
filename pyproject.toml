@@ -2,8 +2,19 @@
 target-version = "py310"
 line-length = 110
 
+[tool.ruff.lint]
+select = []
+ignore = ["A001", "A002", "ANN401", "C90", "D100", "D103", "D104", "D105", "D107", "D200", "D202", "D207", "D208", "D212", "E501", "EM101", "EM102", "ERA001", "FA", "FBT001", "FBT002", "FIX", "FIX002", "I001", "PERF203", "PLR09", "PLR2004", "PLW2901", "PT027", "Q000", "S101", "SIM105", "T201", "TD", "TD002", "W293"]
+extend-select = ["UP", "I", "S", "B", "ALL"]
+
 [tool.ruff.lint.pydocstyle]
 convention = "numpy"
+
+[tool.ruff.lint.extend-per-file-ignores]
+"tests/**" = ["PT027"]
+"**/tests/**" = ["PT027"]
+"**/test_*.py" = ["PT027"]
+"**/*_test.py" = ["PT027"]
 
 [tool.poetry]
 version = "0.0.0"

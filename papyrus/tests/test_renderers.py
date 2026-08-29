@@ -215,7 +215,7 @@ class Test_GeoJSON(unittest.TestCase):
                     "type": "Feature",
                     "id": 1,
                     "properties": {"title": "Dict 1"},
-                }
+                },
             ],
         }  # NOQA
         assert request.response.content_type == "application/geo+json"

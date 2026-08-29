@@ -81,7 +81,7 @@ class create_geom_filter_Tests(unittest.TestCase):
             == b'ST_DWithin("table".geom, ST_GeomFromWKB(%(ST_GeomFromWKB_1)s, 4326), %(ST_DWithin_1)s)'
         )  # NOQA
         assert wkb.loads(bytes(params["ST_GeomFromWKB_1"])).equals(
-            wkt.loads("POLYGON ((-180 -90, -180 90, 180 90, 180 -90, -180 -90))")
+            wkt.loads("POLYGON ((-180 -90, -180 90, 180 90, 180 -90, -180 -90))"),
         )  # NOQA
         assert params["ST_DWithin_1"] == 1
 
@@ -101,7 +101,7 @@ class create_geom_filter_Tests(unittest.TestCase):
             == b'ST_DWithin(ST_Transform("table".geom, %(ST_Transform_1)s), ST_GeomFromWKB(%(ST_GeomFromWKB_1)s, 900913), %(ST_DWithin_1)s)'
         )  # NOQA
         assert wkb.loads(bytes(params["ST_GeomFromWKB_1"])).equals(
-            wkt.loads("POLYGON ((-180 -90, -180 90, 180 90, 180 -90, -180 -90))")
+            wkt.loads("POLYGON ((-180 -90, -180 90, 180 90, 180 -90, -180 -90))"),
         )  # NOQA
         assert params["ST_Transform_1"] == 900913
         assert params["ST_DWithin_1"] == 1
