@@ -19,5 +19,10 @@
       matchDepNames: ["setuptools"],
       allowedVersions: "<81.0.0",
     },
+    /** Keep poetry-core at the version pinned by the poetry CLI */
+    {
+      enabled: false,
+      matchDepNames: ["poetry-core"],
+    },
   ],
 }
