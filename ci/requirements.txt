@@ -5,6 +5,6 @@ pre-commit==4.6.2
 # OIDC (OpenID connect)
 id==1.6.1
 cryptography>=44.0.1 # not directly required, pinned by Snyk to avoid a vulnerability
-tag-publish==1.2.5
+tag-publish==1.2.6
 requests>=2.32.4 # not directly required, pinned by Snyk to avoid a vulnerability
 urllib3>=2.5.0 # not directly required, pinned by Snyk to avoid a vulnerability
