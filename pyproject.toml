@@ -82,7 +82,7 @@ security-md = "security_md.cli:main"
 
 [build-system]
 requires = [
-    "poetry-core==2.4.0",
+    "poetry-core==2.4.1",
     "poetry-dynamic-versioning[plugin]==1.10.0",
 ]
 build-backend = "poetry.core.masonry.api"
