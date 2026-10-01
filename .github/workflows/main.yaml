@@ -19,7 +19,7 @@ permissions:
 jobs:
   pre-commit:
     name: Check with pre-commit and Prospector
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 15
     if: "!startsWith(github.event.head_commit.message, '[skip ci] ')"
 
@@ -63,7 +63,7 @@ jobs:
 
   main:
     name: Continuous integration
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 15
 
     outputs:
@@ -100,7 +100,7 @@ jobs:
 
   publish:
     name: Publish
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 15
     needs:
       - main
