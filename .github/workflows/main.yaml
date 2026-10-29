@@ -67,7 +67,7 @@ jobs:
 
     outputs:
       success-3-10: ${{ steps.success.outputs.success-3-10 }}
-      success-3-x: ${{ steps.success.outputs.success-3-x }}
+      success-3-14: ${{ steps.success.outputs.success-3-14 }}
 
     strategy:
       fail-fast: false
@@ -75,7 +75,7 @@ jobs:
         python-version:
           # Test the min and max Python versions supported by the project
           - "3.10"
-          - "3.x"
+          - "3.14"
 
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -84,9 +84,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      # No '--only-binary=:all:' here: the `3.x` entry of the matrix follows the newest CPython,
-      # 3.15.1 today, and some dependencies have no wheel for it yet, PyYAML for instance.
-      - run: python3 -m pip install --requirement=ci/requirements.txt
+      - run: python3 -m pip install '--only-binary=:all:' --requirement=ci/requirements.txt
 
       - name: Install with Poetry
         run: poetry install
@@ -115,7 +113,7 @@ jobs:
     steps:
       - run: "[[ ${{ needs.pre-commit.outputs.success }} == 'true' ]]"
       - run: "[[ ${{ needs.main.outputs.success-3-10 }} == 'true' ]]"
-      - run: "[[ ${{ needs.main.outputs.success-3-x }} == 'true' ]]"
+      - run: "[[ ${{ needs.main.outputs.success-3-14 }} == 'true' ]]"
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 

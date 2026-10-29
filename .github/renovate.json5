@@ -12,12 +12,36 @@
     "github>camptocamp/gs-renovate-config-preset:own.json5#1.13.1",
     "github>camptocamp/gs-renovate-config-preset:security.json5#1.13.1",
   ],
+  customManagers: [
+    /**
+     * The Python versions of the test matrix. The preset extracts only the
+     * `python-version: "x.y"` form, the entries of a matrix are a plain list, and the preset
+     * disables the Python updates in the workflow files, so both the extraction and the
+     * activation are declared here.
+     */
+    {
+      customType: "regex",
+      fileMatch: ["^\\.github/workflows/main\\.yaml$"],
+      matchStrings: ['\n          - "(?<currentValue>[0-9]+\\.[0-9]+)"'],
+      datasourceTemplate: "python-version",
+      depNameTemplate: "python-test-matrix",
+    },
+  ],
   packageRules: [
     /** Keep setuptools below 81.0.0 for pyramid */
     {
       enabled: false,
       matchDepNames: ["setuptools"],
       allowedVersions: "<81.0.0",
+    },
+    /** Follow the Python releases in the test matrix, with the `<major>.<minor>` form */
+    {
+      enabled: true,
+      matchDepNames: ["python-test-matrix"],
+      matchFileNames: [".github/workflows/main.yaml"],
+      versioning: "regex:^(?<major>\\d+)\\.(?<minor>\\d+)$",
+      allowedVersions: "/^[0-9]+\\.[0-9]+$/",
+      groupName: "Python test matrix",
     },
   ],
 }
