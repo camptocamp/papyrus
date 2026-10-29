@@ -14,16 +14,16 @@
   ],
   customManagers: [
     /**
-     * The maximum Python version of the test matrix, marked by a `renovate:` comment because the
-     * minimum one must not move. The preset extracts only the `python-version: "x.y"` form, the
-     * entries of a matrix are a plain list, and the preset disables the Python updates in the
-     * workflow files, so both the extraction and the activation are declared here.
+     * The maximum Python version of the test matrix, marked by a `renovate:` comment so that the
+     * minimum one, which comes from `requires-python`, and the Python of the tooling jobs are left
+     * alone. The preset extracts the `python-version: "x.y"` form, but it disables the Python
+     * updates in the workflow files, so the activation is declared here.
      */
     {
       customType: "regex",
       fileMatch: ["^\\.github/workflows/main\\.yaml$"],
       matchStrings: [
-        '# renovate: datasource=(?<datasource>[a-z-]+) depName=(?<depName>[a-z-]+)\\n          - "(?<currentValue>[0-9]+\\.[0-9]+)"',
+        '# renovate: datasource=(?<datasource>[a-z-]+) depName=(?<depName>[a-z-]+)\\n          - python-version: "(?<currentValue>[0-9]+\\.[0-9]+)"',
       ],
     },
   ],

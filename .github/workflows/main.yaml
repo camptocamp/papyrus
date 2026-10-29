@@ -58,7 +58,7 @@ jobs:
           poetry run prospector --output-format=pylint --direct-tool-stdout
 
       - id: success
-        run: echo "::set-output name=success::true"
+        run: echo "success=true" >> "$GITHUB_OUTPUT"
 
   main:
     name: Continuous integration
@@ -66,17 +66,19 @@ jobs:
     timeout-minutes: 15
 
     outputs:
-      success-3-10: ${{ steps.success.outputs.success-3-10 }}
-      success-3-14: ${{ steps.success.outputs.success-3-14 }}
+      success-min: ${{ steps.success.outputs.success-min }}
+      success-max: ${{ steps.success.outputs.success-max }}
 
     strategy:
       fail-fast: false
       matrix:
-        python-version:
-          # Test the min and max Python versions supported by the project
-          - "3.10"
+        # Test the min and max Python versions supported by the project
+        include:
+          - python-version: "3.10"
+            role: min
           # renovate: datasource=python-version depName=python-test-matrix
-          - "3.14"
+          - python-version: "3.14"
+            role: max
 
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -94,9 +96,7 @@ jobs:
         run: poetry run pytest -vv
 
       - id: success
-        run: |
-          VERSION=$(echo "${{ matrix.python-version }}" | tr '.' '-')
-          echo "::set-output name=success-${VERSION}::true"
+        run: echo "success-${{ matrix.role }}=true" >> "$GITHUB_OUTPUT"
 
   publish:
     name: Publish
@@ -112,9 +112,9 @@ jobs:
       id-token: write
 
     steps:
-      - run: "[[ ${{ needs.pre-commit.outputs.success }} == 'true' ]]"
-      - run: "[[ ${{ needs.main.outputs.success-3-10 }} == 'true' ]]"
-      - run: "[[ ${{ needs.main.outputs.success-3-14 }} == 'true' ]]"
+      - run: '[[ "${{ needs.pre-commit.outputs.success }}" == "true" ]]'
+      - run: '[[ "${{ needs.main.outputs.success-min }}" == "true" ]]'
+      - run: '[[ "${{ needs.main.outputs.success-max }}" == "true" ]]'
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
