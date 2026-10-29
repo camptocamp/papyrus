@@ -75,6 +75,7 @@ jobs:
         python-version:
           # Test the min and max Python versions supported by the project
           - "3.10"
+          # renovate: datasource=python-version depName=python-test-matrix
           - "3.14"
 
     steps:
