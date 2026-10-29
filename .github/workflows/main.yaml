@@ -128,6 +128,9 @@ jobs:
         with:
           version: latest-known
           cache-python: true
+          # The publishing step can be skipped, and then uv never runs, so its cache directory
+          # is never created.
+          ignore-nothing-to-cache: true
           python-version: "3.13"
 
       # tag-publish connects itself to PyPI with OpenId Connect, and only when the context publishes.
