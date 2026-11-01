@@ -25,7 +25,7 @@ pyramid-handlers = "0.5"
 psycopg2 = "2.9.13"
 id = "1.6.1"
 claims = "0.3.0"
-types-requests = "2.33.0.20260906"
+types-requests = "2.33.0.20261006"
 ruff = "0.16.8"
 pylint = "4.0.9"
 
@@ -83,6 +83,6 @@ security-md = "security_md.cli:main"
 [build-system]
 requires = [
     "poetry-core==2.5.0",
-    "poetry-dynamic-versioning[plugin]==1.10.0",
+    "poetry-dynamic-versioning[plugin]==1.10.1",
 ]
 build-backend = "poetry.core.masonry.api"
