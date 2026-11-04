@@ -39,7 +39,7 @@ from pyramid.response import Response
 from shapely.geometry.point import Point
 from shapely.geometry.polygon import Polygon
 from sqlalchemy.orm.util import class_mapper
-from sqlalchemy.sql import and_, asc, desc, func
+from sqlalchemy.sql import and_, func
 
 from papyrus._shapely_utils import asShape
 
@@ -284,9 +284,10 @@ class Protocol:
         attr = request.params.get("sort", request.params.get("order_by"))
         if attr is None or not hasattr(self.mapped_class, attr):
             return None
+        column: sqlalchemy.sql.expression.ColumnElement[Any] = getattr(self.mapped_class, attr)
         if request.params.get("dir", "").upper() == "DESC":
-            return desc(getattr(self.mapped_class, attr))
-        return asc(getattr(self.mapped_class, attr))
+            return column.desc()
+        return column.asc()
 
     def _query(
         self,

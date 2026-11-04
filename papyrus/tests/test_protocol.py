@@ -63,7 +63,7 @@ class create_geom_filter_Tests(unittest.TestCase):
     def _get_engine(self):
         from sqlalchemy import create_engine
 
-        return create_engine("postgresql://user:user@no_connection/no_db", echo=True)
+        return create_engine("postgresql+psycopg2://user:user@no_connection/no_db", echo=True)
 
     def test_box_filter(self):
         from shapely import wkb, wkt
@@ -349,7 +349,7 @@ class Test_protocol(unittest.TestCase):
     def _get_engine(self):
         from sqlalchemy import create_engine
 
-        return create_engine("postgresql://user:user@no_connection/no_db", echo=True)
+        return create_engine("postgresql+psycopg2://user:user@no_connection/no_db", echo=True)
 
     def _get_session(self, engine):
         from sqlalchemy import orm
