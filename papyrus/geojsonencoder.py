@@ -1,6 +1,6 @@
 # Copyright (c) 2008-2026 Camptocamp.  All rights reserved.
 
-import datetime
+import datetime as dt
 import decimal
 import functools
 from typing import Any
@@ -22,7 +22,7 @@ class GeoJSONEncoder(PyGFPEncoder):  # type: ignore[misc]
 
     def default(self, obj: str) -> Any:
         """Get the default value for an object."""
-        if isinstance(obj, datetime.date | datetime.datetime | datetime.time):
+        if isinstance(obj, dt.date | dt.datetime | dt.time):
             return obj.isoformat()
         if isinstance(obj, _AssociationList):
             return list(obj)
